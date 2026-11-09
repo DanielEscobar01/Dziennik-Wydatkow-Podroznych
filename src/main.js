@@ -2,6 +2,37 @@
 import { createClient } from '@supabase/supabase-js';
 // PL: Importuj Chart.js z kontrolerami potrzebnymi do wykresów dziennych i kołowych. | ES-CO: Importa Chart.js con controladores para gráficos diarios y circulares.
 import Chart from 'chart.js/auto';
+import '@fontsource/quicksand/latin-400.css';
+import '@fontsource/quicksand/latin-500.css';
+import '@fontsource/quicksand/latin-600.css';
+import '@fontsource/quicksand/latin-700.css';
+import '@fontsource/quicksand/latin-ext-400.css';
+import '@fontsource/quicksand/latin-ext-500.css';
+import '@fontsource/quicksand/latin-ext-600.css';
+import '@fontsource/quicksand/latin-ext-700.css';
+import { greatCircle } from '@turf/great-circle';
+import 'leaflet/dist/leaflet.css';
+import airlineAnaLogo from 'simple-icons/icons/ana.svg';
+import airlineLotLogo from 'simple-icons/icons/lotpolishairlines.svg';
+import airlineKoreanLogo from './assets/korean-air.svg';
+import flagAu from 'flag-icons/flags/4x3/au.svg';
+import flagCa from 'flag-icons/flags/4x3/ca.svg';
+import flagCh from 'flag-icons/flags/4x3/ch.svg';
+import flagCn from 'flag-icons/flags/4x3/cn.svg';
+import flagDe from 'flag-icons/flags/4x3/de.svg';
+import flagEs from 'flag-icons/flags/4x3/es.svg';
+import flagFr from 'flag-icons/flags/4x3/fr.svg';
+import flagGb from 'flag-icons/flags/4x3/gb.svg';
+import flagIt from 'flag-icons/flags/4x3/it.svg';
+import flagJp from 'flag-icons/flags/4x3/jp.svg';
+import flagKr from 'flag-icons/flags/4x3/kr.svg';
+import flagNl from 'flag-icons/flags/4x3/nl.svg';
+import flagPl from 'flag-icons/flags/4x3/pl.svg';
+import flagPt from 'flag-icons/flags/4x3/pt.svg';
+import flagSg from 'flag-icons/flags/4x3/sg.svg';
+import flagTh from 'flag-icons/flags/4x3/th.svg';
+import flagUs from 'flag-icons/flags/4x3/us.svg';
+import flagVn from 'flag-icons/flags/4x3/vn.svg';
 
 // PL: Pobierz publiczny adres projektu z lokalnego pliku środowiskowego. | ES-CO: Lee la URL pública del proyecto desde el archivo local de entorno.
 const projectUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -9,12 +40,15 @@ const projectUrl = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // PL: Ustaw unikalny klucz tabeli wydatków w bazie Supabase. | ES-CO: Define el nombre de la tabla de gastos en Supabase.
 const TABLE_NAME = 'expenses';
+const RESERVATION_CACHE_PREFIX = 'trip-reservations-preview';
 // PL: Uporządkuj nazwy walut widoczne na formularzu i liście wydatków. | ES-CO: Organiza los nombres de monedas visibles en el formulario y el diario.
 const currencyNames = { JPY: 'Japoński jen', KRW: 'Won południowokoreański', PLN: 'Polski złoty', EUR: 'Euro', USD: 'Dolar amerykański', GBP: 'Funt szterling', CHF: 'Frank szwajcarski', CZK: 'Korona czeska', HUF: 'Forint węgierski', SEK: 'Korona szwedzka', NOK: 'Korona norweska', DKK: 'Korona duńska', CAD: 'Dolar kanadyjski', AUD: 'Dolar australijski', SGD: 'Dolar singapurski', HKD: 'Dolar hongkoński', CNY: 'Juan chiński', INR: 'Rupia indyjska', THB: 'Bat tajski', TRY: 'Lira turecka', BRL: 'Real brazylijski', MXN: 'Peso meksykańskie', ZAR: 'Rand południowoafrykański', NZD: 'Dolar nowozelandzki', RON: 'Lej rumuński', BGN: 'Lew bułgarski', ISK: 'Korona islandzka', IDR: 'Rupia indonezyjska', ILS: 'Nowy szekel izraelski', MYR: 'Ringgit malezyjski', PHP: 'Peso filipińskie' };
 // PL: Ustal wspólną kolejność kategorii w statystykach i wykresach. | ES-CO: Define el orden de categorías en estadísticas y gráficas.
 const expenseCategories = ['Hotel', 'Loty', 'Transport', 'Jedzenie', 'Atrakcje', 'Zakupy', 'Inne'];
 // PL: Użyj różnych kolorów dla rozróżnienia kategorii na wykresach. | ES-CO: Usa colores variados para diferenciar categorías.
 const chartColors = ['#16716b', '#4a7fa0', '#e5b34f', '#de7157', '#76a99b', '#d48b52', '#718797'];
+const flagAssets = { au: flagAu, ca: flagCa, ch: flagCh, cn: flagCn, de: flagDe, es: flagEs, fr: flagFr, gb: flagGb, it: flagIt, jp: flagJp, kr: flagKr, nl: flagNl, pl: flagPl, pt: flagPt, sg: flagSg, th: flagTh, us: flagUs, vn: flagVn };
+const airlineLogoAssets = { ana: airlineAnaLogo, lot: airlineLotLogo, 'korean-air': airlineKoreanLogo };
 // PL: Sformatuj wartości pieniężne według polskich separatorów i dwóch miejsc. | ES-CO: Formatea importes con separadores polacos y dos decimales.
 const formatter = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 // PL: Utwórz klienta Supabase z trwałą sesją i obsługą linku email. | ES-CO: Crea el cliente de Supabase con sesión persistente y enlaces de correo.
@@ -29,6 +63,18 @@ const expenseDialog = document.querySelector('#expenseDialog');
 const dayList = document.querySelector('#dayList');
 // PL: Pobierz listę wydatków dla wybranego dnia. | ES-CO: Obtén la lista de gastos del día seleccionado.
 const expenseList = document.querySelector('#expenseList');
+const dayExpenseList = document.querySelector('#dayExpenseList');
+const overviewPage = document.querySelector('#overviewPage');
+const reservationsPage = document.querySelector('#reservationsPage');
+const viewTabs = document.querySelector('#viewTabs');
+const overviewTab = document.querySelector('#overviewTab');
+const reservationsTab = document.querySelector('#reservationsTab');
+const dayPage = document.querySelector('#dayPage');
+const dayMapElement = document.querySelector('#dayMap');
+const openDayDetailsButton = document.querySelector('#openDayDetails');
+const reservationSection = document.querySelector('#reservationsSection');
+const hotelReservationsList = document.querySelector('#hotelReservations');
+const flightReservationsList = document.querySelector('#flightReservations');
 // PL: Pobierz pola daty, waluty, kwoty i kursu w formularzu. | ES-CO: Obtén los campos de fecha, moneda, importe y tasa.
 const dateInput = document.querySelector('#expenseDate');
 // PL: Pobierz rozwijaną listę walut. | ES-CO: Obtén la lista desplegable de monedas.
@@ -53,6 +99,7 @@ let currentUser = null;
 let expenses = [];
 // PL: Przechowuj wyjazdy i ich dni zwrócone przez RLS dla bieżącego konta. | ES-CO: Guarda viajes y días devueltos por RLS para la cuenta activa.
 let trips = [];
+let reservationPreviewByTrip = new Map();
 // PL: Wybierz aktualny wyjazd bez ustawień wpisanych na stałe w kodzie. | ES-CO: Mantiene el viaje activo fuera de las constantes del código.
 let currentTrip = null;
 // PL: Pomijaj początkowe zdarzenie Auth do zakończenia odczytu sesji. | ES-CO: Ignora el evento inicial de Auth hasta terminar de leer la sesión.
@@ -63,16 +110,23 @@ let pendingAuthSession = null;
 let hasPendingAuthEvent = false;
 // PL: Zaznacz początkowo pierwszy dzień podróży. | ES-CO: Selecciona inicialmente el primer día del viaje.
 let selectedDate = '';
+let activeMainView = 'overview';
 // PL: Numeruj żądania kursu, aby starsza odpowiedź nie nadpisała nowszej. | ES-CO: Numera las solicitudes de tasa para ignorar respuestas antiguas.
 let rateRequest = 0;
 // PL: Zachowaj datę kursu zwróconą przez serwis albo dzień wydatku dla kursu ręcznego. | ES-CO: Conserva la fecha de la tasa o la fecha del gasto si se ingresa a mano.
 let currentRateDate = null;
 // PL: Zablokuj wielokrotny zapis tego samego formularza w trakcie żądania. | ES-CO: Evita guardar dos veces mientras la solicitud está activa.
 let savingExpense = false;
+let savingExpenseIds = new Set();
 // PL: Przechowuj instancje wykresów, aby aktualizować je zamiast dublować. | ES-CO: Conserva los gráficos para actualizarlos sin duplicarlos.
 let dailyChart = null;
 // PL: Przechowuj wykresu podziału kategorii. | ES-CO: Conserva la gráfica de categorías.
 let categoryChart = null;
+let leafletLibrary = null;
+let leafletLoadPromise = null;
+let leafletMap = null;
+let dayMapMarker = null;
+let flightRouteMapInstances = new Map();
 // PL: Zachowaj identyfikator timera powiadomienia, aby móc go odświeżyć. | ES-CO: Conserva el temporizador del aviso para poder reiniciarlo.
 let toastTimer;
 
@@ -96,8 +150,86 @@ function initialSelectedDate() {
 
 // PL: Znajdź nazwę miejsca zapisaną dla konkretnej daty. | ES-CO: Encuentra el destino guardado para una fecha.
 function destinationForDate(date) { return currentTrip?.days.find((day) => day.date === date)?.destination || currentTrip?.name || 'Podróż'; }
+function countryForDate(date) { return currentTrip?.days.find((day) => day.date === date)?.country || destinationForDate(date); }
 // PL: Zwróć budżet konkretnego dnia lub budżet domyślny wyjazdu. | ES-CO: Devuelve el presupuesto del día o el general del viaje.
 function dailyBudgetForDate(date) { return Number(currentTrip?.days.find((day) => day.date === date)?.dailyBudget ?? currentTrip?.dailyBudget ?? 0); }
+
+const countryAliases = [
+  { code: 'pl', name: 'Polska', aliases: ['polska', 'poland', 'warszawa', 'warsaw'] },
+  { code: 'jp', name: 'Japonia', aliases: ['japonia', 'japan', 'tokio', 'tokyo', 'fuji', 'fujiyoshida', 'kioto', 'kyoto', 'osaka', 'kumamoto', 'narita', 'itami'] },
+  { code: 'kr', name: 'Korea Południowa', aliases: ['korea', 'korea poludniowa', 'south korea', 'seul', 'seoul', 'incheon'] },
+  { code: 'us', name: 'Stany Zjednoczone', aliases: ['stany zjednoczone', 'united states', 'usa'] },
+  { code: 'gb', name: 'Wielka Brytania', aliases: ['wielka brytania', 'united kingdom', 'anglia'] },
+  { code: 'fr', name: 'Francja', aliases: ['francja', 'france'] },
+  { code: 'de', name: 'Niemcy', aliases: ['niemcy', 'germany'] },
+  { code: 'it', name: 'Włochy', aliases: ['wlochy', 'italy'] },
+  { code: 'es', name: 'Hiszpania', aliases: ['hiszpania', 'spain'] },
+  { code: 'pt', name: 'Portugalia', aliases: ['portugalia', 'portugal'] },
+  { code: 'th', name: 'Tajlandia', aliases: ['tajlandia', 'thailand'] },
+  { code: 'vn', name: 'Wietnam', aliases: ['wietnam', 'vietnam'] },
+  { code: 'cn', name: 'Chiny', aliases: ['chiny', 'china'] },
+  { code: 'ca', name: 'Kanada', aliases: ['kanada', 'canada'] },
+  { code: 'au', name: 'Australia', aliases: ['australia'] },
+  { code: 'ch', name: 'Szwajcaria', aliases: ['szwajcaria', 'switzerland'] },
+  { code: 'nl', name: 'Holandia', aliases: ['holandia', 'netherlands'] },
+  { code: 'sg', name: 'Singapur', aliases: ['singapur', 'singapore'] },
+];
+const countryCoordinates = {
+  jp: { lat: 36.2048, lon: 138.2529, zoom: 5 },
+  kr: { lat: 36.5, lon: 127.8, zoom: 6 },
+  pl: { lat: 52.0692, lon: 19.4803, zoom: 5 },
+};
+const airportCoordinates = {
+  WAW: [20.9671, 52.1657],
+  NRT: [140.3929, 35.7720],
+  ITM: [135.4382, 34.7855],
+  KMJ: [130.8551, 32.8373],
+  ICN: [126.4407, 37.4602],
+};
+
+function countriesFor(value) {
+  const normalized = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return countryAliases.filter((country) => country.aliases.some((alias) => normalized.includes(alias)));
+}
+
+function countryFlagMarkup(value) {
+  const countries = countriesFor(value);
+  if (!countries.length) return '';
+  return `<span class="country-flags">${countries.map((country) => `<img class="country-flag" src="${flagAssets[country.code]}" alt="${escapeHTML(country.name)}" title="${escapeHTML(country.name)}">`).join('')}</span>`;
+}
+
+function tripFlagsMarkup() {
+  const countries = [...new Map((currentTrip?.days || []).flatMap((day) => countriesFor(day.country || day.destination)).map((country) => [country.code, country])).values()];
+  return countryFlagMarkup(countries.map((country) => country.name).join(' '));
+}
+function coordinatesForDate(date) {
+  const destination = String(destinationForDate(date)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const cities = [
+    { aliases: ['tokio', 'tokyo'], lat: 35.6762, lon: 139.6503, zoom: 12 },
+    { aliases: ['fuji', 'fujiyoshida'], lat: 35.487456, lon: 138.8078281, zoom: 13 },
+    { aliases: ['kioto', 'kyoto'], lat: 35.0116, lon: 135.7681, zoom: 12 },
+    { aliases: ['osaka'], lat: 34.6937, lon: 135.5023, zoom: 12 },
+    { aliases: ['kumamoto'], lat: 32.8031, lon: 130.7079, zoom: 12 },
+    { aliases: ['seul', 'seoul'], lat: 37.5665, lon: 126.978, zoom: 12 },
+  ];
+  const city = cities.find((place) => place.aliases.some((alias) => destination.includes(alias)));
+  if (city) return city;
+  const countries = countriesFor(countryForDate(date));
+  return countryCoordinates[countries.at(-1)?.code] || countryCoordinates[countries[0]?.code] || null;
+}
+
+function flightRoutePoints(flight) {
+  const airportCodes = [...String(flight.route || '').matchAll(/\(([A-Z]{3})\)/g)].map((match) => match[1]);
+  if (airportCodes.length < 2) return null;
+  const origin = airportCoordinates[airportCodes[0]];
+  const destination = airportCoordinates[airportCodes[airportCodes.length - 1]];
+  return origin && destination ? { airportCodes: [airportCodes[0], airportCodes[airportCodes.length - 1]], origin, destination } : null;
+}
+
+function mapDestinationForDate(date) {
+  const destination = String(destinationForDate(date)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return destination.includes('fuji') ? 'Fujiyoshida' : destinationForDate(date);
+}
 
 // PL: Zamień wartość liczbową na czytelny zapis PLN albo innej waluty. | ES-CO: Convierte un valor numérico a un formato legible en PLN u otra moneda.
 function money(value, currency = 'PLN') {
@@ -144,41 +276,68 @@ function renderAuthState() {
 
 // PL: Renderuj selektor tylko z podróży zwróconych dla bieżącego konta. | ES-CO: Renderiza el selector con viajes visibles para la cuenta activa.
 function renderTripSelector() {
-  // PL: Wypełnij opcje nazwami podróży z Supabase. | ES-CO: Llena las opciones con viajes de Supabase.
   tripSelector.innerHTML = trips.map((trip) => `<option value="${escapeHTML(trip.id)}">${escapeHTML(trip.name)}</option>`).join('');
-  // PL: Pokaż listę tylko wtedy, gdy jest co wybierać. | ES-CO: Muestra la lista solo cuando hay opciones.
   tripSelector.hidden = trips.length === 0;
-  // PL: Pokaż informację pustą, jeśli użytkownik nie ma podróży. | ES-CO: Muestra un estado vacío cuando no hay viajes.
   document.querySelector('#tripSelectorEmpty').hidden = trips.length > 0;
-  // PL: Ustaw bieżący wyjazd w selektorze. | ES-CO: Selecciona el viaje actual en la lista.
   if (currentTrip) tripSelector.value = currentTrip.id;
+}
+
+function reservationCacheKey(userId, tripId) { return `${RESERVATION_CACHE_PREFIX}:${userId}:${tripId}`; }
+
+function cacheReservationPreview(userId, tripId, reservations) {
+  try { sessionStorage.setItem(reservationCacheKey(userId, tripId), JSON.stringify(reservations)); } catch {}
+  reservationPreviewByTrip.set(tripId, reservations);
+}
+
+function readReservationPreview(userId, tripId) {
+  if (reservationPreviewByTrip.has(tripId)) return reservationPreviewByTrip.get(tripId);
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(reservationCacheKey(userId, tripId)) || '[]');
+    reservationPreviewByTrip.set(tripId, cached);
+    return cached;
+  } catch { return []; }
+}
+
+function clearReservationPreview() {
+  reservationPreviewByTrip.clear();
+  try {
+    for (const key of Object.keys(sessionStorage)) if (key.startsWith(`${RESERVATION_CACHE_PREFIX}:`)) sessionStorage.removeItem(key);
+  } catch {}
+}
+
+async function loadTripReservations(ownerId) {
+  if (!trips.length) return;
+  const { data, error } = await supabase.from('trip_reservations').select('*').eq('user_id', ownerId).in('trip_id', trips.map((trip) => trip.id)).order('sort_order', { ascending: true });
+  if (!currentUser || currentUser.id !== ownerId) return;
+  if (error) {
+    if (!['PGRST205', '42P01'].includes(error.code)) showToast('Nie udało się pobrać rezerwacji z Supabase.');
+    trips = trips.map((trip) => ({ ...trip, reservations: readReservationPreview(ownerId, trip.id) }));
+    return;
+  }
+  const reservationsByTrip = new Map();
+  (data || []).forEach((row) => {
+    const items = reservationsByTrip.get(row.trip_id) || [];
+    items.push({ type: row.reservation_type, sortOrder: row.sort_order, sourceRef: row.source_ref, title: row.title, city: row.city, checkIn: row.check_in, checkOut: row.check_out, nights: row.nights, flightNumber: row.flight_number, route: row.route, flightDate: row.flight_date, departureTime: row.departure_time, arrivalTime: row.arrival_time, airlineName: row.airline_name, airlineLogo: row.airline_logo, provider: row.provider, bookingReference: row.booking_reference, priceText: row.price_text, totalPriceText: row.total_price_text, amountLocal: row.amount_local == null ? null : Number(row.amount_local), currencyCode: row.currency_code, amountPln: row.amount_pln == null ? null : Number(row.amount_pln), plnPerNight: row.pln_per_night == null ? null : Number(row.pln_per_night) });
+    reservationsByTrip.set(row.trip_id, items);
+  });
+  trips = trips.map((trip) => ({ ...trip, reservations: reservationsByTrip.get(trip.id) || [] }));
 }
 
 // PL: Załaduj podróże i ich dni dla bieżącego użytkownika. | ES-CO: Carga viajes y días del usuario autenticado.
 async function loadTrips() {
-  // PL: Wyczyść wszystkie dane przy braku sesji. | ES-CO: Limpia datos cuando no hay sesión activa.
   if (!currentUser) { trips = []; currentTrip = null; expenses = []; renderAuthState(); render(); return; }
-  // PL: Zachowaj właściciela, aby odrzucić wynik po zmianie konta. | ES-CO: Conserva el usuario para descartar respuestas de otra sesión.
   const ownerId = currentUser.id;
-  // PL: Pokaż, że konfiguracja wyjazdów jest pobierana. | ES-CO: Indica que se están cargando los viajes.
   document.querySelector('#syncStatus').textContent = 'Pobieranie podróży…';
-  // PL: Pobierz tylko własne wyjazdy i ich dni, zgodnie z RLS. | ES-CO: Consulta solo viajes propios y sus días, respetando RLS.
   const { data, error } = await supabase.from('trips').select('id,user_id,name,start_date,end_date,daily_budget_pln,available_before_trip_pln,source_ref,trip_days(id,trip_date,destination,country,daily_budget_pln)').eq('user_id', ownerId).order('start_date', { ascending: false });
-  // PL: Odrzuć wynik, jeśli użytkownik w międzyczasie się zmienił. | ES-CO: Descarta resultados si cambió el usuario durante la consulta.
   if (!currentUser || currentUser.id !== ownerId) return;
-  // PL: Pokaż błąd bez wyświetlania danych podróży z poprzedniego konta. | ES-CO: Muestra error sin conservar datos del usuario anterior.
   if (error) { trips = []; currentTrip = null; expenses = []; renderTripSelector(); render(); showToast('Nie udało się pobrać podróży. Sprawdź migrację Supabase.'); return; }
-  // PL: Zamień wiersze relacji na format używany przez interfejs. | ES-CO: Convierte las filas relacionadas al formato de la interfaz.
   trips = (data || []).map((row) => ({ id: row.id, userId: row.user_id, name: row.name, startDate: row.start_date, endDate: row.end_date, dailyBudget: Number(row.daily_budget_pln), availableBeforeTrip: Number(row.available_before_trip_pln), sourceRef: row.source_ref, days: (row.trip_days || []).map((day) => ({ id: day.id, date: day.trip_date, destination: day.destination, country: day.country || '', dailyBudget: day.daily_budget_pln == null ? null : Number(day.daily_budget_pln) })).sort((a, b) => a.date.localeCompare(b.date)) }));
-  // PL: Zachowaj wybrany wyjazd albo wybierz najnowszy dostępny. | ES-CO: Conserva el viaje elegido o selecciona el más reciente.
+  await loadTripReservations(ownerId);
+  if (!currentUser || currentUser.id !== ownerId) return;
   currentTrip = trips.find((trip) => trip.id === currentTrip?.id) || trips[0] || null;
-  // PL: Ustaw początkową datę wybranego wyjazdu. | ES-CO: Establece la fecha inicial del viaje seleccionado.
   selectedDate = initialSelectedDate();
-  // PL: Odśwież selektor i nagłówek podróży. | ES-CO: Actualiza selector y encabezado del viaje.
   renderTripSelector();
-  // PL: Pobierz wydatki wybranego wyjazdu albo pokaż podpowiedź do importu. | ES-CO: Carga gastos o invita a importar el primer viaje.
   if (currentTrip) await loadExpenses();
-  // PL: Ustaw stan pusty przy koncie bez podróży. | ES-CO: Muestra el estado inicial sin viajes.
   else { expenses = []; document.querySelector('#syncStatus').textContent = 'Zaimportuj pierwszą podróż'; render(); }
 }
 
@@ -227,6 +386,7 @@ async function loadExpenses() {
 
 // PL: Rysuj podsumowanie, dni i wydatki z aktualnego stanu Supabase. | ES-CO: Renderiza resumen, días y gastos desde el estado de Supabase.
 function render() {
+  if (!currentTrip) showOverview();
   // PL: Odśwież nazwę, daty i trasę aktywnej podróży. | ES-CO: Actualiza nombre, fechas y ruta del viaje activo.
   renderTripContext();
   // PL: Odśwież listę wyboru podróży. | ES-CO: Actualiza el selector de viajes.
@@ -237,6 +397,8 @@ function render() {
   renderDays();
   // PL: Odśwież wydatki wybranego dnia. | ES-CO: Actualiza los gastos del día seleccionado.
   renderExpenses();
+  renderReservations();
+  renderDayPage();
   // PL: Odśwież wykresy na podstawie tych samych rekordów co podsumowanie. | ES-CO: Actualiza gráficas con los mismos registros del resumen.
   renderCharts();
 }
@@ -254,11 +416,183 @@ function renderTripContext() {
   document.querySelector('#tripRoute').textContent = currentTrip ? destinations.join(' · ') : 'Zaimportuj arkusz podróży, aby rozpocząć.';
   document.querySelector('#tripSidebarName').textContent = tripName;
   document.querySelector('#tripSidebarDates').textContent = currentTrip ? `${dateLabel(currentTrip.startDate, { day: 'numeric', month: 'short' })} — ${dateLabel(currentTrip.endDate, { day: 'numeric', month: 'short' })}` : 'Zaimportuj podróż';
+  document.querySelector('#tripSidebarFlags').innerHTML = tripFlagsMarkup();
   document.querySelector('#daysCount').textContent = `${datesInTrip().length} dni`;
   document.querySelector('#dailyBudgetValue').textContent = money(currentTrip?.dailyBudget || 0);
+  viewTabs.hidden = !currentTrip;
+  reservationsTab.hidden = !(currentTrip?.reservations?.length);
+  if (activeMainView === 'reservations' && !currentTrip?.reservations?.length) showOverview();
+  overviewTab.setAttribute('aria-selected', String(activeMainView === 'overview'));
+  reservationsTab.setAttribute('aria-selected', String(activeMainView === 'reservations'));
   // PL: Ustaw zakres dat formularza dla aktywnego wyjazdu. | ES-CO: Limita las fechas del formulario al viaje activo.
   dateInput.min = currentTrip?.startDate || '';
   dateInput.max = currentTrip?.endDate || '';
+}
+
+function renderReservations() {
+  clearFlightRouteMaps();
+  const reservations = currentTrip?.reservations || [];
+  const hotels = reservations.filter((item) => item.type === 'hotel').sort((a, b) => a.sortOrder - b.sortOrder);
+  const flights = reservations.filter((item) => item.type === 'flight').sort((a, b) => a.sortOrder - b.sortOrder);
+  reservationSection.hidden = !currentTrip;
+  document.querySelector('#reservationCount').textContent = `${reservations.length} rezerwacji`;
+  document.querySelector('#hotelReservationCount').textContent = `${hotels.length}`;
+  document.querySelector('#flightReservationCount').textContent = `${flights.length}`;
+  hotelReservationsList.innerHTML = hotels.length ? hotels.map((hotel) => {
+    const nights = `${hotel.nights} ${hotel.nights === 1 ? 'noc' : 'nocy'}`;
+    const period = `${dateLabel(hotel.checkIn, { day: 'numeric', month: 'short' })} – ${dateLabel(hotel.checkOut, { day: 'numeric', month: 'short' })}`;
+    const relatedExpenses = expenses.filter((item) => item.category === 'Hotel' && normalizeReservationText(item.description).includes(normalizeReservationText(hotel.title)));
+    const allPaid = relatedExpenses.length > 0 && relatedExpenses.every((item) => item.status === 'Opłacone');
+    const paidSome = relatedExpenses.some((item) => item.status === 'Opłacone');
+    const status = allPaid ? 'Opłacone' : paidSome ? 'Częściowo opłacone' : relatedExpenses[0]?.status || '';
+    const localPrice = hotel.amountLocal == null || !hotel.currencyCode ? escapeHTML(hotel.priceText || '—') : localMoney(hotel.amountLocal, hotel.currencyCode);
+    return `<article class="reservation-row"><div class="reservation-date"><strong>${period}</strong><span>${nights}</span></div><div class="reservation-main"><div class="reservation-title-line">${countryFlagMarkup(hotel.city)}<strong>${escapeHTML(hotel.title)}</strong></div><span class="reservation-flight-number">${escapeHTML(hotel.city)}</span></div><div class="reservation-detail"><span>${escapeHTML(hotel.provider || 'Rezerwacja')}</span><span class="reservation-reference">${hotel.bookingReference ? `Nr: ${escapeHTML(hotel.bookingReference)}` : ''}</span>${status ? `<span>${escapeHTML(status)}</span>` : ''}</div><div class="reservation-price"><strong>${escapeHTML(localPrice)}</strong><span>Łącznie ${hotel.amountPln == null ? '—' : money(hotel.amountPln)}</span></div></article>`;
+  }).join('') : '<p class="reservation-empty">Brak rezerwacji hotelowych w arkuszu.</p>';
+  flightReservationsList.innerHTML = flights.length ? flights.map((flight) => {
+    const price = escapeHTML(flight.priceText || '—');
+    const total = flight.amountPln == null ? escapeHTML(flight.totalPriceText || 'Brak ceny w arkuszu') : `Łącznie ${money(flight.amountPln)}`;
+    const logo = airlineLogoAssets[flight.airlineLogo];
+    return `<article class="reservation-row"><div class="reservation-date"><strong>${dateLabel(flight.flightDate, { day: 'numeric', month: 'short', year: 'numeric' })}</strong><span>${escapeHTML(flight.departureTime || '')} → ${escapeHTML(flight.arrivalTime || '')}</span></div><div class="reservation-main"><div class="airline-title">${logo ? `<img class="airline-logo" src="${logo}" alt="${escapeHTML(flight.airlineName)}">` : ''}<strong>${escapeHTML(flight.airlineName || flight.provider || 'Linia lotnicza')}</strong></div><span class="reservation-flight-number">${escapeHTML(flight.flightNumber)}</span><div class="reservation-detail reservation-route">${countryFlagMarkup(flight.route)}${escapeHTML(flight.route)}</div></div><div class="reservation-detail"><span>${escapeHTML(flight.provider || '')}${flight.bookingReference ? ` · ${escapeHTML(flight.bookingReference)}` : ''}</span></div><div class="reservation-price"><strong>${price}</strong><span>${total}</span></div><div class="flight-route-map" data-flight-map="${escapeHTML(flight.sourceRef)}" role="application" aria-label="Mapa de ruta: ${escapeHTML(flight.route)}"></div><p class="flight-route-caption">Trasa geodezyjna ma charakter orientacyjny i nie pokazuje rzeczywistej drogi lotu.</p></article>`;
+  }).join('') : '<p class="reservation-empty">Brak lotów w arkuszu.</p>';
+  if (activeMainView === 'reservations' && !reservationsPage.hidden) renderFlightRouteMaps(flights);
+}
+
+function normalizeReservationText(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function clearFlightRouteMaps() {
+  flightRouteMapInstances.forEach((map) => map.remove());
+  flightRouteMapInstances.clear();
+}
+
+async function renderFlightRouteMaps(flights) {
+  if (reservationsPage.hidden || !flights.length || !currentTrip || !currentUser) return;
+  const ownerId = currentUser.id;
+  const tripId = currentTrip.id;
+  leafletLoadPromise ||= import('leaflet').then((module) => { leafletLibrary = module.default; return leafletLibrary; });
+  let Leaflet;
+  try { Leaflet = await leafletLoadPromise; }
+  catch { return; }
+  if (!currentUser || currentUser.id !== ownerId || !currentTrip || currentTrip.id !== tripId || reservationsPage.hidden) return;
+  for (const container of flightReservationsList.querySelectorAll('[data-flight-map]')) {
+    const flight = flights.find((item) => item.sourceRef === container.dataset.flightMap);
+    if (flight && flightRouteMapInstances.has(flight.sourceRef)) continue;
+    const points = flight && flightRoutePoints(flight);
+    if (!points) { container.textContent = 'Brak współrzędnych lotnisk tej trasy.'; continue; }
+    const map = Leaflet.map(container, { scrollWheelZoom: false, zoomControl: false, dragging: false, doubleClickZoom: false, keyboard: false }).setView([points.origin[1], points.origin[0]], 4);
+    Leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+    const route = greatCircle(points.origin, points.destination, { npoints: 96 });
+    const routeLayer = Leaflet.geoJSON(route, { style: { color: '#de7157', weight: 3, opacity: .9 } }).addTo(map);
+    const bounds = routeLayer.getBounds();
+    Leaflet.circleMarker([points.origin[1], points.origin[0]], { radius: 5, color: '#ffffff', weight: 2, fillColor: '#16716b', fillOpacity: 1 }).bindTooltip(points.airportCodes[0], { permanent: true, direction: 'top' }).addTo(map);
+    Leaflet.circleMarker([points.destination[1], points.destination[0]], { radius: 5, color: '#ffffff', weight: 2, fillColor: '#de7157', fillOpacity: 1 }).bindTooltip(points.airportCodes[1], { permanent: true, direction: 'top' }).addTo(map);
+    map.invalidateSize({ pan: false });
+    map.fitBounds(bounds.pad(.12), { padding: [18, 18], maxZoom: 7 });
+    flightRouteMapInstances.set(flight.sourceRef, map);
+  }
+}
+
+function showOverview() {
+  clearFlightRouteMaps();
+  activeMainView = 'overview';
+  overviewPage.hidden = false;
+  reservationsPage.hidden = true;
+  dayPage.hidden = true;
+  viewTabs.hidden = !currentTrip;
+  overviewTab.setAttribute('aria-selected', 'true');
+  reservationsTab.setAttribute('aria-selected', 'false');
+  document.querySelector('#backToOverview').hidden = true;
+}
+
+function showReservations() {
+  if (!currentTrip?.reservations?.length) return;
+  clearFlightRouteMaps();
+  activeMainView = 'reservations';
+  overviewPage.hidden = true;
+  reservationsPage.hidden = false;
+  dayPage.hidden = true;
+  viewTabs.hidden = false;
+  overviewTab.setAttribute('aria-selected', 'false');
+  reservationsTab.setAttribute('aria-selected', 'true');
+  document.querySelector('#backToOverview').hidden = true;
+  renderFlightRouteMaps(currentTrip.reservations.filter((item) => item.type === 'flight'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openDayPage(date) {
+  if (!datesInTrip().includes(date)) return;
+  clearFlightRouteMaps();
+  selectedDate = date;
+  activeMainView = 'day';
+  overviewPage.hidden = true;
+  reservationsPage.hidden = true;
+  dayPage.hidden = false;
+  viewTabs.hidden = true;
+  document.querySelector('#backToOverview').hidden = false;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectDay(date) {
+  if (!datesInTrip().includes(date)) return;
+  selectedDate = date;
+  renderDays();
+  renderExpenses();
+}
+
+function moveDay(offset) {
+  const dates = datesInTrip();
+  const nextDate = dates[dates.indexOf(selectedDate) + offset];
+  if (nextDate) openDayPage(nextDate);
+}
+
+async function renderDayPage() {
+  if (dayPage.hidden || !currentTrip || !selectedDate) return;
+  const destination = mapDestinationForDate(selectedDate);
+  const country = countryForDate(selectedDate);
+  const coordinates = coordinatesForDate(selectedDate);
+  const encodedQuery = encodeURIComponent(`${destination}, ${country}`);
+  const expensesForDay = dayExpenses(selectedDate);
+  const dayCount = expensesForDay.length;
+  const dayIndex = datesInTrip().indexOf(selectedDate);
+  document.querySelector('#dayPageTitle').textContent = dateLabel(selectedDate, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.querySelector('#dayPageLocation').textContent = destination;
+  document.querySelector('#dayPageFlags').innerHTML = countryFlagMarkup(country);
+  document.querySelector('#dayPageTotal').textContent = money(dayTotal(selectedDate));
+  document.querySelector('#dayPageCount').textContent = `${dayCount} ${dayCount === 1 ? 'wydatek' : 'wydatków'}`;
+  document.querySelector('#dayPageBudget').textContent = money(dailyBudgetForDate(selectedDate));
+  dayMapElement.hidden = !coordinates;
+  if (!coordinates) {
+    if (leafletMap) { leafletMap.remove(); leafletMap = null; dayMapMarker = null; }
+    document.querySelector('#openMapLink').href = `https://www.openstreetmap.org/search?query=${encodedQuery}`;
+    document.querySelector('#mapCaption').textContent = 'Nie zapisano współrzędnych dla tego miejsca. Otwórz mapę, aby wyszukać je ręcznie.';
+    document.querySelector('#previousDay').disabled = dayIndex <= 0;
+    document.querySelector('#nextDay').disabled = dayIndex < 0 || dayIndex >= datesInTrip().length - 1;
+    return;
+  }
+  const tripId = currentTrip.id;
+  const requestedDate = selectedDate;
+  leafletLoadPromise ||= import('leaflet').then((module) => { leafletLibrary = module.default; return leafletLibrary; });
+  let Leaflet;
+  try { Leaflet = await leafletLoadPromise; }
+  catch { document.querySelector('#mapCaption').textContent = 'Nie udało się załadować mapy.'; return; }
+  if (dayPage.hidden || !currentTrip || currentTrip.id !== tripId || selectedDate !== requestedDate) return;
+  if (!leafletMap) {
+    leafletMap = Leaflet.map(dayMapElement, { scrollWheelZoom: false }).setView([coordinates.lat, coordinates.lon], coordinates.zoom);
+    Leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(leafletMap);
+    dayMapMarker = Leaflet.circleMarker([coordinates.lat, coordinates.lon], { radius: 8, color: '#ffffff', weight: 2, fillColor: '#de7157', fillOpacity: 1 }).addTo(leafletMap);
+  } else {
+    leafletMap.setView([coordinates.lat, coordinates.lon], coordinates.zoom);
+    dayMapMarker.setLatLng([coordinates.lat, coordinates.lon]);
+  }
+  leafletMap.setView([coordinates.lat, coordinates.lon], coordinates.zoom);
+  leafletMap.invalidateSize({ pan: false });
+  const mapCenter = leafletMap.getCenter();
+  document.querySelector('#openMapLink').href = `https://www.openstreetmap.org/?mlat=${mapCenter.lat}&mlon=${mapCenter.lng}#map=${leafletMap.getZoom()}/${mapCenter.lat}/${mapCenter.lng}`;
+  document.querySelector('#mapCaption').textContent = `Przybliżone miejsce: ${destination}. To nie jest lokalizacja GPS.`;
+  document.querySelector('#previousDay').disabled = dayIndex <= 0;
+  document.querySelector('#nextDay').disabled = dayIndex < 0 || dayIndex >= datesInTrip().length - 1;
 }
 
 // PL: Aktualizuj sumę wydatków, saldo i licznik dni do podróży. | ES-CO: Actualiza gastos totales, saldo y cuenta regresiva.
@@ -390,7 +724,7 @@ function renderDays() {
     return;
   }
   // PL: Wygeneruj każdy dzień z daty, destynacji, liczby wydatków i paska budżetu. | ES-CO: Genera cada día con fecha, destino, cantidad de gastos y barra de presupuesto.
-  dayList.innerHTML = datesInTrip().map((date, index) => {
+  dayList.innerHTML = datesInTrip().map((date) => {
     // PL: Oblicz sumę wydatków dnia. | ES-CO: Calcula el total gastado ese día.
     const total = dayTotal(date);
     // PL: Policz wydatki przypisane do dnia. | ES-CO: Cuenta los gastos asignados al día.
@@ -405,16 +739,12 @@ function renderDays() {
     const dailyBudget = dailyBudgetForDate(date);
     const percentage = dailyBudget > 0 ? Math.min(100, Math.max(0, total / dailyBudget * 100)) : 0;
     // PL: Zwróć dostępny przycisk dnia z bezpiecznymi wartościami tekstowymi. | ES-CO: Devuelve un botón por día con valores de texto controlados.
-    return `<button class="day-row${date === selectedDate ? ' selected' : ''}" type="button" data-date="${date}" aria-pressed="${date === selectedDate}"><span class="day-date"><b>${day.getDate()}</b><small>${month}</small></span><span><span class="day-place">${escapeHTML(destinationForDate(date))}</span><span class="day-week">${weekday} · ${count} ${count === 1 ? 'wydatek' : 'wydatków'}</span></span><span class="day-total"><b>${money(total)}</b><small>z ${formatter.format(dailyBudget)} PLN</small><span class="budget-track"><span style="width:${percentage}%"></span></span></span></button>`;
+    return `<button class="day-row${date === selectedDate ? ' selected' : ''}" type="button" data-date="${date}" aria-pressed="${date === selectedDate}"><span class="day-date"><b>${day.getDate()}</b><small>${month}</small></span><span><span class="day-place-line">${countryFlagMarkup(countryForDate(date))}<span class="day-place">${escapeHTML(destinationForDate(date))}</span></span><span class="day-week">${weekday} · ${count} ${count === 1 ? 'wydatek' : 'wydatków'}</span></span><span class="day-total"><b>${money(total)}</b><small>z ${formatter.format(dailyBudget)} PLN</small><span class="budget-track"><span style="width:${percentage}%"></span></span></span></button>`;
   }).join('');
   // PL: Obsłuż wybór dnia i odśwież jego podsumowanie bez przeładowania. | ES-CO: Maneja la selección del día y actualiza el detalle sin recargar.
   dayList.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
     // PL: Zapamiętaj datę klikniętego przycisku. | ES-CO: Guarda la fecha del botón seleccionado.
-    selectedDate = button.dataset.date;
-    // PL: Odśwież zaznaczenie w liście dni. | ES-CO: Actualiza el resaltado en la lista de días.
-    renderDays();
-    // PL: Pokaż wydatki nowego dnia. | ES-CO: Muestra los gastos del nuevo día.
-    renderExpenses();
+    selectDay(button.dataset.date);
   }));
 }
 
@@ -430,45 +760,62 @@ function markClass(category) {
 
 // PL: Pokaż wydatki, budżet i pozostałe saldo wybranego dnia. | ES-CO: Muestra gastos, presupuesto y saldo restante del día.
 function renderExpenses() {
-  // PL: Posortuj wydatki dnia od najnowszego. | ES-CO: Ordena los gastos del día del más reciente al más antiguo.
   const current = dayExpenses(selectedDate).sort((a, b) => b.createdAt - a.createdAt);
-  // PL: Zaktualizuj polski tytuł daty i destynacji. | ES-CO: Actualiza el título polaco de fecha y destino.
   if (!currentTrip || !selectedDate) {
+    openDayDetailsButton.hidden = true;
     document.querySelector('#selectedDayTitle').textContent = 'Wybierz podróż';
     document.querySelector('#dayBudgetLabel').textContent = '0,00 PLN';
     document.querySelector('#dailyRemaining').textContent = '0,00 PLN';
-    expenseList.innerHTML = '<li class="empty-state"><strong>Brak wybranej podróży</strong><p>Zaimportuj arkusz lub wybierz wyjazd z listy.</p></li>';
+    const empty = '<li class="empty-state"><strong>Brak wybranej podróży</strong><p>Zaimportuj arkusz lub wybierz wyjazd z listy.</p></li>';
+    expenseList.innerHTML = empty;
+    dayExpenseList.innerHTML = empty;
     return;
   }
   const dailyBudget = dailyBudgetForDate(selectedDate);
+  openDayDetailsButton.hidden = false;
   document.querySelector('#selectedDayTitle').textContent = `${dateLabel(selectedDate)} · ${destinationForDate(selectedDate)}`;
-  // PL: Pokaż zużyty budżet w relacji do limitu dnia. | ES-CO: Muestra el presupuesto usado frente al límite diario.
   document.querySelector('#dayBudgetLabel').textContent = `${formatter.format(dayTotal(selectedDate))} / ${formatter.format(dailyBudget)} PLN`;
-  // PL: Wyświetl kwotę pozostałą na bieżący dzień. | ES-CO: Muestra cuánto presupuesto queda para hoy.
   document.querySelector('#dailyRemaining').textContent = money(dailyBudget - dayTotal(selectedDate));
-  // PL: Pokaż podpowiedź i przycisk dodawania, jeśli dzień jest pusty. | ES-CO: Muestra una invitación a añadir un gasto si el día está vacío.
-  if (!current.length) {
-    // PL: Narysuj stan pusty po polsku i podłącz przycisk. | ES-CO: Renderiza el estado vacío en polaco y conecta el botón.
-    expenseList.innerHTML = '<li class="empty-state"><strong>Dzień czeka na pierwszy wydatek</strong><p>Dodaj jedzenie, transport, bilety lub dowolny koszt z tego dnia.</p><button class="primary-button" id="emptyAdd" type="button">＋ Dodaj wydatek</button></li>';
-    // PL: Otwórz formularz po wybraniu pustego stanu. | ES-CO: Abre el formulario al pulsar el botón del estado vacío.
-    document.querySelector('#emptyAdd').addEventListener('click', openExpenseDialog);
-    // PL: Zakończ, aby nie nadpisywać stanu pustego listą. | ES-CO: Termina aquí para no reemplazar el estado vacío.
-    return;
-  }
-  // PL: Zbuduj kartę każdego wydatku z oryginalną kwotą i utrwalonym PLN. | ES-CO: Construye cada gasto con valor local y equivalente PLN guardado.
-  expenseList.innerHTML = current.map((item) => {
-    // PL: Pobierz pierwszą literę kategorii jako symbol wizualny. | ES-CO: Usa la inicial de la categoría como distintivo.
+  const empty = '<li class="empty-state"><strong>Dzień czeka na pierwszy wydatek</strong><p>Dodaj jedzenie, transport lub inny koszt z tego dnia.</p><button class="primary-button" data-add-expense type="button">＋ Dodaj wydatek</button></li>';
+  const markup = current.length ? current.map((item) => {
     const mark = (item.category || 'Inne').slice(0, 1).toUpperCase();
-    // PL: Pokaż zapisaną wartość kursu na jedną jednostkę waluty. | ES-CO: Muestra la tasa guardada por unidad de moneda.
-    // PL: Pokaż sześć miejsc kursu, aby małe jednostki JPY i KRW pozostały czytelne. | ES-CO: Muestra hasta seis decimales para conservar precisión en JPY y KRW.
     const rateFormatter = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
-    // PL: Sformatuj kurs jednostkowy w kolejności waluta lokalna do PLN. | ES-CO: Formatea la tasa unitaria de moneda local a PLN.
     const rateText = `1 ${item.currency} = ${rateFormatter.format(Number(item.rate))} PLN`;
-    // PL: Zwróć escapowaną kartę z dostępnością i przyciskiem usuwania. | ES-CO: Devuelve una fila escapada con botón para eliminar.
-    return `<li class="expense-item"><span class="category-mark ${markClass(item.category)}" aria-hidden="true">${escapeHTML(mark)}</span><span class="expense-copy"><span class="expense-title">${escapeHTML(item.description)}</span><span class="expense-meta">${escapeHTML(item.category)} · ${escapeHTML(item.status || 'W Podróży')} · ${escapeHTML(item.payment || 'Nie podano')}</span><span class="expense-rate">${escapeHTML(rateText)}</span></span><span class="expense-amount"><b>${money(item.plnAmount)}</b><small>${localMoney(item.amount, item.currency)}</small></span><button class="delete-button" type="button" data-delete="${escapeHTML(item.id)}" aria-label="Usuń: ${escapeHTML(item.description)}">Usuń</button></li>`;
-  }).join('');
-  // PL: Połącz każdy przycisk usuwania z bezpiecznym żądaniem do Supabase. | ES-CO: Conecta cada botón de eliminación con Supabase.
-  expenseList.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => deleteExpense(button.dataset.delete)));
+    const pending = item.status === 'Płatne w Hotelu' || item.status === 'Nieopłacone';
+    const paidAction = pending ? `<button class="paid-button" type="button" data-paid="${escapeHTML(item.id)}" ${savingExpenseIds.has(item.id) ? 'disabled' : ''}>${savingExpenseIds.has(item.id) ? 'Zapisywanie…' : '✓ Oznacz jako opłacone'}</button>` : '';
+    return `<li class="expense-item"><span class="category-mark ${markClass(item.category)}" aria-hidden="true">${escapeHTML(mark)}</span><span class="expense-copy"><span class="expense-title-line">${countryFlagMarkup(countryForDate(item.date))}<span class="expense-title">${escapeHTML(item.description)}</span></span><span class="expense-meta">${escapeHTML(item.category)} · ${escapeHTML(item.status || 'W Podróży')} · ${escapeHTML(item.payment || 'Nie podano')}</span><span class="expense-rate">${escapeHTML(rateText)}</span></span><span class="expense-amount"><b>${money(item.plnAmount)}</b><small>${localMoney(item.amount, item.currency)}</small></span>${paidAction}<button class="delete-button" type="button" data-delete="${escapeHTML(item.id)}" aria-label="Usuń: ${escapeHTML(item.description)}">Usuń</button></li>`;
+  }).join('') : empty;
+  expenseList.innerHTML = markup;
+  dayExpenseList.innerHTML = markup;
+  [expenseList, dayExpenseList].forEach((list) => {
+    list.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => deleteExpense(button.dataset.delete)));
+    list.querySelectorAll('[data-paid]').forEach((button) => button.addEventListener('click', () => markExpensePaid(button.dataset.paid, button)));
+    list.querySelectorAll('[data-add-expense]').forEach((button) => button.addEventListener('click', openExpenseDialog));
+  });
+}
+
+async function markExpensePaid(id, button) {
+  const item = expenses.find((expense) => expense.id === id);
+  if (!currentUser || !currentTrip || !item || savingExpenseIds.has(id) || !['Płatne w Hotelu', 'Nieopłacone'].includes(item.status)) return;
+  const ownerId = currentUser.id;
+  const tripId = currentTrip.id;
+  savingExpenseIds.add(id);
+  button.disabled = true;
+  button.textContent = 'Zapisywanie…';
+  try {
+    const { data: updated, error } = await supabase.from(TABLE_NAME).update({ expense_status: 'Opłacone' }).eq('id', id).eq('user_id', ownerId).eq('trip_id', tripId).eq('expense_status', item.status).select('id,expense_status').maybeSingle();
+    if (!currentUser || currentUser.id !== ownerId || !currentTrip || currentTrip.id !== tripId) return;
+    if (error) { showToast('Nie udało się zmienić statusu wydatku.'); return; }
+    if (!updated) { await loadExpenses(); showToast('Status wydatku został zmieniony w innym miejscu.'); return; }
+    item.status = updated.expense_status;
+    render();
+    showToast('Wydatek oznaczony jako opłacony.');
+  } catch {
+    showToast('Nie udało się połączyć z Supabase. Spróbuj ponownie.');
+  } finally {
+    savingExpenseIds.delete(id);
+    if (button.isConnected) { button.disabled = false; button.textContent = '✓ Oznacz jako opłacone'; }
+  }
 }
 
 // PL: Pokaż formularz i pobierz kurs dla wybranej waluty oraz daty. | ES-CO: Abre el formulario y consulta la tasa para la moneda y fecha elegidas.
@@ -662,7 +1009,7 @@ async function importWorkbook(file) {
     // PL: Załaduj parser dopiero po wybraniu importu, nie zwiększając startowego pakietu aplikacji. | ES-CO: Carga el parser solo al importar para reducir el paquete inicial.
     const { parseExpenseWorkbook } = await import('./excel-import.js');
     // PL: Odczytaj skoroszyt lokalnie i pomiń puste pola. | ES-CO: Lee el Excel localmente e ignora celdas vacías.
-    const { trip, tripDays, expenses: rows } = await parseExpenseWorkbook(file);
+    const { trip, tripDays, expenses: rows, reservations } = await parseExpenseWorkbook(file);
     // PL: Przerwij, jeśli użytkownik zdążył się wylogować lub zmienić konto. | ES-CO: Detén la operación si cambió o cerró sesión.
     if (!currentUser || currentUser.id !== ownerId) return;
     // PL: Zatrzymaj import z jasną informacją, jeśli nie ma żadnych kwot. | ES-CO: Informa si no hay valores para importar.
@@ -674,7 +1021,9 @@ async function importWorkbook(file) {
     // PL: Policz rezerwacje płatne dopiero w hotelu. | ES-CO: Cuenta reservas que se pagan en el hotel.
     const hotelCount = rows.filter((item) => item.status === 'Płatne w Hotelu').length;
     // PL: Pokaż liczbę, sumę i rozkład statusów przed zapisem. | ES-CO: Confirma cantidad, total y estados antes de guardar.
-    const confirmed = window.confirm(`Importować podróż „${trip.name}” z ${tripDays.length} dniami i ${rows.length} wydatkami o łącznej wartości ${money(importTotal)}?\n\n${paidCount} opłaconych · ${hotelCount} płatnych w hotelu.\nPuste miejsca i pozycje bez kwoty zostaną pominięte.`);
+    const hotelReservationCount = reservations.filter((item) => item.type === 'hotel').length;
+    const flightReservationCount = reservations.filter((item) => item.type === 'flight').length;
+    const confirmed = window.confirm(`Importować podróż „${trip.name}” z ${tripDays.length} dniami, ${hotelReservationCount} rezerwacjami hotelowymi i ${flightReservationCount} lotami oraz ${rows.length} wydatkami o łącznej wartości ${money(importTotal)}?\n\n${paidCount} opłaconych · ${hotelCount} płatnych w hotelu.\nPuste miejsca i pozycje bez kwoty zostaną pominięte.`);
     // PL: Nie zapisuj niczego, jeśli użytkownik anuluje podgląd. | ES-CO: No guarda filas si se cancela la confirmación.
     if (!confirmed) { document.querySelector('#syncStatus').textContent = `Wczytano ${expenses.length} wydatków`; document.querySelector('#syncStatus').classList.add('synced'); return; }
     // PL: Pokaż oczekiwanie na zapis w bazie. | ES-CO: Muestra que los registros se están enviando a la base.
@@ -689,6 +1038,38 @@ async function importWorkbook(file) {
     const { error: daysError } = await supabase.from('trip_days').upsert(dayPayload, { onConflict: 'trip_id,trip_date' });
     if (!currentUser || currentUser.id !== ownerId) return;
     if (daysError) { showToast('Nie udało się zapisać planu dni. Sprawdź migrację multi-trip w Supabase.'); document.querySelector('#syncStatus').textContent = 'Import nieudany'; return; }
+    cacheReservationPreview(ownerId, tripId, reservations);
+    const reservationPayload = reservations.map((item) => ({
+      user_id: ownerId,
+      trip_id: tripId,
+      reservation_type: item.type,
+      sort_order: item.sortOrder,
+      source_ref: item.sourceRef,
+      title: item.title,
+      city: item.city || null,
+      check_in: item.checkIn || null,
+      check_out: item.checkOut || null,
+      nights: item.nights ?? null,
+      flight_number: item.flightNumber || null,
+      route: item.route || null,
+      flight_date: item.flightDate || null,
+      departure_time: item.departureTime || null,
+      arrival_time: item.arrivalTime || null,
+      airline_name: item.airlineName || null,
+      airline_logo: item.airlineLogo || null,
+      provider: item.provider || null,
+      booking_reference: item.bookingReference || null,
+      price_text: item.priceText || null,
+      total_price_text: item.totalPriceText || null,
+      amount_local: item.amountLocal,
+      currency_code: item.currencyCode,
+      amount_pln: item.amountPln,
+      pln_per_night: item.plnPerNight,
+    }));
+    const { error: reservationsError } = await supabase.from('trip_reservations').upsert(reservationPayload, { onConflict: 'trip_id,source_ref' });
+    if (!currentUser || currentUser.id !== ownerId) return;
+    const reservationsPendingMigration = reservationsError && ['PGRST205', '42P01'].includes(reservationsError.code);
+    if (reservationsError && !reservationsPendingMigration) showToast('Rezerwacje zostaną widoczne w tej sesji, ale nie udało się ich zsynchronizować z Supabase.');
     // PL: Przypisz wcześniej zaimportowane rekordy bez duplikowania ich ani zmiany kwot. | ES-CO: Asocia gastos existentes sin duplicarlos ni cambiar importes.
     const sourceRefs = rows.map((item) => item.sourceRef);
     const { error: attachError } = await supabase.from(TABLE_NAME).update({ trip_id: tripId }).eq('user_id', ownerId).is('trip_id', null).in('source_ref', sourceRefs);
@@ -707,6 +1088,7 @@ async function importWorkbook(file) {
     await loadTrips();
     // PL: Poinformuj, ile wierszy dodano, a ile pominięto jako duplikaty. | ES-CO: Informa cuántas filas se agregaron y cuántas eran duplicadas.
     showToast(`Zaimportowano ${data?.length || 0} nowych wydatków; ${rows.length - (data?.length || 0)} już istniało.`);
+    if (reservationsPendingMigration) showToast('Rezerwacje widoczne w tej sesji. Zastosuj migrację trip_reservations, aby synchronizować je z Supabase.');
   // PL: Pokaż błąd pliku lub połączenia bez technicznego stack trace. | ES-CO: Muestra error de archivo o conexión sin detalles internos.
   } catch (error) {
     // PL: Przywróć komunikat synchronizacji po nieudanej próbie. | ES-CO: Restaura el estado de sincronización si falla.
@@ -848,6 +1230,7 @@ rateInput.addEventListener('input', () => {
 expenseForm.addEventListener('submit', saveExpense);
 // PL: Przełącz aktywny wyjazd i pobierz wyłącznie jego dziennik. | ES-CO: Cambia el viaje activo y consulta solo sus gastos.
 tripSelector.addEventListener('change', async () => {
+  showOverview();
   // PL: Wybierz rekord podróży znany bieżącej sesji. | ES-CO: Selecciona un viaje visible para esta sesión.
   currentTrip = trips.find((trip) => trip.id === tripSelector.value) || null;
   // PL: Ustaw pierwszą lub dzisiejszą datę w nowym wyjeździe. | ES-CO: Selecciona la fecha inicial o de hoy del nuevo viaje.
@@ -859,38 +1242,31 @@ tripSelector.addEventListener('change', async () => {
   // PL: Pobierz wiersze przypisane do nowego trip_id. | ES-CO: Consulta filas asociadas al nuevo trip_id.
   await loadExpenses();
 });
-// PL: Otwórz formularz z górnego przycisku. | ES-CO: Abre el formulario desde el botón superior.
+document.querySelector('#backToOverview').addEventListener('click', showOverview);
+overviewTab.addEventListener('click', showOverview);
+reservationsTab.addEventListener('click', showReservations);
+document.querySelector('#dayPageBack').addEventListener('click', showOverview);
+openDayDetailsButton.addEventListener('click', () => openDayPage(selectedDate));
+document.querySelector('#previousDay').addEventListener('click', () => moveDay(-1));
+document.querySelector('#nextDay').addEventListener('click', () => moveDay(1));
+document.querySelector('#addDayExpense').addEventListener('click', openExpenseDialog);
 document.querySelector('#openExpense').addEventListener('click', openExpenseDialog);
-// PL: Otwórz formularz także ze stanu pustego. | ES-CO: Abre el formulario también desde el estado vacío.
 document.querySelector('#closeDialog').addEventListener('click', () => expenseDialog.close());
-// PL: Zamknij formularz po kliknięciu anulowania. | ES-CO: Cierra el formulario al pulsar cancelar.
 document.querySelector('#cancelDialog').addEventListener('click', () => expenseDialog.close());
-// PL: Pobierz raport CSV z danymi załadowanymi dla użytkownika. | ES-CO: Descarga el CSV con los gastos cargados del usuario.
 document.querySelector('#exportButton').addEventListener('click', exportCSV);
-// PL: Otwórz lokalny wybór pliku po naciśnięciu przycisku importu. | ES-CO: Abre el selector local al pulsar importar.
 importExcelButton.addEventListener('click', () => {
-  // PL: Wymagaj sesji przed importem danych do konta. | ES-CO: Exige sesión para importar a una cuenta.
   if (!currentUser) { showToast('Zaloguj się, aby zaimportować wydatki.'); return; }
-  // PL: Otwórz natywny selektor plików urządzenia. | ES-CO: Abre el selector de archivos del dispositivo.
   excelFileInput.click();
 });
-// PL: Przekaż wybrany skoroszyt do importera po lokalnym odczycie. | ES-CO: Envía el Excel seleccionado al importador local.
 excelFileInput.addEventListener('change', () => {
-  // PL: Odczytaj pierwszy wybrany plik. | ES-CO: Lee el primer archivo seleccionado.
   const file = excelFileInput.files?.[0];
-  // PL: Uruchom import tylko wtedy, gdy użytkownik wybrał plik. | ES-CO: Inicia la importación solo si se seleccionó un archivo.
   if (file) importWorkbook(file);
 });
-// PL: Zakończ sesję po kliknięciu przycisku wylogowania. | ES-CO: Cierra la sesión al pulsar el botón correspondiente.
 document.querySelector('#signOutButton').addEventListener('click', async () => {
-  // PL: Poproś Supabase o wylogowanie i pokaż ewentualny błąd. | ES-CO: Solicita cerrar sesión y muestra cualquier error.
   const { error } = await supabase.auth.signOut();
-  // PL: Zachowaj ekran, jeśli wylogowanie nie powiodło się. | ES-CO: Mantiene la pantalla si el cierre de sesión falla.
   if (error) showToast('Nie udało się wylogować. Spróbuj ponownie.');
 });
-// PL: Zareaguj na kliknięcie tła okna dialogowego. | ES-CO: Maneja el clic sobre el fondo del diálogo.
 expenseDialog.addEventListener('click', (event) => { if (event.target === expenseDialog) expenseDialog.close(); });
-
 // PL: Nasłuchuj zmian logowania, wygaśnięcia tokenu i wylogowania. | ES-CO: Escucha cambios de acceso, vencimiento del token y cierre de sesión.
 supabase.auth.onAuthStateChange((_event, session) => {
   // PL: Zapamiętaj zdarzenie, jeśli odczyt początkowej sesji nadal trwa. | ES-CO: Guarda el evento si la lectura de sesión inicial sigue pendiente.
@@ -900,7 +1276,7 @@ supabase.auth.onAuthStateChange((_event, session) => {
     // PL: Podmień aktualnego właściciela na użytkownika z nowej sesji. | ES-CO: Reemplaza el usuario activo por el de la nueva sesión.
     currentUser = session?.user || null;
     // PL: Wyczyść prywatne wydatki od razu po wylogowaniu. | ES-CO: Borra gastos privados inmediatamente al cerrar sesión.
-    if (!currentUser) { trips = []; currentTrip = null; expenses = []; }
+    if (!currentUser) { trips = []; currentTrip = null; expenses = []; clearReservationPreview(); }
     // PL: Zmień widoczność aplikacji zgodnie z nową sesją. | ES-CO: Cambia la vista según la sesión nueva.
     renderAuthState();
     // PL: Pobierz dane użytkownika po zalogowaniu albo wyczyść widok. | ES-CO: Carga los datos al entrar o limpia la pantalla al salir.

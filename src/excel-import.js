@@ -24,6 +24,35 @@ function dateToIso(value) {
   return match ? match[1] : '';
 }
 
+function timeToText(value) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString().slice(11, 16);
+  const text = String(value ?? '').trim();
+  const isoTime = text.match(/T(\d{2}:\d{2})/);
+  return isoTime ? isoTime[1] : text;
+}
+
+function splitProviderReference(value) {
+  const [provider, ...referenceParts] = String(value ?? '').split(' · ');
+  return { provider: provider.trim(), reference: referenceParts.join(' · ').trim() || null };
+}
+
+function numericPrice(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return roundAmount(value);
+  const text = String(value ?? '').trim();
+  if (!text || /mil|mile/i.test(text) || !(/[¥₩€$]|zł|\bPLN\b|\bJPY\b|\bKRW\b/i.test(text))) return null;
+  const match = text.match(/[\d][\d\s\u00a0]*(?:[,.]\d{1,2})?/);
+  return match ? roundAmount(Number(match[0].replace(/[\s\u00a0]/g, '').replace(',', '.'))) : null;
+}
+
+function currencyForPrice(value) {
+  const text = String(value ?? '');
+  if (text.includes('¥')) return 'JPY';
+  if (text.includes('₩')) return 'KRW';
+  if (text.includes('zł')) return 'PLN';
+  if (text.includes('€')) return 'EUR';
+  return null;
+}
+
 // PL: Wczytaj lokalny arkusz i przygotuj tylko wiersze mające dodatnią kwotę PLN. | ES-CO: Lee el Excel local y prepara filas con un PLN positivo.
 export async function parseExpenseWorkbook(file) {
   // PL: Odczytaj dziennik i podsumowanie bez wysyłania pliku na serwer. | ES-CO: Lee diario y resumen sin subir el archivo al servidor.
@@ -60,6 +89,66 @@ export async function parseExpenseWorkbook(file) {
   const tripSourceRef = `excel:${normalizeText(tripName)}:${uniqueDays[0].date}`;
   // PL: Przechowuj konfigurację wyjazdu niezależnie od interfejsu aplikacji. | ES-CO: Devuelve la configuración del viaje separada de la interfaz.
   const trip = { name: tripName, startDate: uniqueDays[0].date, endDate: uniqueDays[uniqueDays.length - 1].date, dailyBudgetPln, availableBeforeTripPln, sourceRef: tripSourceRef };
+  const hotelReservations = hotelRows.flatMap((row, index) => {
+    const city = String(row[1] ?? '').trim();
+    const name = String(row[2] ?? '').trim();
+    const checkIn = dateToIso(row[3]);
+    const checkOut = dateToIso(row[4]);
+    if (!name || !checkIn || !checkOut) return [];
+    const provider = splitProviderReference(row[7]);
+    const currencyCode = normalizeText(city) === 'seul' ? 'KRW' : 'JPY';
+    const amountLocal = numericPrice(row[8]);
+    const nights = Number(row[5]) || 0;
+    const plnPerNight = Number(row[9]) || 0;
+    return [{
+      type: 'hotel',
+      sortOrder: index,
+      sourceRef: `excel:Podsumowanie!B${index + 37}`,
+      title: name,
+      city,
+      checkIn,
+      checkOut,
+      nights,
+      provider: provider.provider,
+      bookingReference: provider.reference,
+      priceText: String(row[8] ?? '').trim(),
+      amountLocal,
+      currencyCode: amountLocal == null ? null : currencyCode,
+      amountPln: nights && plnPerNight ? roundAmount(nights * plnPerNight) : null,
+      plnPerNight: plnPerNight || null,
+    }];
+  });
+  const flightReservations = flightRows.flatMap((row, index) => {
+    const flightNumber = String(row[1] ?? '').trim();
+    const route = String(row[2] ?? '').trim();
+    const flightDate = dateToIso(row[3]);
+    if (!flightNumber || !route || !flightDate) return [];
+    const provider = splitProviderReference(row[7]);
+    const airline = flightNumber.startsWith('LO') ? { name: 'LOT Polish Airlines', logo: 'lot' } : flightNumber.startsWith('NH') ? { name: 'ANA', logo: 'ana' } : flightNumber.startsWith('KE') ? { name: 'Korean Air', logo: 'korean-air' } : { name: provider.provider, logo: null };
+    const priceText = String(row[8] ?? '').trim();
+    const totalPriceText = typeof row[9] === 'string' ? row[9].trim() : null;
+    const currencyCode = currencyForPrice(row[8]);
+    return [{
+      type: 'flight',
+      sortOrder: index,
+      sourceRef: `excel:Podsumowanie!B${index + 48}`,
+      flightNumber,
+      route,
+      flightDate,
+      departureTime: timeToText(row[4]),
+      arrivalTime: timeToText(row[5]),
+      airlineName: airline.name,
+      airlineLogo: airline.logo,
+      provider: provider.provider,
+      bookingReference: provider.reference,
+      priceText,
+      totalPriceText,
+      amountLocal: currencyCode && !/mil|mile/i.test(priceText) ? numericPrice(row[8]) : null,
+      currencyCode,
+      amountPln: numericPrice(row[9]),
+    }];
+  });
+  const reservations = [...hotelReservations, ...flightReservations];
   // PL: Przejdź po wycenionych wierszach wydatków z prawidłowym numerem w Excelu. | ES-CO: Recorre los gastos con precio conservando su fila de Excel.
   const expenses = diaryRows.slice(9).flatMap((row, index) => {
     // PL: Odczytaj kwotę PLN obliczoną przez arkusz. | ES-CO: Lee el importe PLN calculado por la hoja.
@@ -146,5 +235,5 @@ export async function parseExpenseWorkbook(file) {
     return [{ expenseDate, category, description, amountLocal, currencyCode, plnPerUnit, amountPln: roundAmount(amountPln), status, payment, sourceRef: `excel:Dziennik!B${index + 10}` }];
   });
   // PL: Zwróć ustawienia podróży, plan dni i wydatki jako osobne zbiory danych. | ES-CO: Devuelve viaje, itinerario y gastos como datos separados.
-  return { trip, tripDays, expenses };
+  return { trip, tripDays, expenses, reservations };
 }

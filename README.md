@@ -31,8 +31,8 @@ ES-CO: `.env.example` muestra los nombres de variables requeridos, sin valores r
 PL: W Supabase otwórz **SQL Editor**, wklej zawartość `supabase/schema.sql` i uruchom ją raz. Skrypt tworzy tabelę, jawne uprawnienia dla `authenticated` i polityki RLS właściciela.
 ES-CO: En Supabase abre **SQL Editor**, pega el contenido de `supabase/schema.sql` y ejecútalo una vez. El script crea la tabla, permisos explícitos para `authenticated` y políticas RLS por propietario.
 
-PL: Przy istniejącej bazie uruchom migracje w kolejności: `20261109_excel_import.sql`, potem `20261109_multi_trip_model.sql`. Druga tworzy prywatne podróże i dni oraz wiąże wydatki z podróżą.
-ES-CO: En una base existente, ejecuta las migraciones en orden: `20261109_excel_import.sql` y luego `20261109_multi_trip_model.sql`. La segunda crea viajes y días privados y relaciona cada gasto con un viaje.
+PL: Przy istniejącej bazie uruchom migracje w kolejności: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql`, a następnie `20261109_trip_reservations.sql`. Ostatnia tworzy prywatne rezerwacje hoteli i lotów powiązane z podróżą.
+ES-CO: En una base existente, ejecuta las migraciones en orden: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql` y luego `20261109_trip_reservations.sql`. La última crea reservas privadas de hoteles y vuelos vinculadas al viaje.
 
 PL: W **Authentication → Providers → Email** upewnij się, że logowanie email/hasło jest włączone. Każde konto musi mieć ustawione hasło i potwierdzony adres email.
 ES-CO: En **Authentication → Providers → Email**, confirma que esté activo el acceso con correo y contraseña. Cada cuenta debe tener contraseña y correo confirmado.

@@ -43,6 +43,38 @@ create table if not exists public.trip_days (
   constraint trip_days_unique_date unique (trip_id, trip_date)
 );
 
+create table if not exists public.trip_reservations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  trip_id uuid not null references public.trips(id) on delete cascade,
+  reservation_type text not null check (reservation_type in ('hotel', 'flight')),
+  sort_order integer not null default 0 check (sort_order >= 0),
+  source_ref text not null,
+  title text not null,
+  city text,
+  check_in date,
+  check_out date,
+  nights integer check (nights is null or nights >= 0),
+  flight_number text,
+  route text,
+  flight_date date,
+  departure_time text,
+  arrival_time text,
+  airline_name text,
+  airline_logo text,
+  provider text,
+  booking_reference text,
+  price_text text,
+  total_price_text text,
+  amount_local numeric(14, 2) check (amount_local is null or amount_local >= 0),
+  currency_code char(3),
+  amount_pln numeric(14, 2) check (amount_pln is null or amount_pln >= 0),
+  pln_per_night numeric(18, 8) check (pln_per_night is null or pln_per_night >= 0),
+  created_at timestamptz not null default now(),
+  constraint trip_reservations_unique_source unique (trip_id, source_ref),
+  constraint trip_reservations_valid_dates check (check_in is null or check_out is null or check_out >= check_in)
+);
+
 -- PL: Utwórz tabelę wydatków tylko wtedy, gdy jeszcze nie istnieje. | ES-CO: Crea la tabla de gastos solo si aún no existe.
 create table if not exists public.expenses (
   -- PL: Identyfikator każdego wydatku generowany po stronie bazy. | ES-CO: Identificador de cada gasto generado por la base de datos.
@@ -81,16 +113,17 @@ create table if not exists public.expenses (
 alter table public.trips enable row level security;
 -- PL: Włącz RLS dla planu dni. | ES-CO: Activa RLS para los días del viaje.
 alter table public.trip_days enable row level security;
+alter table public.trip_reservations enable row level security;
 -- PL: Wymuś kontrolę dostępu na poziomie każdego wiersza wydatków. | ES-CO: Activa el control de acceso a nivel de fila en gastos.
 alter table public.expenses enable row level security;
 -- PL: Odbierz domyślny dostęp anonimowy do konfiguracji wyjazdów. | ES-CO: Revoca acceso anónimo a la configuración del viaje.
-revoke all on public.trips, public.trip_days from anon, public;
+revoke all on public.trips, public.trip_days, public.trip_reservations from anon, public;
 -- PL: Jawnie odbierz dostęp anonimowy i odziedziczony dostęp publiczny. | ES-CO: Revoca explícitamente el acceso anónimo y público heredado.
 revoke all on public.expenses from anon, public;
 -- PL: Zezwól uwierzytelnionym rolom na korzystanie ze schematu public. | ES-CO: Permite que los usuarios autenticados usen el esquema public.
 grant usage on schema public to authenticated;
 -- PL: Nadaj dostęp do wyjazdów i dni tylko uwierzytelnionym rolom. | ES-CO: Concede acceso a viajes y días solo a roles autenticados.
-grant select, insert, update, delete on public.trips, public.trip_days to authenticated;
+grant select, insert, update, delete on public.trips, public.trip_days, public.trip_reservations to authenticated;
 -- PL: Nadaj tylko potrzebne operacje tabeli; polityki RLS ograniczają wiersze. | ES-CO: Concede las operaciones necesarias; RLS limita las filas visibles.
 grant select, insert, update, delete on public.expenses to authenticated;
 -- PL: Przyspiesz wyświetlanie dziennika jednego użytkownika według daty. | ES-CO: Acelera la consulta del diario por usuario y fecha.
@@ -135,6 +168,15 @@ create policy trip_days_update_own on public.trip_days for update to authenticat
 drop policy if exists trip_days_delete_own on public.trip_days;
 -- PL: Usuwaj dni tylko z własnego wyjazdu. | ES-CO: Borra días únicamente de viajes propios.
 create policy trip_days_delete_own on public.trip_days for delete to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_days.trip_id and trips.user_id = (select auth.uid())));
+
+drop policy if exists trip_reservations_select_own on public.trip_reservations;
+create policy trip_reservations_select_own on public.trip_reservations for select to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
+drop policy if exists trip_reservations_insert_own on public.trip_reservations;
+create policy trip_reservations_insert_own on public.trip_reservations for insert to authenticated with check ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
+drop policy if exists trip_reservations_update_own on public.trip_reservations;
+create policy trip_reservations_update_own on public.trip_reservations for update to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid()))) with check ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
+drop policy if exists trip_reservations_delete_own on public.trip_reservations;
+create policy trip_reservations_delete_own on public.trip_reservations for delete to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
 
 -- PL: Usuń poprzednią politykę odczytu, aby skrypt można było uruchomić ponownie. | ES-CO: Borra la política de lectura previa para permitir repetir el script.
 drop policy if exists expenses_select_own on public.expenses;

@@ -11,12 +11,6 @@
   <meta name="theme-color" content="#eef3f6">
   <!-- PL: Nadaj karcie strony polską nazwę. | ES-CO: Define el título polaco de la pestaña. -->
   <title>Dziennik wydatków</title>
-  <!-- PL: Przygotuj wcześniejsze połączenie z serwerem fontów. | ES-CO: Prepara la conexión al servidor de tipografías. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <!-- PL: Przygotuj bezpieczne połączenie zasobów fontów. | ES-CO: Prepara una conexión segura para las fuentes. -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- PL: Wczytaj dwa kroje używane przez interfejs. | ES-CO: Carga las dos tipografías de la interfaz. -->
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- PL: Rozpocznij style układu, kolorów i responsywności. | ES-CO: Inicia estilos de diseño, colores y adaptación. -->
   <style>
     :root {
@@ -64,6 +58,9 @@
     .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 36px; } /* PL: Ustaw tytuł nawigacji i akcje w jednym pasku. | ES-CO: Organiza navegación y acciones en una barra. */
     .breadcrumb { color: var(--muted); font-size: 12px; } /* PL: Zmniejsz kontrast ścieżki nawigacji. | ES-CO: Reduce el contraste de la ruta de navegación. */
     .top-actions { display: flex; align-items: center; gap: 10px; } /* PL: Ułóż eksport, wylogowanie i dodawanie w rzędzie. | ES-CO: Alinea exportar, cerrar sesión y agregar. */
+    .view-tabs { display: flex; gap: 20px; margin: -12px 0 28px; border-bottom: 1px solid var(--line); }
+    .view-tab { padding: 11px 2px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; }
+    .view-tab[aria-selected="true"] { border-color: var(--green); color: var(--ink); font-weight: 700; }
     .quiet-button, .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 0 15px; border-radius: 8px; font-size: 12px; font-weight: 700; } /* PL: Nadaj przyciskom stałą wysokość, zaokrąglenie i cel dotykowy. | ES-CO: Da altura, bordes redondeados y área cómoda para pulsar. */
     .quiet-button { border: 1px solid var(--line); background: transparent; color: var(--ink); } /* PL: Ustaw drugorzędny przycisk bez wypełnienia. | ES-CO: Define un botón secundario sin relleno. */
     .primary-button { border: 1px solid var(--green); background: var(--green); color: white; } /* PL: Wyróżnij główne działanie kolorem. | ES-CO: Resalta la acción principal con color. */
@@ -78,7 +75,7 @@
     .count-number { font-family: "Quicksand", sans-serif; font-size: 30px; font-weight: 700; line-height: 1; } /* PL: Wyróżnij liczbę dni fontem Quicksand. | ES-CO: Resalta el número de días con Quicksand. */
     .trip-countdown span:last-child { color: var(--muted); font-size: 11px; line-height: 1.4; } /* PL: Sformatuj opis licznika w dwóch krótkich wierszach. | ES-CO: Da formato al texto del contador en dos líneas. */
     .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 30px 0 32px; } /* PL: Rozłóż wskaźniki i stan budżetu w równych panelach. | ES-CO: Distribuye indicadores y presupuesto en paneles equilibrados. */
-    .stat { min-height: 105px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 5px 16px rgba(25,45,59,.035); } /* PL: Nadaj wskaźnikom jasne tło i zaokrąglone rogi. | ES-CO: Da fondo claro y bordes redondeados a los indicadores. */
+    .stat { min-height: 105px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); } /* PL: Ustaw proste panele danych bez dekoracyjnego cienia. | ES-CO: Usa paneles de datos sobrios y sin sombra decorativa. */
     .stat-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; } /* PL: Pokaż opis nad wartością wskaźnika. | ES-CO: Muestra la etiqueta encima del valor. */
     .stat-value { display: block; font-size: 23px; font-weight: 600; letter-spacing: 0; } /* PL: Wyróżnij główną wartość bez ściskania liter. | ES-CO: Resalta el valor sin comprimir las letras. */
     .stat-detail { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; } /* PL: Dodaj drobny opis źródła lub znaczenia wartości. | ES-CO: Añade un detalle sobre la cifra. */
@@ -91,7 +88,7 @@
     /* PL: Ułóż wykresy obok siebie z możliwością zwężenia. | ES-CO: Organiza los gráficos en columnas adaptables. */
     .chart-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr); gap: 14px; margin: 17px 0 34px; }
     /* PL: Opraw każdy wykres w osobny panel zaokrąglony. | ES-CO: Enmarca cada gráfico en un panel redondeado. */
-    .chart-panel { min-width: 0; overflow: hidden; margin: 0; padding: 17px 18px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 5px 16px rgba(25,45,59,.035); }
+    .chart-panel { min-width: 0; overflow: hidden; margin: 0; padding: 17px 18px 13px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
     /* PL: Wyrównaj nazwę wykresu i jego sumę. | ES-CO: Alinea el título del gráfico con su total. */
     .chart-panel-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 10px; }
     /* PL: Ustaw czytelny tytuł wykresu. | ES-CO: Da formato al título del gráfico. */
@@ -113,7 +110,65 @@
     /* PL: Zmień statystyki na dwie kolumny i zmniejsz panele na telefonie. | ES-CO: Muestra estadísticas en dos columnas en celular. */
     @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .stat { min-height: 94px; padding: 13px 12px; } .stat-value { font-size: 18px; } .chart-panel { padding: 14px 12px 10px; } .chart-wrap { height: 230px; } .category-chart-wrap { height: 240px; } }
     .content-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: clamp(24px, 4vw, 54px); align-items: start; } /* PL: Zestaw listę dni i panel szczegółów w dwóch kolumnach. | ES-CO: Organiza días y detalle en dos columnas. */
+    .trip-summary { display: grid; gap: 7px; padding: 16px 8px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .trip-summary-label { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    .trip-summary strong { font-size: 13px; }
+    .trip-summary-date { color: var(--muted); font-size: 11px; }
+    .country-flags { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; }
+    .country-flag { display: block; flex: 0 0 22px; width: 22px; height: 16px; object-fit: cover; border: 1px solid rgba(25,45,59,.12); border-radius: 2px; }
+    .day-place-line { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .day-place-line .day-place { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .day-page { padding-bottom: 28px; }
+    .day-page-heading { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px 24px; align-items: end; padding: 10px 0 22px; border-bottom: 1px solid var(--ink); }
+    .day-page-heading .back-link { grid-column: 1 / -1; justify-self: start; margin-bottom: 10px; }
+    .back-link { padding: 0; border: 0; background: transparent; color: var(--green); font-size: 12px; font-weight: 700; }
+    .day-page-heading h1 { margin: 6px 0 4px; font-size: 34px; }
+    .day-location { display: flex; align-items: center; gap: 9px; }
+    .day-summary { display: grid; justify-items: end; gap: 5px; text-align: right; }
+    .day-summary strong { font-size: 24px; }
+    .day-summary span { color: var(--muted); font-size: 11px; }
+    .day-page-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(320px,.85fr); gap: 24px; align-items: start; padding-top: 22px; }
+    .map-panel, .day-records { min-width: 0; }
+    .detail-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .detail-heading h2 { margin: 0; font-size: 14px; }
+    .detail-heading a { color: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; }
+    .day-map { display: block; width: 100%; aspect-ratio: 4 / 3; border: 1px solid var(--line); background: #e8eee8; }
+    .map-caption { margin: 8px 0 0; color: var(--muted); font-size: 10px; }
+    .polish-map-label { border: 0; border-radius: 2px; padding: 3px 6px; background: var(--surface); color: var(--ink); font-family: "Quicksand", "Segoe UI", sans-serif; font-size: 11px; font-weight: 700; box-shadow: 0 1px 5px rgba(25,45,59,.2); }
+    .day-records .expense-list { border-top: 1px solid var(--line); }
+    .day-pagination { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .expense-title-line { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .expense-title-line .expense-title { flex: 1; }
+    .paid-button { grid-column: 2 / 4; justify-self: start; padding: 5px 0 0; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; }
+    .paid-button:disabled { opacity: .6; cursor: wait; }
+    .trip-photo { display: none; }
+    .reservation-section { margin: 0 0 38px; }
+    .reservation-groups { display: grid; gap: 27px; margin-top: 20px; }
+    .reservation-group-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .reservation-group-heading h3 { margin: 0; font-size: 15px; }
+    .reservation-group-heading span { color: var(--muted); font-size: 10px; }
+    .reservation-list { border-top: 1px solid var(--ink); }
+    .reservation-row { display: grid; grid-template-columns: minmax(95px,.55fr) minmax(180px,1.2fr) minmax(170px,1fr) max-content; gap: 17px; align-items: center; padding: 15px 7px; border-bottom: 1px solid var(--line); }
+    .reservation-date { display: grid; gap: 3px; }
+    .reservation-date strong { font-size: 12px; }
+    .reservation-date span, .reservation-detail { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .reservation-main { min-width: 0; }
+    .reservation-main strong { display: block; font-size: 12px; line-height: 1.4; }
+    .reservation-title-line, .airline-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .reservation-title-line .country-flags { flex: 0 0 auto; }
+    .airline-logo { display: block; flex: 0 0 70px; width: 70px; height: 28px; object-fit: contain; object-position: left center; }
+    .reservation-flight-number { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .reservation-route { margin-top: 5px; }
+    .reservation-detail { display: grid; gap: 3px; }
+    .flight-route-map { grid-column: 1 / -1; width: 100%; height: 156px; min-width: 0; border: 1px solid var(--line); background: #e8eee8; }
+    .flight-route-caption { grid-column: 1 / -1; margin: -10px 0 0; color: var(--muted); font-size: 10px; }
+    .reservation-reference { overflow-wrap: anywhere; }
+    .reservation-price { display: grid; justify-items: end; gap: 4px; text-align: right; white-space: nowrap; }
+    .reservation-price strong { font-size: 12px; }
+    .reservation-price span { color: var(--muted); font-size: 10px; }
+    .reservation-empty { padding: 16px 8px; color: var(--muted); font-size: 11px; }
     .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 13px; border-bottom: 1px solid var(--ink); } /* PL: Oddziel nagłówek sekcji od listy. | ES-CO: Separa el título de la sección de su contenido. */
+    .expense-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 9px; }
     .section-heading h2 { margin: 0; font-family: "Quicksand", sans-serif; font-size: 24px; font-weight: 700; } /* PL: Ustaw tytuł sekcji fontem Quicksand. | ES-CO: Define el título de sección con Quicksand. */
     .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; } /* PL: Ustaw instrukcję pod tytułem sekcji. | ES-CO: Da formato a la instrucción bajo el título. */
     .day-list { margin-top: 3px; } /* PL: Zachowaj mały odstęp nad listą dni. | ES-CO: Conserva una separación pequeña sobre los días. */
@@ -155,7 +210,6 @@
     .empty-state p { margin: 0 auto 15px; max-width: 230px; font-size: 11px; line-height: 1.55; } /* PL: Ogranicz szerokość krótkiej instrukcji. | ES-CO: Limita el ancho de la instrucción breve. */
     .budget-note { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 12px; border-top: 1px dashed #cbd6cc; color: var(--muted); font-size: 10px; } /* PL: Oddziel saldo dnia przerywaną linią. | ES-CO: Separa el saldo del día con una línea discontinua. */
     .budget-note strong { color: var(--ink); } /* PL: Wyróżnij pozostały budżet dnia. | ES-CO: Resalta el presupuesto diario restante. */
-    .footnote { margin-top: 26px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.5; } /* PL: Wyjaśnij ograniczenia kursu referencyjnego. | ES-CO: Explica los límites de la tasa de referencia. */
     dialog { width: min(520px, calc(100vw - 28px)); max-height: min(92vh, 760px); padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); } /* PL: Ogranicz rozmiar modalu i nadaj mu miękkie rogi. | ES-CO: Limita el diálogo y le da esquinas suaves. */
     dialog::backdrop { background: rgba(23, 45, 37, .42); backdrop-filter: blur(2px); } /* PL: Przyciemnij i lekko rozmyj tło modalu. | ES-CO: Oscurece y difumina ligeramente el fondo. */
     .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 23px 24px 18px; border-bottom: 1px solid var(--line); } /* PL: Ustaw tytuł i przycisk zamknięcia w nagłówku. | ES-CO: Organiza título y botón de cierre. */
@@ -206,9 +260,10 @@
       .app-shell { display: block; } /* PL: Usuń boczną kolumnę siatki na telefonie. | ES-CO: Quita la columna lateral en el celular. */
       .sidebar { position: static; width: 100%; height: auto; padding: 13px 16px; border-right: 0; border-bottom: 1px solid var(--line); } /* PL: Zamień panel boczny na niski pasek marki. | ES-CO: Convierte la barra lateral en una franja superior. */
       .brand { width: fit-content; } /* PL: Zachowaj szerokość marki zgodną z jej treścią. | ES-CO: Ajusta la marca al ancho de su contenido. */
-      .sidebar .nav-label, .sidebar nav, .sidebar-spacer, .trip-photo, .local-note { display: none; } /* PL: Ukryj elementy panelu zbędne na małym ekranie. | ES-CO: Oculta elementos laterales que sobran en móvil. */
+      .sidebar .nav-label, .sidebar nav, .sidebar-spacer, .local-note { display: none; } /* PL: Ukryj elementy panelu zbędne na małym ekranie. | ES-CO: Oculta elementos laterales que sobran en móvil. */
       main { padding: 21px 17px 38px; } /* PL: Zmniejsz marginesy treści telefonu. | ES-CO: Reduce los márgenes del contenido móvil. */
       .topbar { align-items: flex-start; flex-wrap: wrap; margin-bottom: 28px; } /* PL: Ułóż ścieżkę i akcje w osobnych wierszach. | ES-CO: Separa la ruta y las acciones en filas. */
+      .view-tabs { margin: -10px 0 24px; }
       .breadcrumb { flex: 1 1 100%; padding-top: 0; } /* PL: Rozciągnij trasę nad przyciskami. | ES-CO: Extiende la ruta encima de los botones. */
       .top-actions { width: 100%; justify-content: flex-end; gap: 7px; } /* PL: Ustaw akcje w jednej zwartej linii. | ES-CO: Alinea las acciones en una fila compacta. */
       #importExcelButton, #exportButton, #signOutButton { width: 42px; padding: 0; font-size: 0; } /* PL: Zmień akcje pomocnicze na małe przyciski ikon. | ES-CO: Convierte acciones secundarias en íconos compactos. */
@@ -225,6 +280,16 @@
       .stat-label { font-size: 9px; } /* PL: Zmniejsz etykietę wskaźnika. | ES-CO: Reduce el tamaño de la etiqueta. */
       .stat-detail { font-size: 9px; } /* PL: Zmniejsz szczegół wskaźnika. | ES-CO: Reduce el detalle del indicador. */
       .content-grid { gap: 31px; } /* PL: Zachowaj odstęp między planem a wydatkami. | ES-CO: Conserva espacio entre el itinerario y los gastos. */
+      .day-page-heading { grid-template-columns: 1fr; align-items: start; }
+      .day-summary { justify-items: start; text-align: left; }
+      .day-page-grid { grid-template-columns: minmax(0,1fr); gap: 27px; }
+      .day-map { aspect-ratio: 1 / 1; }
+      .reservation-row { grid-template-columns: minmax(0,1fr) auto; gap: 7px 12px; padding: 13px 4px; }
+      .reservation-date { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px 8px; }
+      .reservation-main { grid-column: 1; }
+      .reservation-detail { grid-column: 1 / -1; }
+      .reservation-price { grid-column: 2; grid-row: 2 / span 2; align-self: center; }
+      .airline-logo { flex-basis: 58px; width: 58px; height: 24px; }
       .section-heading h2 { font-size: 22px; } /* PL: Zmniejsz nagłówki sekcji na telefonie. | ES-CO: Reduce los títulos de sección en móvil. */
       .day-row { grid-template-columns: 43px minmax(0,1fr) auto; gap: 9px; padding-inline: 5px; } /* PL: Dopasuj kolumny wiersza dnia do wąskiego ekranu. | ES-CO: Ajusta las columnas diarias al celular. */
       .day-total b { font-size: 11px; } /* PL: Zmniejsz kwotę dnia na wąskim ekranie. | ES-CO: Reduce el total diario en pantallas estrechas. */
@@ -298,11 +363,10 @@
       <div class="sidebar-spacer"></div>
       <!-- PL: Pokaż zdjęcie jako wizualny punkt podróży. | ES-CO: Muestra una imagen representativa del viaje. -->
       <div class="trip-photo">
-        <!-- PL: Wczytaj neutralne zdjęcie podróżnicze. | ES-CO: Carga una foto de viaje genérica. -->
-        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&amp;fit=crop&amp;w=700&amp;q=80" alt="Górski krajobraz" loading="lazy">
-        <!-- PL: Nałóż daty i nazwę podróży na zdjęcie. | ES-CO: Superpone fechas y nombre del viaje sobre la imagen. -->
-        <div class="trip-photo-copy"><span id="tripSidebarDates">Wybierz podróż</span><strong id="tripSidebarName">Dziennik podróży</strong></div>
-      <!-- PL: Zamknij kartę zdjęcia. | ES-CO: Cierra la tarjeta de la imagen. -->
+        <span class="trip-summary-label">Podróż aktywna</span>
+        <strong id="tripSidebarName">Dziennik podróży</strong>
+        <span class="trip-summary-date" id="tripSidebarDates">Wybierz podróż</span>
+        <span class="country-flags" id="tripSidebarFlags" aria-label="Kraje podróży"></span>
       </div>
       <!-- PL: Wyjaśnij lokalny zapis i kopię zapasową. | ES-CO: Explica el almacenamiento y la copia de seguridad. -->
       <p class="local-note">Dane zapisują się na Twoim koncie. Eksportuj CSV, aby zachować kopię.</p>
@@ -317,6 +381,7 @@
         <div class="breadcrumb">Podróże <span aria-hidden="true">/</span><select id="tripSelector" aria-label="Wybierz podróż" hidden></select><span id="tripSelectorEmpty">Brak podróży</span> <span class="sync-status" id="syncStatus" role="status">Łączenie…</span></div>
         <!-- PL: Zgrupuj eksport, wylogowanie i nowy wydatek. | ES-CO: Agrupa exportar, cerrar sesión y agregar gasto. -->
         <div class="top-actions">
+          <button class="quiet-button" id="backToOverview" type="button" hidden>← Plan podróży</button>
           <!-- PL: Wczytaj zaplanowane wydatki z pliku Excel na konto bieżącego użytkownika. | ES-CO: Importa gastos del Excel a la cuenta activa. -->
           <button class="quiet-button" id="importExcelButton" type="button" title="Importuj wydatki z Excela">Importuj Excel</button>
           <!-- PL: Wybierz skoroszyt lokalnie; jego zawartość nie jest wysyłana jako plik. | ES-CO: Selecciona el Excel local; el archivo no se sube como archivo. -->
@@ -332,6 +397,12 @@
       <!-- PL: Zamknij górny pasek. | ES-CO: Cierra la barra superior. -->
       </header>
 
+      <nav class="view-tabs" id="viewTabs" role="tablist" aria-label="Widoki podróży" hidden>
+        <button class="view-tab" id="overviewTab" type="button" role="tab" aria-selected="true">Podsumowanie</button>
+        <button class="view-tab" id="reservationsTab" type="button" role="tab" aria-selected="false">Rezerwacje</button>
+      </nav>
+
+      <div id="overviewPage">
       <!-- PL: Pokaż tytuł podróży, licznik i trzy wskaźniki finansowe. | ES-CO: Muestra viaje, cuenta regresiva e indicadores financieros. -->
       <section aria-labelledby="pageTitle">
         <!-- PL: Ułóż nagłówek podróży i odliczanie. | ES-CO: Organiza título del viaje y cuenta regresiva. -->
@@ -422,18 +493,67 @@
           <!-- PL: Pokaż datę, miejsce i wykorzystanie budżetu. | ES-CO: Muestra fecha, destino y presupuesto usado. -->
           <div class="section-heading">
             <div><h2 id="expensesTitle">Wydatki dnia</h2><p id="selectedDayTitle">Wybierz podróż</p></div>
-            <span class="selected-day-label" id="dayBudgetLabel">0,00 PLN</span>
+            <div class="expense-heading-actions"><span class="selected-day-label" id="dayBudgetLabel">0,00 PLN</span><button class="quiet-button" id="openDayDetails" type="button" hidden>Szczegóły dnia ↗</button></div>
           </div>
           <!-- PL: Renderuj wydatki pobrane dla zalogowanego użytkownika. | ES-CO: Renderiza gastos consultados para la sesión activa. -->
           <ul class="expense-list" id="expenseList"></ul>
           <!-- PL: Pokaż saldo budżetu na wybrany dzień. | ES-CO: Muestra el saldo del día seleccionado. -->
           <div class="budget-note"><span>Pozostało na dziś</span><strong id="dailyRemaining">0,00 PLN</strong></div>
-          <!-- PL: Wyjaśnij źródło kursu i jego trwałe przypisanie do wydatku. | ES-CO: Explica la fuente de tasa y que queda fijada al gasto. -->
-          <p class="footnote">Kurs pochodzi z serwisu referencyjnego. Kurs banku lub karty może się różnić. Przy zapisie kurs zostaje przypisany do wydatku i nie zmienia się później.</p>
         <!-- PL: Zamknij panel wydatków. | ES-CO: Cierra el panel de gastos. -->
         </section>
       <!-- PL: Zamknij układ planu i panelu dnia. | ES-CO: Cierra el diseño de itinerario y detalle. -->
       </div>
+      </div>
+
+      <section id="reservationsPage" hidden>
+        <section id="reservationsSection" class="reservation-section" aria-labelledby="reservationsTitle">
+          <div class="section-heading">
+            <div><h1 id="reservationsTitle">Rezerwacje</h1><p>Hotele i loty według planu z arkusza</p></div>
+            <span class="selected-day-label" id="reservationCount">0 rezerwacji</span>
+          </div>
+          <div class="reservation-groups">
+            <section aria-labelledby="hotelReservationsTitle">
+              <div class="reservation-group-heading"><h2 id="hotelReservationsTitle">Noclegi</h2><span id="hotelReservationCount">0</span></div>
+              <div class="reservation-list" id="hotelReservations"></div>
+            </section>
+            <section aria-labelledby="flightReservationsTitle">
+              <div class="reservation-group-heading"><h2 id="flightReservationsTitle">Loty</h2><span id="flightReservationCount">0</span></div>
+              <div class="reservation-list" id="flightReservations"></div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <section id="dayPage" class="day-page" aria-labelledby="dayPageTitle" hidden>
+        <header class="day-page-heading">
+          <button class="back-link" id="dayPageBack" type="button">← Wróć do planu podróży</button>
+          <div>
+            <span class="eyebrow">DZIENNIK DNIA</span>
+            <h1 id="dayPageTitle">Wybierz dzień</h1>
+            <p class="subheading day-location"><span class="country-flags" id="dayPageFlags"></span><span id="dayPageLocation"></span></p>
+          </div>
+          <div class="day-summary">
+            <strong id="dayPageTotal">0,00 PLN</strong>
+            <span id="dayPageCount">0 wydatków</span>
+            <span>Budżet <b id="dayPageBudget">0,00 PLN</b></span>
+          </div>
+        </header>
+        <div class="day-page-grid">
+          <section class="map-panel" aria-labelledby="mapTitle">
+            <div class="detail-heading"><h2 id="mapTitle">Mapa dnia</h2><a id="openMapLink" href="#" target="_blank" rel="noopener noreferrer">Otwórz mapę ↗</a></div>
+            <div id="dayMap" class="day-map" role="application" aria-label="Mapa orientacyjna miejsca planowanego na ten dzień"></div>
+            <p class="map-caption" id="mapCaption">Miejsce z planu podróży.</p>
+          </section>
+          <section class="day-records" aria-labelledby="dayExpensesTitle">
+            <div class="detail-heading"><h2 id="dayExpensesTitle">Wydatki dnia</h2><button class="quiet-button" id="addDayExpense" type="button">＋ Dodaj wydatek</button></div>
+            <ul class="expense-list" id="dayExpenseList"></ul>
+          </section>
+        </div>
+        <nav class="day-pagination" aria-label="Nawigacja po dniach">
+          <button class="quiet-button" id="previousDay" type="button">← Poprzedni dzień</button>
+          <button class="quiet-button" id="nextDay" type="button">Następny dzień →</button>
+        </nav>
+      </section>
     <!-- PL: Zamknij główną treść aplikacji. | ES-CO: Cierra el contenido principal. -->
     </main>
   <!-- PL: Zamknij kontener widoku po zalogowaniu. | ES-CO: Cierra el contenedor de la vista autenticada. -->
