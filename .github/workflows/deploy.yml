@@ -1,0 +1,87 @@
+# PL: Nazwij proces automatycznej publikacji aplikacji. | ES-CO: Nombra el flujo automático de publicación.
+name: Deploy Vite to GitHub Pages
+
+# PL: Uruchamiaj publikację po zmianie main albo ręcznie z GitHub Actions. | ES-CO: Publica al cambiar main o al lanzarlo manualmente.
+on:
+  # PL: Obserwuj główną gałąź repozytorium. | ES-CO: Vigila la rama principal del repositorio.
+  push:
+    # PL: Buduj stronę tylko po zmianach w main. | ES-CO: Compila solo cuando hay cambios en main.
+    branches: [main]
+  # PL: Pozwól uruchomić publikację ręcznie. | ES-CO: Permite iniciar la publicación manualmente.
+  workflow_dispatch:
+
+# PL: Nadaj tokenowi Actions minimalne uprawnienia wymagane do publikacji. | ES-CO: Da al token los permisos mínimos para publicar.
+permissions:
+  # PL: Odczytuj kod repozytorium. | ES-CO: Permite leer el código del repositorio.
+  contents: read
+  # PL: Wysyłaj artefakt do GitHub Pages. | ES-CO: Permite publicar el artefacto en GitHub Pages.
+  pages: write
+  # PL: Uwierzytelniaj wdrożenie przez OIDC. | ES-CO: Autoriza el despliegue con OIDC.
+  id-token: write
+
+# PL: Nie uruchamiaj równoległych wdrożeń tej samej strony. | ES-CO: Evita despliegues simultáneos de la misma página.
+concurrency:
+  # PL: Użyj jednej grupy blokującej publikację Pages. | ES-CO: Usa un solo grupo para bloquear despliegues Pages.
+  group: pages
+  # PL: Anuluj starsze wdrożenie, jeśli nowsze już się rozpoczęło. | ES-CO: Cancela un despliegue anterior si ya empezó uno nuevo.
+  cancel-in-progress: true
+
+# PL: Zbuduj pliki i opublikuj je jako statyczną stronę. | ES-CO: Compila y publica los archivos como sitio estático.
+jobs:
+  # PL: Przygotuj artefakt strony w katalogu dist. | ES-CO: Prepara el sitio compilado en dist.
+  build:
+    # PL: Użyj czystej maszyny Linux GitHub Actions. | ES-CO: Usa una máquina Linux limpia de GitHub Actions.
+    runs-on: ubuntu-latest
+    # PL: Wykonaj kolejne kroki kompilacji. | ES-CO: Ejecuta los pasos de compilación.
+    steps:
+      # PL: Pobierz kod z repozytorium. | ES-CO: Descarga el código del repositorio.
+      - name: Checkout
+        uses: actions/checkout@v4
+      # PL: Skonfiguruj Node.js i cache zależności npm. | ES-CO: Configura Node.js y caché de npm.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # PL: Użyj wersji Node wspieranej przez Vite. | ES-CO: Usa una versión de Node compatible con Vite.
+          node-version: 20
+          # PL: Użyj package-lock.json do cache npm. | ES-CO: Usa package-lock.json para el caché de npm.
+          cache: npm
+      # PL: Zainstaluj dokładne wersje z pliku blokady. | ES-CO: Instala las versiones exactas del lockfile.
+      - name: Install dependencies
+        run: npm ci
+      # PL: Zbuduj klienta z publiczną konfiguracją Supabase. | ES-CO: Compila el cliente con configuración pública de Supabase.
+      - name: Build site
+        run: npm run build
+        env:
+          # PL: Odczytaj adres projektu z Variables repozytorium. | ES-CO: Lee la URL del proyecto desde Variables del repositorio.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          # PL: Odczytaj wyłącznie klucz publishable, nigdy secret. | ES-CO: Lee solo la clave publishable, nunca una secret.
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      # PL: Przygotuj konfigurację środowiska GitHub Pages. | ES-CO: Prepara el entorno de GitHub Pages.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      # PL: Przekaż katalog dist do usługi publikującej. | ES-CO: Sube la carpeta dist al servicio de Pages.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # PL: Publikuj gotowy wynik Vite. | ES-CO: Publica el resultado compilado de Vite.
+          path: ./dist
+
+  # PL: Opublikuj artefakt po poprawnym buildzie. | ES-CO: Publica el artefacto cuando termine el build.
+  deploy:
+    # PL: Wymagaj zakończenia zadania budowania. | ES-CO: Espera a que termine el trabajo de compilación.
+    needs: build
+    # PL: Użyj czystej maszyny do wdrożenia. | ES-CO: Usa una máquina limpia para el despliegue.
+    runs-on: ubuntu-latest
+    # PL: Zapisz adres witryny w środowisku Pages. | ES-CO: Registra la URL del sitio en el entorno Pages.
+    environment:
+      # PL: Użyj domyślnego środowiska GitHub Pages. | ES-CO: Usa el entorno predeterminado de GitHub Pages.
+      name: github-pages
+      # PL: Pokaż końcowy adres wdrożonej strony. | ES-CO: Muestra la URL publicada.
+      url: ${{ steps.deployment.outputs.page_url }}
+    # PL: Wykonaj wdrożenie artefaktu. | ES-CO: Ejecuta la publicación del artefacto.
+    steps:
+      # PL: Wyślij stronę do hostingu GitHub Pages. | ES-CO: Publica el sitio en GitHub Pages.
+      - name: Deploy to GitHub Pages
+        # PL: Zapisz wynik z adresem witryny. | ES-CO: Guarda el resultado con la dirección del sitio.
+        id: deployment
+        uses: actions/deploy-pages@v4

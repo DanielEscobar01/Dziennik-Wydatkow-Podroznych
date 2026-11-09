@@ -1,0 +1,10 @@
+# PL: Nie śledź zainstalowanych zależności npm. | ES-CO: No versiona las dependencias instaladas con npm.
+node_modules/
+# PL: Nie śledź plików wynikowych kompilacji Vite. | ES-CO: No versiona la salida compilada de Vite.
+dist/
+# PL: Zachowaj lokalne sekrety i ustawienia poza Git. | ES-CO: Mantén secretos y configuración local fuera de Git.
+.env.local
+# PL: Zachowaj pozostałe lokalne pliki środowiskowe poza Git. | ES-CO: Mantén otros archivos de entorno locales fuera de Git.
+.env.*.local
+# PL: Nie zapisuj metadanych systemu macOS. | ES-CO: No guardes metadatos del sistema macOS.
+.DS_Store

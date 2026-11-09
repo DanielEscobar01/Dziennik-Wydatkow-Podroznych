@@ -1,0 +1,507 @@
+<!doctype html>
+<!-- PL: Rozpocznij dokument HTML5. | ES-CO: Inicia el documento en estándar HTML5. -->
+<html lang="pl">
+<!-- PL: Rozpocznij metadane strony i style. | ES-CO: Inicia los metadatos y estilos de la página. -->
+<head>
+  <!-- PL: Ustaw kodowanie Unicode dla polskich znaków. | ES-CO: Define UTF-8 para conservar caracteres polacos. -->
+  <meta charset="utf-8">
+  <!-- PL: Dopasuj szerokość strony do ekranu telefonu. | ES-CO: Ajusta el ancho de la página a pantallas móviles. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- PL: Ustaw kolor paska przeglądarki mobilnej. | ES-CO: Define el color de la barra del navegador móvil. -->
+  <meta name="theme-color" content="#eef3f6">
+  <!-- PL: Nadaj karcie strony polską nazwę. | ES-CO: Define el título polaco de la pestaña. -->
+  <title>Dziennik wydatków</title>
+  <!-- PL: Przygotuj wcześniejsze połączenie z serwerem fontów. | ES-CO: Prepara la conexión al servidor de tipografías. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- PL: Przygotuj bezpieczne połączenie zasobów fontów. | ES-CO: Prepara una conexión segura para las fuentes. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- PL: Wczytaj dwa kroje używane przez interfejs. | ES-CO: Carga las dos tipografías de la interfaz. -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- PL: Rozpocznij style układu, kolorów i responsywności. | ES-CO: Inicia estilos de diseño, colores y adaptación. -->
+  <style>
+    :root {
+      color-scheme: light; /* PL: Ustaw jasny wariant elementów przeglądarki. | ES-CO: Define el modo claro de los controles del navegador. */
+      --paper: #eef3f6; /* PL: Ustaw chłodne, jasne tło aplikacji. | ES-CO: Define un fondo claro y frío para la aplicación. */
+      --surface: #ffffff; /* PL: Ustaw czystą biel paneli i formularzy. | ES-CO: Define blanco limpio para paneles y formularios. */
+      --ink: #192d3b; /* PL: Ustaw głęboki granatowo-grafitowy tekst. | ES-CO: Define un texto oscuro entre azul y grafito. */
+      --muted: #637785; /* PL: Ustaw stonowany kolor pomocniczych opisów. | ES-CO: Define un color secundario más suave. */
+      --line: #d8e2e8; /* PL: Ustaw chłodny kolor obramowań. | ES-CO: Define un borde de tono frío. */
+      --green: #16716b; /* PL: Ustaw morski kolor podstawowych akcji. | ES-CO: Define el teal para las acciones principales. */
+      --mint: #d9efeb; /* PL: Ustaw jasne tło zielonych znaczników. | ES-CO: Define el fondo claro de los indicadores verdes. */
+      --orange: #de7157; /* PL: Ustaw koralowy kolor wydatków i akcentów. | ES-CO: Define coral para gastos y acentos. */
+      --yellow: #e5b34f; /* PL: Ustaw złoty kolor informacji budżetowych. | ES-CO: Define un acento dorado para presupuesto. */
+      --blue: #4a7fa0; /* PL: Ustaw niebieski kolor kategorii transportu. | ES-CO: Define azul para categorías de transporte. */
+      --shadow: 0 18px 48px rgba(25, 45, 59, .1); /* PL: Ustaw miękki cień zgodny z nową paletą. | ES-CO: Define una sombra suave acorde a la paleta. */
+      font-family: "Quicksand", "Segoe UI", sans-serif; /* PL: Ustaw Quicksand jako font całej aplikacji. | ES-CO: Define Quicksand como tipografía de toda la aplicación. */
+      font-synthesis: none; /* PL: Wyłącz sztuczne odmiany brakujących znaków fontu. | ES-CO: Evita sintetizar variantes tipográficas inexistentes. */
+    }
+
+    * { box-sizing: border-box; } /* PL: Wliczaj padding i obramowanie do wymiarów elementu. | ES-CO: Incluye bordes y relleno dentro del tamaño del elemento. */
+    body { margin: 0; background: var(--paper); color: var(--ink); min-width: 320px; } /* PL: Usuń margines przeglądarki i ustaw minimalną szerokość. | ES-CO: Quita el margen del navegador y fija un ancho mínimo. */
+    button, input, select { font: inherit; } /* PL: Dziedzicz font formularzy z całej strony. | ES-CO: Hereda la tipografía en los controles. */
+    button { cursor: pointer; } /* PL: Sygnalizuj możliwość kliknięcia przycisku. | ES-CO: Indica que los botones se pueden pulsar. */
+    .app-shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; } /* PL: Podziel ekran na nawigację i elastyczną treść. | ES-CO: Divide la pantalla entre navegación y contenido adaptable. */
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 20px 24px; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #e7eef2; } /* PL: Przyklej panel nawigacji i ułóż jego elementy pionowo. | ES-CO: Fija la navegación lateral y ordena sus elementos verticalmente. */
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 5px; color: inherit; text-decoration: none; } /* PL: Wyrównaj znak i nazwę aplikacji w jednym wierszu. | ES-CO: Alinea el símbolo y el nombre de la app en una fila. */
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--green); color: white; font-family: "Quicksand", sans-serif; font-size: 15px; font-weight: 700; } /* PL: Umieść znak podróży w stabilnym okrągłym polu. | ES-CO: Centra el símbolo del viaje en un círculo estable. */
+    .brand-copy { display: grid; gap: 2px; } /* PL: Ułóż nazwę i opis marki w dwóch wierszach. | ES-CO: Organiza el nombre y la descripción en dos líneas. */
+    .brand-copy strong { font-size: 13px; letter-spacing: .04em; } /* PL: Wyróżnij nazwę marki małym kapitalikiem. | ES-CO: Resalta el nombre de marca con mayúsculas espaciadas. */
+    .brand-copy span { color: var(--muted); font-size: 10px; text-transform: uppercase; } /* PL: Zmniejsz i przycisz opis roku podróży. | ES-CO: Reduce y suaviza el texto del año. */
+    .nav-label { margin: 42px 10px 11px; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; } /* PL: Oddziel nazwę sekcji nawigacji. | ES-CO: Separa el rótulo de la sección de navegación. */
+    .nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 2px 0; border-radius: 8px; color: #607482; text-decoration: none; font-size: 13px; } /* PL: Ułóż odnośnik, ikonę i opis w wygodnym celu kliknięcia. | ES-CO: Organiza enlace, ícono y texto en un objetivo cómodo. */
+    .nav-link.active { background: #d6ebe8; color: var(--green); font-weight: 700; } /* PL: Zaznacz aktualną sekcję kolorem i wagą tekstu. | ES-CO: Resalta la sección activa con color y peso tipográfico. */
+    .nav-glyph { width: 18px; text-align: center; font-size: 15px; } /* PL: Zachowaj stałą szerokość symboli nawigacji. | ES-CO: Mantiene estable el ancho de los símbolos. */
+    .sidebar-spacer { flex: 1; } /* PL: Wypchnij kartę podróży na dół panelu. | ES-CO: Empuja la tarjeta del viaje hacia abajo. */
+    .trip-photo { position: relative; overflow: hidden; min-height: 170px; border-radius: 10px; background: #35685c; color: white; } /* PL: Przygotuj przycięte zdjęcie podróży w panelu. | ES-CO: Prepara la foto recortada del viaje en el panel. */
+    .trip-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } /* PL: Wypełnij zdjęciem kartę bez zmiany jej wymiarów. | ES-CO: Llena la tarjeta con la foto sin alterar sus dimensiones. */
+    .trip-photo::after { content: ""; position: absolute; inset: 30% 0 0; background: linear-gradient(transparent, rgba(12, 35, 29, .82)); } /* PL: Dodaj cień pod tekstem dla lepszego kontrastu. | ES-CO: Agrega sombra bajo el texto para mejorar el contraste. */
+    .trip-photo-copy { position: absolute; z-index: 1; left: 14px; right: 12px; bottom: 13px; } /* PL: Umieść podpis na dole zdjęcia nad cieniem. | ES-CO: Ubica el texto sobre la parte oscura de la foto. */
+    .trip-photo-copy span { display: block; margin-bottom: 5px; color: #dcebe1; font-size: 10px; text-transform: uppercase; } /* PL: Pokaż zakres dat jako mały podpis. | ES-CO: Muestra las fechas como una etiqueta pequeña. */
+    .trip-photo-copy strong { font-family: "Quicksand", sans-serif; font-size: 20px; font-weight: 700; } /* PL: Wyróżnij nazwę podróży fontem Quicksand. | ES-CO: Destaca el nombre del viaje con Quicksand. */
+    .local-note { margin: 13px 3px 0; color: var(--muted); font-size: 10px; line-height: 1.5; } /* PL: Wyjaśnij lokalizację i kopię zapasową danych. | ES-CO: Explica dónde quedan los datos y cómo respaldarlos. */
+
+    main { width: min(1240px, 100%); margin: 0 auto; padding: 28px clamp(20px, 4vw, 56px) 60px; } /* PL: Ogranicz szerokość treści i wyśrodkuj ją na ekranie. | ES-CO: Limita el ancho y centra el contenido. */
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 36px; } /* PL: Ustaw tytuł nawigacji i akcje w jednym pasku. | ES-CO: Organiza navegación y acciones en una barra. */
+    .breadcrumb { color: var(--muted); font-size: 12px; } /* PL: Zmniejsz kontrast ścieżki nawigacji. | ES-CO: Reduce el contraste de la ruta de navegación. */
+    .top-actions { display: flex; align-items: center; gap: 10px; } /* PL: Ułóż eksport, wylogowanie i dodawanie w rzędzie. | ES-CO: Alinea exportar, cerrar sesión y agregar. */
+    .quiet-button, .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 0 15px; border-radius: 8px; font-size: 12px; font-weight: 700; } /* PL: Nadaj przyciskom stałą wysokość, zaokrąglenie i cel dotykowy. | ES-CO: Da altura, bordes redondeados y área cómoda para pulsar. */
+    .quiet-button { border: 1px solid var(--line); background: transparent; color: var(--ink); } /* PL: Ustaw drugorzędny przycisk bez wypełnienia. | ES-CO: Define un botón secundario sin relleno. */
+    .primary-button { border: 1px solid var(--green); background: var(--green); color: white; } /* PL: Wyróżnij główne działanie kolorem. | ES-CO: Resalta la acción principal con color. */
+    .primary-button:hover { background: #19493d; } /* PL: Przyciemnij główny przycisk po najechaniu. | ES-CO: Oscurece el botón principal al pasar el cursor. */
+    .quiet-button:hover { background: #e4e9e2; } /* PL: Podświetl drugorzędny przycisk po najechaniu. | ES-CO: Resalta el botón secundario al pasar el cursor. */
+    .eyebrow { color: var(--orange); font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; } /* PL: Zaznacz mały kontekstowy nagłówek. | ES-CO: Distingue la etiqueta contextual pequeña. */
+    h1, .section-heading h2, .dialog-head h2, .empty-state strong { font-family: "Quicksand", sans-serif; } /* PL: Zachowaj Quicksand także w nagłówkach. | ES-CO: Mantiene Quicksand también en los títulos. */
+    h1 { margin: 9px 0 5px; font-size: clamp(32px, 4vw, 46px); font-weight: 500; line-height: 1.08; } /* PL: Ustaw główny tytuł z ograniczoną skalą i krótką interlinią. | ES-CO: Define el título principal con tamaño controlado. */
+    .subheading { margin: 0; color: var(--muted); font-size: 13px; } /* PL: Pokaż trasę jako opis pomocniczy. | ES-CO: Muestra la ruta como texto secundario. */
+    .hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 22px; } /* PL: Ułóż tytuł i odliczanie obok siebie. | ES-CO: Alinea el título y la cuenta regresiva. */
+    .trip-countdown { display: flex; align-items: center; gap: 12px; min-width: 195px; padding: 12px 14px; border-left: 3px solid var(--yellow); background: #f7f8f2; } /* PL: Wyróżnij odliczanie bocznym akcentem. | ES-CO: Resalta la cuenta regresiva con un borde lateral. */
+    .count-number { font-family: "Quicksand", sans-serif; font-size: 30px; font-weight: 700; line-height: 1; } /* PL: Wyróżnij liczbę dni fontem Quicksand. | ES-CO: Resalta el número de días con Quicksand. */
+    .trip-countdown span:last-child { color: var(--muted); font-size: 11px; line-height: 1.4; } /* PL: Sformatuj opis licznika w dwóch krótkich wierszach. | ES-CO: Da formato al texto del contador en dos líneas. */
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 30px 0 32px; } /* PL: Rozłóż wskaźniki i stan budżetu w równych panelach. | ES-CO: Distribuye indicadores y presupuesto en paneles equilibrados. */
+    .stat { min-height: 105px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 5px 16px rgba(25,45,59,.035); } /* PL: Nadaj wskaźnikom jasne tło i zaokrąglone rogi. | ES-CO: Da fondo claro y bordes redondeados a los indicadores. */
+    .stat-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; } /* PL: Pokaż opis nad wartością wskaźnika. | ES-CO: Muestra la etiqueta encima del valor. */
+    .stat-value { display: block; font-size: 23px; font-weight: 600; letter-spacing: 0; } /* PL: Wyróżnij główną wartość bez ściskania liter. | ES-CO: Resalta el valor sin comprimir las letras. */
+    .stat-detail { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; } /* PL: Dodaj drobny opis źródła lub znaczenia wartości. | ES-CO: Añade un detalle sobre la cifra. */
+    /* PL: Wyrównaj stan synchronizacji obok nawigacji. | ES-CO: Alinea el estado de sincronización junto a la ruta. */
+    .sync-status { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+    /* PL: Dodaj kropkę pokazującą status pobierania danych. | ES-CO: Añade un punto para indicar la carga de datos. */
+    .sync-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); }
+    /* PL: Zmień kolor kropki po pomyślnym pobraniu wydatków. | ES-CO: Cambia el punto cuando se cargan los gastos. */
+    .sync-status.synced::before { background: var(--green); }
+    /* PL: Ułóż wykresy obok siebie z możliwością zwężenia. | ES-CO: Organiza los gráficos en columnas adaptables. */
+    .chart-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr); gap: 14px; margin: 17px 0 34px; }
+    /* PL: Opraw każdy wykres w osobny panel zaokrąglony. | ES-CO: Enmarca cada gráfico en un panel redondeado. */
+    .chart-panel { min-width: 0; overflow: hidden; margin: 0; padding: 17px 18px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 5px 16px rgba(25,45,59,.035); }
+    /* PL: Wyrównaj nazwę wykresu i jego sumę. | ES-CO: Alinea el título del gráfico con su total. */
+    .chart-panel-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 10px; }
+    /* PL: Ustaw czytelny tytuł wykresu. | ES-CO: Da formato al título del gráfico. */
+    .chart-panel-head h3 { margin: 0; font-size: 13px; font-weight: 700; }
+    /* PL: Wyróżnij sumę wybranego okresu. | ES-CO: Resalta el total del periodo mostrado. */
+    .chart-total { color: var(--green); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    /* PL: Ustal wysokość obszaru rysowania wykresu. | ES-CO: Define la altura del área del gráfico. */
+    .chart-wrap { position: relative; min-width: 0; height: 245px; overflow: hidden; }
+    /* PL: Nie pozwól, aby canvas wykresu przekraczał szerokość panelu. | ES-CO: Evita que el canvas supere el ancho del panel. */
+    .chart-wrap canvas { display: block; max-width: 100%; }
+    /* PL: Ustaw proporcje wykresu kołowego. | ES-CO: Define proporciones para el gráfico de categorías. */
+    .category-chart-wrap { width: min(100%, 340px); margin: 0 auto; }
+    /* PL: Wyśrodkuj komunikat, gdy konto nie ma wydatków. | ES-CO: Centra el mensaje cuando no hay gastos. */
+    .chart-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 18px; border-radius: 8px; background: var(--surface); color: var(--muted); font-size: 11px; text-align: center; }
+    /* PL: Ukryj komunikat pustego stanu, gdy są dane. | ES-CO: Oculta el mensaje vacío cuando hay datos. */
+    .chart-empty[hidden] { display: none; }
+    /* PL: Dopasuj wykresy do jednej kolumny na tabletach. | ES-CO: Apila los gráficos en tabletas. */
+    @media (max-width: 920px) { .chart-grid { grid-template-columns: minmax(0, 1fr); } }
+    /* PL: Zmień statystyki na dwie kolumny i zmniejsz panele na telefonie. | ES-CO: Muestra estadísticas en dos columnas en celular. */
+    @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .stat { min-height: 94px; padding: 13px 12px; } .stat-value { font-size: 18px; } .chart-panel { padding: 14px 12px 10px; } .chart-wrap { height: 230px; } .category-chart-wrap { height: 240px; } }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: clamp(24px, 4vw, 54px); align-items: start; } /* PL: Zestaw listę dni i panel szczegółów w dwóch kolumnach. | ES-CO: Organiza días y detalle en dos columnas. */
+    .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 13px; border-bottom: 1px solid var(--ink); } /* PL: Oddziel nagłówek sekcji od listy. | ES-CO: Separa el título de la sección de su contenido. */
+    .section-heading h2 { margin: 0; font-family: "Quicksand", sans-serif; font-size: 24px; font-weight: 700; } /* PL: Ustaw tytuł sekcji fontem Quicksand. | ES-CO: Define el título de sección con Quicksand. */
+    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; } /* PL: Ustaw instrukcję pod tytułem sekcji. | ES-CO: Da formato a la instrucción bajo el título. */
+    .day-list { margin-top: 3px; } /* PL: Zachowaj mały odstęp nad listą dni. | ES-CO: Conserva una separación pequeña sobre los días. */
+    .day-row { width: 100%; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 13px 8px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; text-align: left; transition: background .16s ease; } /* PL: Ustal stabilne kolumny daty, miejsca i sumy dnia. | ES-CO: Fija columnas estables para fecha, destino y total. */
+    .day-row:hover { background: rgba(255,255,255,.55); } /* PL: Podświetl wskazany dzień. | ES-CO: Resalta el día señalado. */
+    .day-row.selected { border-radius: 9px; background: var(--surface); box-shadow: inset 3px 0 var(--orange), 0 5px 16px rgba(25,45,59,.04); } /* PL: Oznacz wybrany dzień tłem, paskiem i miękkim cieniem. | ES-CO: Resalta el día con fondo, borde y sombra suave. */
+    .day-date { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 10px; background: #e2ebef; } /* PL: Wyświetl dzień i miesiąc w zaokrąglonym polu. | ES-CO: Muestra día y mes en un recuadro redondeado. */
+    .day-row.selected .day-date { background: var(--green); color: white; } /* PL: Dopasuj datę do stanu wybranego. | ES-CO: Ajusta la fecha al estado seleccionado. */
+    .day-date b { font-size: 16px; line-height: 1; } /* PL: Wyróżnij numer dnia. | ES-CO: Resalta el número del día. */
+    .day-date small { margin-top: 2px; font-size: 9px; text-transform: uppercase; } /* PL: Zmniejsz skrót miesiąca. | ES-CO: Reduce la abreviatura del mes. */
+    .day-place { display: block; font-size: 12px; font-weight: 700; } /* PL: Wyróżnij miejsce przypisane do dnia. | ES-CO: Resalta el destino del día. */
+    .day-week { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; } /* PL: Pokaż dzień tygodnia i liczbę wydatków. | ES-CO: Muestra día de la semana y cantidad de gastos. */
+    .day-total { text-align: right; } /* PL: Wyrównaj kwoty dnia do prawej. | ES-CO: Alinea los importes del día a la derecha. */
+    .day-total b { display: block; font-size: 12px; } /* PL: Ustaw widoczny zapis sumy. | ES-CO: Da formato al total diario. */
+    .day-total small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; } /* PL: Opisz dzienny limit budżetu. | ES-CO: Indica el límite diario del presupuesto. */
+    .budget-track { width: 70px; height: 3px; margin: 7px 0 0 auto; overflow: hidden; background: #dfe5df; } /* PL: Przygotuj pasek pokazujący zużycie budżetu. | ES-CO: Prepara la barra de uso del presupuesto. */
+    .budget-track span { display: block; height: 100%; background: var(--orange); } /* PL: Wypełnij pasek proporcją wydatków. | ES-CO: Llena la barra según el gasto acumulado. */
+    .expense-panel { min-height: 380px; } /* PL: Zachowaj miejsce na szczegóły nawet przy pustej liście. | ES-CO: Mantiene espacio para el detalle cuando está vacío. */
+    .expense-panel .section-heading { margin-bottom: 3px; } /* PL: Dosuń nagłówek panelu do listy. | ES-CO: Acerca el encabezado a la lista. */
+    .selected-day-label { color: var(--muted); font-size: 10px; white-space: nowrap; } /* PL: Nie zawijaj małego licznika dnia. | ES-CO: Evita partir el contador del día. */
+    .expense-list { list-style: none; margin: 0; padding: 0; } /* PL: Usuń domyślne punkty i odstępy listy wydatków. | ES-CO: Quita viñetas y espacios predeterminados. */
+    .expense-item { display: grid; grid-template-columns: 34px minmax(0,1fr) max-content; gap: 11px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); } /* PL: Rezerwuj osobną kolumnę na kwoty i nie pozwól opisowi najechać na nie. | ES-CO: Reserva una columna para los importes y evita que la descripción la invada. */
+    .expense-copy { min-width: 0; } /* PL: Pozwól kolumnie tekstu zwężać się wewnątrz siatki. | ES-CO: Permite que la columna de texto se reduzca dentro de la cuadrícula. */
+    .category-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--mint); color: var(--green); font-size: 10px; font-weight: 700; } /* PL: Umieść inicjał kategorii w okręgu. | ES-CO: Ubica la inicial de la categoría en un círculo. */
+    .category-mark.orange { background: #f6e2d9; color: #a64c31; } /* PL: Nadaj ciepły kolor atrakcjom i zakupom. | ES-CO: Da un tono cálido a compras y atracciones. */
+    .category-mark.blue { background: #dce9ed; color: #376477; } /* PL: Nadaj chłodny kolor transportowi. | ES-CO: Da un tono frío al transporte. */
+    .expense-title { display: block; min-width: 0; overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; } /* PL: Skróć długą nazwę w bloku o ograniczonej szerokości. | ES-CO: Recorta nombres largos dentro de un bloque limitado. */
+    .expense-meta { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; } /* PL: Zawijaj status i kurs w dostępnej szerokości. | ES-CO: Ajusta estado y tasa al espacio disponible. */
+    /* PL: Oddziel kurs jednostkowy od szczegółów kategorii i płatności. | ES-CO: Separa la tasa unitaria de categoría y pago. */
+    .expense-rate { display: block; margin-top: 4px; color: var(--green); font-size: 10px; font-weight: 700; line-height: 1.35; }
+    /* PL: Ogranicz szerokość długiej stawki, aby nie wchodziła na kwoty. | ES-CO: Limita tasas largas para que no invadan los importes. */
+    .expense-rate span { overflow-wrap: anywhere; }
+    .expense-amount { min-width: 0; padding-left: 4px; text-align: right; white-space: nowrap; } /* PL: Utrzymuj kwoty w osobnej, niełamanej kolumnie. | ES-CO: Mantiene los importes alineados sin partirlos. */
+    .expense-amount b { display: block; font-size: 12px; white-space: nowrap; } /* PL: Wyróżnij zapisaną kwotę PLN bez zawijania. | ES-CO: Resalta el valor PLN sin saltos de línea. */
+    .expense-amount small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; } /* PL: Pokaż pod spodem wartość w walucie lokalnej. | ES-CO: Muestra debajo el valor en moneda local. */
+    .delete-button { grid-column: 2 / 4; justify-self: end; padding: 3px 0 0; border: 0; background: transparent; color: #a64c31; font-size: 10px; } /* PL: Umieść akcję usunięcia pod opisem po prawej. | ES-CO: Ubica la acción de borrar debajo de la descripción. */
+    .empty-state { padding: 38px 12px; color: var(--muted); text-align: center; } /* PL: Wyśrodkuj instrukcję pustego dnia. | ES-CO: Centra la invitación cuando no hay gastos. */
+    .empty-state strong { display: block; margin-bottom: 6px; color: var(--ink); font-family: "Quicksand", sans-serif; font-size: 19px; font-weight: 700; } /* PL: Wyróżnij tytuł pustego stanu fontem Quicksand. | ES-CO: Resalta el estado vacío con Quicksand. */
+    .empty-state p { margin: 0 auto 15px; max-width: 230px; font-size: 11px; line-height: 1.55; } /* PL: Ogranicz szerokość krótkiej instrukcji. | ES-CO: Limita el ancho de la instrucción breve. */
+    .budget-note { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 12px; border-top: 1px dashed #cbd6cc; color: var(--muted); font-size: 10px; } /* PL: Oddziel saldo dnia przerywaną linią. | ES-CO: Separa el saldo del día con una línea discontinua. */
+    .budget-note strong { color: var(--ink); } /* PL: Wyróżnij pozostały budżet dnia. | ES-CO: Resalta el presupuesto diario restante. */
+    .footnote { margin-top: 26px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.5; } /* PL: Wyjaśnij ograniczenia kursu referencyjnego. | ES-CO: Explica los límites de la tasa de referencia. */
+    dialog { width: min(520px, calc(100vw - 28px)); max-height: min(92vh, 760px); padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); } /* PL: Ogranicz rozmiar modalu i nadaj mu miękkie rogi. | ES-CO: Limita el diálogo y le da esquinas suaves. */
+    dialog::backdrop { background: rgba(23, 45, 37, .42); backdrop-filter: blur(2px); } /* PL: Przyciemnij i lekko rozmyj tło modalu. | ES-CO: Oscurece y difumina ligeramente el fondo. */
+    .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 23px 24px 18px; border-bottom: 1px solid var(--line); } /* PL: Ustaw tytuł i przycisk zamknięcia w nagłówku. | ES-CO: Organiza título y botón de cierre. */
+    .dialog-head h2 { margin: 0; font-family: "Quicksand", sans-serif; font-size: 26px; font-weight: 700; } /* PL: Nadaj tytułowi formularza wyraźną hierarchię Quicksand. | ES-CO: Da jerarquía al título del formulario con Quicksand. */
+    .dialog-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; } /* PL: Ustaw wyjaśnienie pod tytułem formularza. | ES-CO: Da formato a la explicación del formulario. */
+    .icon-button { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); font-size: 18px; } /* PL: Utwórz stabilny okrągły przycisk zamykania. | ES-CO: Crea un botón de cierre circular y estable. */
+    .expense-form { padding: 20px 24px 24px; } /* PL: Odsuń formularz od krawędzi okna. | ES-CO: Separa el formulario de los bordes. */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } /* PL: Ułóż krótkie pola formularza w dwóch kolumnach. | ES-CO: Organiza campos cortos en dos columnas. */
+    .field { display: grid; gap: 6px; } /* PL: Umieść etykietę nad polem z równym odstępem. | ES-CO: Ubica la etiqueta sobre el campo con separación constante. */
+    .field.full { grid-column: 1 / -1; } /* PL: Rozciągnij długie pola przez obie kolumny. | ES-CO: Extiende los campos largos a ambas columnas. */
+    .field label { color: #52635b; font-size: 10px; font-weight: 700; } /* PL: Ustaw wyraźne etykiety pól. | ES-CO: Da formato claro a las etiquetas. */
+    .field input, .field select { width: 100%; height: 42px; padding: 0 11px; border: 1px solid #d5e0e5; border-radius: 7px; outline: none; background: white; color: var(--ink); font-size: 12px; } /* PL: Ujednolić wysokość, obramowanie i tekst zaokrąglonych kontrolek. | ES-CO: Unifica altura, borde y texto de controles redondeados. */
+    .field input:focus, .field select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(36,87,74,.1); } /* PL: Wyróżnij pole, które jest aktualnie edytowane. | ES-CO: Resalta el campo que está activo. */
+    .conversion-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; padding: 12px; background: #edf3ee; } /* PL: Grupuj kurs i podgląd wyniku w jednym panelu. | ES-CO: Agrupa tasa y resultado en un solo panel. */
+    .rate-status { grid-column: 1 / -1; min-height: 14px; color: var(--muted); font-size: 9px; } /* PL: Pokaż źródło kursu albo instrukcję po błędzie. | ES-CO: Muestra la fuente de la tasa o una indicación de error. */
+    .pln-preview { display: flex; flex-direction: column; gap: 4px; min-height: 42px; justify-content: center; } /* PL: Wyrównaj wynik przeliczenia względem pola kursu. | ES-CO: Alinea el resultado con el campo de tasa. */
+    .pln-preview span { color: var(--muted); font-size: 9px; } /* PL: Zmniejsz etykietę wyniku. | ES-CO: Reduce la etiqueta del resultado. */
+    .pln-preview strong { color: var(--green); font-size: 16px; } /* PL: Wyróżnij przeliczoną kwotę PLN. | ES-CO: Resalta el importe convertido a PLN. */
+    .form-footer { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; } /* PL: Ustaw anulowanie i zapis po prawej stronie. | ES-CO: Alinea cancelar y guardar a la derecha. */
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 10; padding: 12px 16px; border-radius: 5px; background: var(--ink); color: white; font-size: 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s; } /* PL: Przygotuj nieinwazyjne powiadomienie przy dolnej krawędzi. | ES-CO: Prepara un aviso discreto en la parte inferior. */
+    .toast.visible { opacity: 1; transform: translateY(0); } /* PL: Pokaż powiadomienie bez przesuwania układu strony. | ES-CO: Muestra el aviso sin mover el contenido. */
+    /* PL: Ukryj widoki nieaktywne do czasu odczytania sesji. | ES-CO: Oculta las vistas inactivas hasta leer la sesión. */
+    [hidden] { display: none !important; }
+    /* PL: Ustaw pełnoekranowe tło ekranu logowania. | ES-CO: Define el fondo de pantalla completa para el acceso. */
+    .auth-panel { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--paper); }
+    /* PL: Ogranicz szerokość formularza logowania i nadaj mu jasną powierzchnię. | ES-CO: Limita el ancho del acceso y usa una superficie clara. */
+    .auth-card { width: min(440px, 100%); padding: 30px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+    /* PL: Ustaw nagłówek karty logowania. | ES-CO: Da formato al encabezado del acceso. */
+    .auth-card h1 { margin-top: 20px; font-size: 34px; }
+    /* PL: Nadaj opisowi logowania spokojny kontrast i czytelność. | ES-CO: Da contraste y legibilidad a la descripción del acceso. */
+    .auth-card p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    /* PL: Ustaw etykietę i pole adresu email w jednej kolumnie. | ES-CO: Organiza la etiqueta y el correo en una columna. */
+    .auth-card form { display: grid; gap: 12px; margin-top: 20px; }
+    /* PL: Zdefiniuj pola formularza logowania. | ES-CO: Define los campos del formulario de acceso. */
+    .auth-card input { height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--ink); }
+    /* PL: Zachowaj miejsce na komunikat logowania. | ES-CO: Reserva espacio para mensajes de acceso. */
+    .auth-status { min-height: 20px; font-size: 11px !important; }
+
+    @media (max-width: 920px) { /* PL: Przełącz układ na jedną kolumnę na tabletach. | ES-CO: Cambia a una columna en tabletas. */
+      .app-shell { grid-template-columns: 205px minmax(0, 1fr); } /* PL: Zwęż boczną nawigację. | ES-CO: Reduce el ancho de la navegación lateral. */
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* PL: Dopasuj cztery wskaźniki do węższej treści tabletu. | ES-CO: Adapta las estadísticas al ancho de tableta. */
+      .sidebar { padding-inline: 14px; } /* PL: Zmniejsz wewnętrzne odstępy panelu. | ES-CO: Reduce el espacio interno del panel. */
+      main { padding-inline: 24px; } /* PL: Dopasuj margines treści do tabletu. | ES-CO: Ajusta el margen del contenido a la tableta. */
+      .content-grid { grid-template-columns: minmax(0, 1fr); } /* PL: Ustaw listę i szczegóły jeden pod drugim. | ES-CO: Apila diario y detalle en una columna. */
+      .expense-panel { min-height: 0; } /* PL: Usuń minimalną wysokość niepotrzebną w układzie mobilnym. | ES-CO: Quita una altura mínima innecesaria en móvil. */
+    }
+    @media (max-width: 640px) { /* PL: Przełącz nawigację i formularz na układ telefonu. | ES-CO: Adapta navegación y formulario al celular. */
+      .app-shell { display: block; } /* PL: Usuń boczną kolumnę siatki na telefonie. | ES-CO: Quita la columna lateral en el celular. */
+      .sidebar { position: static; width: 100%; height: auto; padding: 13px 16px; border-right: 0; border-bottom: 1px solid var(--line); } /* PL: Zamień panel boczny na niski pasek marki. | ES-CO: Convierte la barra lateral en una franja superior. */
+      .brand { width: fit-content; } /* PL: Zachowaj szerokość marki zgodną z jej treścią. | ES-CO: Ajusta la marca al ancho de su contenido. */
+      .sidebar .nav-label, .sidebar nav, .sidebar-spacer, .trip-photo, .local-note { display: none; } /* PL: Ukryj elementy panelu zbędne na małym ekranie. | ES-CO: Oculta elementos laterales que sobran en móvil. */
+      main { padding: 21px 17px 38px; } /* PL: Zmniejsz marginesy treści telefonu. | ES-CO: Reduce los márgenes del contenido móvil. */
+      .topbar { align-items: flex-start; flex-wrap: wrap; margin-bottom: 28px; } /* PL: Ułóż ścieżkę i akcje w osobnych wierszach. | ES-CO: Separa la ruta y las acciones en filas. */
+      .breadcrumb { flex: 1 1 100%; padding-top: 0; } /* PL: Rozciągnij trasę nad przyciskami. | ES-CO: Extiende la ruta encima de los botones. */
+      .top-actions { width: 100%; justify-content: flex-end; gap: 7px; } /* PL: Ustaw akcje w jednej zwartej linii. | ES-CO: Alinea las acciones en una fila compacta. */
+      #importExcelButton, #exportButton, #signOutButton { width: 42px; padding: 0; font-size: 0; } /* PL: Zmień akcje pomocnicze na małe przyciski ikon. | ES-CO: Convierte acciones secundarias en íconos compactos. */
+      #importExcelButton::before { content: "↑"; font-size: 17px; } /* PL: Pokaż symbol importu arkusza. | ES-CO: Muestra el símbolo para importar. */
+      #exportButton::before { content: "↓"; font-size: 17px; } /* PL: Pokaż symbol pobierania w eksporcie. | ES-CO: Muestra el símbolo de descarga para exportar. */
+      #signOutButton::before { content: "↗"; font-size: 17px; } /* PL: Pokaż osobny symbol wyjścia z sesji. | ES-CO: Muestra un símbolo distinto para cerrar sesión. */
+      .primary-button { min-height: 42px; padding-inline: 12px; } /* PL: Zachowaj wygodny cel dotykowy głównej akcji. | ES-CO: Mantiene un área táctil cómoda para la acción principal. */
+      .hero-row { align-items: flex-start; flex-direction: column; gap: 16px; } /* PL: Umieść tytuł i licznik jeden pod drugim. | ES-CO: Apila título y contador. */
+      .trip-countdown { min-width: 100%; } /* PL: Rozciągnij odliczanie przez szerokość telefonu. | ES-CO: Extiende el contador a todo el ancho móvil. */
+      .stats { margin: 23px 0 27px; } /* PL: Zmniejsz pionowe odstępy podsumowania. | ES-CO: Reduce los espacios del resumen. */
+      .stat { min-height: 88px; padding: 14px 8px 14px 0; } /* PL: Zmniejsz wysokość i padding wskaźników. | ES-CO: Reduce la altura y el relleno de indicadores. */
+      .stat + .stat { padding-left: 10px; } /* PL: Zmniejsz odstęp między kolumnami wskaźników. | ES-CO: Reduce la separación entre indicadores. */
+      .stat-value { font-size: clamp(15px, 4.7vw, 20px); } /* PL: Dopasuj wartość do dostępnej szerokości ekranu. | ES-CO: Ajusta el valor al ancho disponible. */
+      .stat-label { font-size: 9px; } /* PL: Zmniejsz etykietę wskaźnika. | ES-CO: Reduce el tamaño de la etiqueta. */
+      .stat-detail { font-size: 9px; } /* PL: Zmniejsz szczegół wskaźnika. | ES-CO: Reduce el detalle del indicador. */
+      .content-grid { gap: 31px; } /* PL: Zachowaj odstęp między planem a wydatkami. | ES-CO: Conserva espacio entre el itinerario y los gastos. */
+      .section-heading h2 { font-size: 22px; } /* PL: Zmniejsz nagłówki sekcji na telefonie. | ES-CO: Reduce los títulos de sección en móvil. */
+      .day-row { grid-template-columns: 43px minmax(0,1fr) auto; gap: 9px; padding-inline: 5px; } /* PL: Dopasuj kolumny wiersza dnia do wąskiego ekranu. | ES-CO: Ajusta las columnas diarias al celular. */
+      .day-total b { font-size: 11px; } /* PL: Zmniejsz kwotę dnia na wąskim ekranie. | ES-CO: Reduce el total diario en pantallas estrechas. */
+      .budget-track { width: 55px; } /* PL: Skróć pasek budżetu, aby nie wypychał tekstu. | ES-CO: Acorta la barra para que no desplace el texto. */
+      .expense-item { grid-template-columns: 32px minmax(0,1fr) max-content; gap: 8px; } /* PL: Dopasuj kolumny kwoty i opisu na telefonie. | ES-CO: Ajusta las columnas de texto e importe en celular. */
+      .form-grid { grid-template-columns: 1fr 1fr; } /* PL: Zachowaj dwie kolumny krótkich pól formularza. | ES-CO: Conserva dos columnas para campos cortos. */
+      .expense-form { padding-inline: 17px; } /* PL: Zmniejsz boczne paddingi modalu. | ES-CO: Reduce el relleno lateral del diálogo. */
+      .dialog-head { padding-inline: 17px; } /* PL: Dopasuj nagłówek modalu do formularza. | ES-CO: Alinea el encabezado con el formulario. */
+    }
+    @media (prefers-reduced-motion: reduce) { /* PL: Szanuj preferencję ograniczenia animacji. | ES-CO: Respeta la preferencia de reducir movimiento. */
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } /* PL: Wyłącz płynne przewijanie i skróć przejścia. | ES-CO: Desactiva desplazamiento suave y reduce transiciones. */
+    }
+  /* PL: Zakończ definicje CSS dokumentu. | ES-CO: Termina las reglas CSS del documento. */
+  </style>
+<!-- PL: Zakończ metadane i style nagłówka. | ES-CO: Cierra los metadatos y estilos del encabezado. -->
+</head>
+<!-- PL: Rozpocznij widoczną treść aplikacji. | ES-CO: Inicia el contenido visible de la app. -->
+<body>
+  <!-- PL: Pokaż formularz logowania osobom bez aktywnej sesji. | ES-CO: Muestra el acceso a quien no tiene sesión activa. -->
+  <main class="auth-panel" id="authPanel" hidden>
+    <!-- PL: Oznacz kartę jako formularz prywatnego dostępu. | ES-CO: Identifica esta tarjeta como acceso privado. -->
+    <section class="auth-card" aria-labelledby="loginTitle">
+      <!-- PL: Pokaż nazwę produktu i zakres podróży. | ES-CO: Muestra el nombre de la app y el viaje. -->
+      <span class="eyebrow">PRYWATNY DZIENNIK PODRÓŻY</span>
+      <!-- PL: Ustaw polski nagłówek ekranu. | ES-CO: Define el título en polaco. -->
+      <h1 id="loginTitle">Dziennik wydatków.</h1>
+      <!-- PL: Wyjaśnij, że logowanie wymaga danych konta utworzonego w Supabase. | ES-CO: Explica que se usan las credenciales creadas en Supabase. -->
+      <p>Zaloguj się adresem email i hasłem przypisanymi do Twojego konta.</p>
+      <!-- PL: Zbierz email i hasło do bieżącej sesji. | ES-CO: Recoge correo y contraseña para iniciar sesión. -->
+      <form id="loginForm">
+        <!-- PL: Opisz pole email dla użytkownika i czytnika ekranu. | ES-CO: Etiqueta el correo para personas y lectores de pantalla. -->
+        <label for="loginEmail">Adres email</label>
+        <!-- PL: Wymagaj poprawnego adresu konta Supabase. | ES-CO: Exige un correo válido de la cuenta Supabase. -->
+        <input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="ty@example.com" required>
+        <!-- PL: Opisz pole hasła dla użytkownika i czytnika ekranu. | ES-CO: Etiqueta la contraseña para personas y lectores de pantalla. -->
+        <label for="loginPassword">Hasło</label>
+        <!-- PL: Odczytuj hasło bez zapisywania go w lokalnym kodzie. | ES-CO: Recoge la contraseña sin guardarla en el código local. -->
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        <!-- PL: Wyślij email i hasło do Supabase Auth. | ES-CO: Envía correo y contraseña a Supabase Auth. -->
+        <button class="primary-button" type="submit">Zaloguj się</button>
+      </form>
+      <!-- PL: Ogłoś wynik wysłania linku lub błąd. | ES-CO: Anuncia el resultado del enlace o un error. -->
+      <!-- PL: Ogłoś wynik logowania lub czytelny błąd. | ES-CO: Anuncia el resultado del acceso o un error claro. -->
+      <p class="auth-status" id="loginStatus" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <!-- PL: Ukryj prywatny dziennik przed odczytaniem sesji użytkownika. | ES-CO: Oculta los gastos hasta verificar la sesión. -->
+  <!-- PL: Utwórz kontener na nawigację boczną i główną treść. | ES-CO: Crea el contenedor de navegación y contenido principal. -->
+  <div class="app-shell" id="appContent" hidden>
+    <!-- PL: Zdefiniuj boczny panel nawigacyjny dziennika. | ES-CO: Define el panel lateral del diario. -->
+    <aside class="sidebar" aria-label="Nawigacja główna">
+      <!-- PL: Link marki wraca do początku podsumowania. | ES-CO: El enlace de marca vuelve al resumen. -->
+      <a class="brand" href="#inicio" aria-label="Dziennik podróży">
+        <!-- PL: Pokaż symbol podróży. | ES-CO: Muestra el símbolo del viaje. -->
+        <span class="brand-mark">旅</span>
+        <!-- PL: Podaj nazwę dziennika i rok podróży. | ES-CO: Indica el nombre del diario y el año. -->
+        <span class="brand-copy"><strong>DZIENNIK</strong><span>Wiele podróży</span></span>
+      <!-- PL: Zamknij link marki. | ES-CO: Cierra el enlace de marca. -->
+      </a>
+      <!-- PL: Opisz nawigację tej podróży. | ES-CO: Identifica la navegación del viaje. -->
+      <p class="nav-label">Podróż</p>
+      <!-- PL: Zgrupuj odnośniki do głównych sekcji. | ES-CO: Agrupa enlaces a las secciones principales. -->
+      <nav>
+        <!-- PL: Przejdź do podsumowania wydatków. | ES-CO: Lleva al resumen de gastos. -->
+        <a class="nav-link active" href="#inicio"><span class="nav-glyph" aria-hidden="true">◷</span>Podsumowanie</a>
+        <!-- PL: Przewiń do dziennika dni podróży. | ES-CO: Desplaza al diario por días. -->
+        <a class="nav-link" href="#dias"><span class="nav-glyph" aria-hidden="true">▤</span>Dziennik dni</a>
+      <!-- PL: Zamknij grupę nawigacji. | ES-CO: Cierra el grupo de navegación. -->
+      </nav>
+      <!-- PL: Wypełnij wolne miejsce między menu i zdjęciem. | ES-CO: Ocupa el espacio entre el menú y la foto. -->
+      <div class="sidebar-spacer"></div>
+      <!-- PL: Pokaż zdjęcie jako wizualny punkt podróży. | ES-CO: Muestra una imagen representativa del viaje. -->
+      <div class="trip-photo">
+        <!-- PL: Wczytaj neutralne zdjęcie podróżnicze. | ES-CO: Carga una foto de viaje genérica. -->
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&amp;fit=crop&amp;w=700&amp;q=80" alt="Górski krajobraz" loading="lazy">
+        <!-- PL: Nałóż daty i nazwę podróży na zdjęcie. | ES-CO: Superpone fechas y nombre del viaje sobre la imagen. -->
+        <div class="trip-photo-copy"><span id="tripSidebarDates">Wybierz podróż</span><strong id="tripSidebarName">Dziennik podróży</strong></div>
+      <!-- PL: Zamknij kartę zdjęcia. | ES-CO: Cierra la tarjeta de la imagen. -->
+      </div>
+      <!-- PL: Wyjaśnij lokalny zapis i kopię zapasową. | ES-CO: Explica el almacenamiento y la copia de seguridad. -->
+      <p class="local-note">Dane zapisują się na Twoim koncie. Eksportuj CSV, aby zachować kopię.</p>
+    <!-- PL: Zamknij boczny panel. | ES-CO: Cierra la navegación lateral. -->
+    </aside>
+
+    <!-- PL: Rozpocznij główną treść podsumowania. | ES-CO: Inicia el contenido principal del resumen. -->
+    <main id="inicio">
+      <!-- PL: Umieść nawigację kontekstową i główne akcje. | ES-CO: Ubica la ruta y las acciones principales. -->
+      <header class="topbar">
+        <!-- PL: Pokaż bieżący poziom nawigacji. | ES-CO: Muestra la ruta actual. -->
+        <div class="breadcrumb">Podróże <span aria-hidden="true">/</span><select id="tripSelector" aria-label="Wybierz podróż" hidden></select><span id="tripSelectorEmpty">Brak podróży</span> <span class="sync-status" id="syncStatus" role="status">Łączenie…</span></div>
+        <!-- PL: Zgrupuj eksport, wylogowanie i nowy wydatek. | ES-CO: Agrupa exportar, cerrar sesión y agregar gasto. -->
+        <div class="top-actions">
+          <!-- PL: Wczytaj zaplanowane wydatki z pliku Excel na konto bieżącego użytkownika. | ES-CO: Importa gastos del Excel a la cuenta activa. -->
+          <button class="quiet-button" id="importExcelButton" type="button" title="Importuj wydatki z Excela">Importuj Excel</button>
+          <!-- PL: Wybierz skoroszyt lokalnie; jego zawartość nie jest wysyłana jako plik. | ES-CO: Selecciona el Excel local; el archivo no se sube como archivo. -->
+          <input id="excelFileInput" type="file" accept=".xlsx" hidden>
+          <!-- PL: Eksportuj aktualne wydatki do arkusza CSV. | ES-CO: Exporta los gastos actuales a CSV. -->
+          <button class="quiet-button" id="exportButton" type="button" title="Eksportuj wydatki do CSV">Eksportuj CSV</button>
+          <!-- PL: Zakończ bieżącą sesję użytkownika. | ES-CO: Cierra la sesión actual. -->
+          <button class="quiet-button" id="signOutButton" type="button">Wyloguj</button>
+          <!-- PL: Otwórz formularz nowego wydatku. | ES-CO: Abre el formulario de gasto nuevo. -->
+          <button class="primary-button" id="openExpense" type="button"><span aria-hidden="true">＋</span> Dodaj wydatek</button>
+        <!-- PL: Zamknij grupę akcji. | ES-CO: Cierra el grupo de acciones. -->
+        </div>
+      <!-- PL: Zamknij górny pasek. | ES-CO: Cierra la barra superior. -->
+      </header>
+
+      <!-- PL: Pokaż tytuł podróży, licznik i trzy wskaźniki finansowe. | ES-CO: Muestra viaje, cuenta regresiva e indicadores financieros. -->
+      <section aria-labelledby="pageTitle">
+        <!-- PL: Ułóż nagłówek podróży i odliczanie. | ES-CO: Organiza título del viaje y cuenta regresiva. -->
+        <div class="hero-row">
+          <!-- PL: Podaj nazwę dziennika i trasę. | ES-CO: Indica nombre del diario y ruta. -->
+          <div>
+            <!-- PL: Oznacz rodzaj widoku i rok. | ES-CO: Identifica el diario y el año. -->
+            <span class="eyebrow" id="tripEyebrow">Dziennik podróży</span>
+            <!-- PL: Ustaw główny tytuł strony. | ES-CO: Define el título principal de la página. -->
+            <h1 id="pageTitle">Wybierz podróż.</h1>
+            <!-- PL: Pokaż listę głównych miejsc na trasie. | ES-CO: Muestra los destinos principales de la ruta. -->
+            <p class="subheading" id="tripRoute">Zaimportuj arkusz podróży, aby rozpocząć.</p>
+          <!-- PL: Zamknij blok tytułowy. | ES-CO: Cierra el bloque del título. -->
+          </div>
+          <!-- PL: Pokaż liczbę dni do podróży lub jej trwania. | ES-CO: Muestra los días que faltan o transcurridos. -->
+          <div class="trip-countdown" aria-live="polite">
+            <!-- PL: Wyświetl dynamiczną liczbę dni. | ES-CO: Muestra el número dinámico de días. -->
+            <span class="count-number" id="countdownNumber">—</span>
+            <!-- PL: Opisz znaczenie odliczania. | ES-CO: Explica el contador. -->
+            <span id="countdownLabel">wybierz<br>podróż</span>
+          <!-- PL: Zamknij licznik. | ES-CO: Cierra la cuenta regresiva. -->
+          </div>
+        <!-- PL: Zamknij wiersz nagłówka podróży. | ES-CO: Cierra la fila del encabezado. -->
+        </div>
+
+        <!-- PL: Zgrupuj sumę wydatków, saldo i budżet dzienny. | ES-CO: Agrupa gasto total, saldo y presupuesto diario. -->
+        <div class="stats" aria-label="Podsumowanie finansowe">
+          <!-- PL: Pokaż sumę wydatków z bazy i liczbę rekordów. | ES-CO: Muestra el gasto total y la cantidad de registros. -->
+          <div class="stat"><span class="stat-label">Łącznie w dzienniku</span><strong class="stat-value" id="spentTotal">0,00 PLN</strong><span class="stat-detail" id="expenseCount">0 wydatków</span></div>
+          <!-- PL: Oddziel wydatki oznaczone jako faktyczne koszty w podróży. | ES-CO: Separa los gastos marcados como realizados durante el viaje. -->
+          <div class="stat"><span class="stat-label">Wydano w podróży</span><strong class="stat-value" id="actualSpentTotal">0,00 PLN</strong><span class="stat-detail">Status „W Podróży”</span></div>
+          <!-- PL: Pokaż kwoty hotelowe i transportowe, które nadal czekają na płatność. | ES-CO: Muestra costos pendientes de pago. -->
+          <div class="stat"><span class="stat-label">Do zapłaty</span><strong class="stat-value" id="pendingTotal">0,00 PLN</strong><span class="stat-detail">Hotel lub nieopłacone</span></div>
+          <!-- PL: Pokaż saldo po odjęciu nowych wydatków. | ES-CO: Muestra el saldo después de los nuevos gastos. -->
+          <!-- PL: Pokaż średnią z dni, w których zapisano wydatki. | ES-CO: Muestra el promedio de los días con gastos. -->
+          <div class="stat"><span class="stat-label">Średnio na dzień</span><strong class="stat-value" id="averagePerDay">0,00 PLN</strong><span class="stat-detail">Wśród dni z wydatkami</span></div>
+          <!-- PL: Pokaż liczbę dni, w których zapisano wydatki. | ES-CO: Muestra cuántos días tienen gastos. -->
+          <div class="stat"><span class="stat-label">Dni z wydatkami</span><strong class="stat-value" id="activeDaysTotal">0 dni</strong><span class="stat-detail" id="activeDayCount">z 17 dni podróży</span></div>
+          <!-- PL: Pokaż dzień z największym wydatkiem. | ES-CO: Muestra el día con mayor gasto. -->
+          <div class="stat"><span class="stat-label">Najdroższy dzień</span><strong class="stat-value" id="highestDayTotal">—</strong><span class="stat-detail" id="highestDayLabel">Brak wydatków</span></div>
+          <!-- PL: Pokaż saldo po odjęciu wydatków podróży. | ES-CO: Muestra el saldo tras restar los gastos del viaje. -->
+          <div class="stat"><span class="stat-label">Dostępne środki</span><strong class="stat-value" id="remainingTotal">10 704,58 PLN</strong><span class="stat-detail">Po odjęciu wydatków w podróży</span></div>
+          <!-- PL: Pokaż dzienny budżet z arkusza. | ES-CO: Muestra el presupuesto diario del archivo. -->
+          <div class="stat"><span class="stat-label">Budżet dzienny</span><strong class="stat-value" id="dailyBudgetValue">0,00 PLN</strong><span class="stat-detail">Na podstawie wyjazdu</span></div>
+        <!-- PL: Zamknij wskaźniki finansowe. | ES-CO: Cierra los indicadores financieros. -->
+        </div>
+      <!-- PL: Zamknij sekcję podsumowania. | ES-CO: Cierra la sección de resumen. -->
+      </section>
+
+      <!-- PL: Pokaż analizę wydatków według dnia i kategorii. | ES-CO: Muestra análisis de gastos por día y categoría. -->
+      <section class="analytics" aria-labelledby="analyticsTitle">
+        <!-- PL: Podaj tytuł analizy i liczbę załadowanych rekordów. | ES-CO: Indica el título y la cantidad de gastos cargados. -->
+        <div class="section-heading">
+          <div><h2 id="analyticsTitle">Analiza wydatków</h2><p>Podział według dnia i kategorii</p></div>
+          <span class="selected-day-label" id="analyticsCount">0 wydatków</span>
+        </div>
+        <!-- PL: Ułóż wykres dzienny i kategorię w osobnych panelach. | ES-CO: Organiza los gráficos diario y por categoría. -->
+        <div class="chart-grid">
+          <!-- PL: Grupuj wydatki dnia w stosy według kategorii. | ES-CO: Apila gastos diarios según su categoría. -->
+          <figure class="chart-panel">
+            <figcaption class="chart-panel-head"><h3>Wydatki każdego dnia</h3><span class="chart-total" id="dailyChartTotal">0,00 PLN</span></figcaption>
+            <div class="chart-wrap"><canvas id="dailyChart" aria-label="Wydatki każdego dnia według kategorii"></canvas><p class="chart-empty" id="dailyChartEmpty">Dodaj wydatki, aby zobaczyć wykres dzienny.</p></div>
+          </figure>
+          <!-- PL: Pokaż udział każdej kategorii w łącznej sumie. | ES-CO: Muestra el aporte de cada categoría al total. -->
+          <figure class="chart-panel">
+            <figcaption class="chart-panel-head"><h3>Według kategorii</h3><span class="chart-total" id="categoryChartTotal">0,00 PLN</span></figcaption>
+            <div class="chart-wrap category-chart-wrap"><canvas id="categoryChart" aria-label="Suma wydatków według kategorii"></canvas><p class="chart-empty" id="categoryChartEmpty">Kategorie pojawią się po dodaniu wydatków.</p></div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- PL: Ułóż plan dni i panel szczegółów obok siebie. | ES-CO: Organiza itinerario y detalle en columnas. -->
+      <div class="content-grid">
+        <!-- PL: Rozpocznij sekcję planu podróży. | ES-CO: Inicia la sección del itinerario. -->
+        <section id="dias" aria-labelledby="daysTitle">
+          <!-- PL: Pokaż tytuł listy i instrukcję wyboru dnia. | ES-CO: Muestra título e instrucción para elegir día. -->
+          <div class="section-heading">
+              <div><h2 id="daysTitle">Plan podróży</h2><p>Wybierz dzień, aby zobaczyć lub dodać wydatki.</p></div>
+            <span class="selected-day-label" id="daysCount">0 dni</span>
+          </div>
+          <!-- PL: Wypełnij listę dni dynamicznie na podstawie zakresu podróży. | ES-CO: Llena dinámicamente los días del viaje. -->
+          <div class="day-list" id="dayList"></div>
+        <!-- PL: Zamknij sekcję planu. | ES-CO: Cierra la sección del itinerario. -->
+        </section>
+
+        <!-- PL: Rozpocznij panel wydatków dla wybranego dnia. | ES-CO: Inicia el panel de gastos del día seleccionado. -->
+        <section class="expense-panel" aria-labelledby="expensesTitle">
+          <!-- PL: Pokaż datę, miejsce i wykorzystanie budżetu. | ES-CO: Muestra fecha, destino y presupuesto usado. -->
+          <div class="section-heading">
+            <div><h2 id="expensesTitle">Wydatki dnia</h2><p id="selectedDayTitle">Wybierz podróż</p></div>
+            <span class="selected-day-label" id="dayBudgetLabel">0,00 PLN</span>
+          </div>
+          <!-- PL: Renderuj wydatki pobrane dla zalogowanego użytkownika. | ES-CO: Renderiza gastos consultados para la sesión activa. -->
+          <ul class="expense-list" id="expenseList"></ul>
+          <!-- PL: Pokaż saldo budżetu na wybrany dzień. | ES-CO: Muestra el saldo del día seleccionado. -->
+          <div class="budget-note"><span>Pozostało na dziś</span><strong id="dailyRemaining">0,00 PLN</strong></div>
+          <!-- PL: Wyjaśnij źródło kursu i jego trwałe przypisanie do wydatku. | ES-CO: Explica la fuente de tasa y que queda fijada al gasto. -->
+          <p class="footnote">Kurs pochodzi z serwisu referencyjnego. Kurs banku lub karty może się różnić. Przy zapisie kurs zostaje przypisany do wydatku i nie zmienia się później.</p>
+        <!-- PL: Zamknij panel wydatków. | ES-CO: Cierra el panel de gastos. -->
+        </section>
+      <!-- PL: Zamknij układ planu i panelu dnia. | ES-CO: Cierra el diseño de itinerario y detalle. -->
+      </div>
+    <!-- PL: Zamknij główną treść aplikacji. | ES-CO: Cierra el contenido principal. -->
+    </main>
+  <!-- PL: Zamknij kontener widoku po zalogowaniu. | ES-CO: Cierra el contenedor de la vista autenticada. -->
+  </div>
+
+  <!-- PL: Utwórz modal dostępny dla formularza wydatków. | ES-CO: Crea el diálogo accesible para registrar gastos. -->
+  <dialog id="expenseDialog" aria-labelledby="dialogTitle">
+    <!-- PL: Oddziel tytuł formularza od pozostałych pól. | ES-CO: Separa el título del formulario de sus campos. -->
+    <div class="dialog-head">
+      <!-- PL: Nazwij formularz i wyjaśnij zapis dwóch wartości waluty. | ES-CO: Nombra el formulario y explica el guardado de ambas monedas. -->
+      <div><h2 id="dialogTitle">Nowy wydatek</h2><p>Zapisz kwotę lokalną, walutę i równowartość w PLN.</p></div>
+      <!-- PL: Pozwól zamknąć okno ikoną. | ES-CO: Permite cerrar la ventana con el ícono. -->
+      <button class="icon-button" id="closeDialog" type="button" aria-label="Zamknij">×</button>
+    <!-- PL: Zamknij nagłówek modalu. | ES-CO: Cierra el encabezado del diálogo. -->
+    </div>
+    <!-- PL: Rozpocznij formularz z natywną walidacją przeglądarki. | ES-CO: Inicia el formulario con validación nativa del navegador. -->
+    <form class="expense-form" id="expenseForm">
+      <!-- PL: Ułóż pola w responsywnej siatce. | ES-CO: Organiza los campos en una cuadrícula adaptable. -->
+      <div class="form-grid">
+        <!-- PL: Wymagaj daty mieszczącej się w okresie podróży. | ES-CO: Exige una fecha dentro del viaje. -->
+        <div class="field"><label for="expenseDate">Data</label><input id="expenseDate" name="date" type="date" required></div>
+        <!-- PL: Ogranicz kategorię do pozycji używanych w dzienniku. | ES-CO: Limita las categorías a las del diario. -->
+        <div class="field"><label for="expenseCategory">Kategoria</label><select id="expenseCategory" name="category" required><option>Jedzenie</option><option>Atrakcje</option><option>Transport</option><option>Hotel</option><option>Loty</option><option>Zakupy</option><option>Inne</option></select></div>
+        <!-- PL: Zachowaj status płatności i uwzględnij go w podsumowaniu. | ES-CO: Conserva el estado del pago y úsalo en los totales. -->
+        <div class="field"><label for="expenseStatus">Status</label><select id="expenseStatus" name="status"><option>W Podróży</option><option>Opłacone</option><option>Nieopłacone</option><option>Płatne w Hotelu</option></select></div>
+        <!-- PL: Zbierz krótki opis pozycji do rozpoznania jej na liście. | ES-CO: Recoge una descripción breve para identificar el gasto. -->
+        <div class="field full"><label for="expenseDescription">Opis</label><input id="expenseDescription" name="description" type="text" maxlength="100" placeholder="Np. ramen przy stacji" required></div>
+        <!-- PL: Zbierz dodatnią kwotę w walucie lokalnej. | ES-CO: Recoge un importe positivo en moneda local. -->
+        <div class="field"><label for="expenseAmount">Kwota</label><input id="expenseAmount" name="amount" type="number" min="0.01" step="any" inputmode="decimal" placeholder="0,00" required></div>
+        <!-- PL: Pozwól wybrać popularną walutę albo wpisać własny kod. | ES-CO: Permite elegir moneda común o ingresar otro código. -->
+        <div class="field"><label for="expenseCurrency">Waluta</label><select id="expenseCurrency" name="currency" required>
+          <option value="JPY" selected>JPY · Japoński jen</option><option value="KRW">KRW · Won południowokoreański</option><option value="PLN">PLN · Polski złoty</option><option value="EUR">EUR · Euro</option><option value="USD">USD · Dolar amerykański</option><option value="GBP">GBP · Funt szterling</option><option value="CHF">CHF · Frank szwajcarski</option><option value="CZK">CZK · Korona czeska</option><option value="HUF">HUF · Forint węgierski</option><option value="SEK">SEK · Korona szwedzka</option><option value="NOK">NOK · Korona norweska</option><option value="DKK">DKK · Korona duńska</option><option value="CAD">CAD · Dolar kanadyjski</option><option value="AUD">AUD · Dolar australijski</option><option value="SGD">SGD · Dolar singapurski</option><option value="HKD">HKD · Dolar hongkoński</option><option value="CNY">CNY · Juan chiński</option><option value="INR">INR · Rupia indyjska</option><option value="THB">THB · Bat tajski</option><option value="TRY">TRY · Lira turecka</option><option value="BRL">BRL · Real brazylijski</option><option value="MXN">MXN · Peso meksykańskie</option><option value="ZAR">ZAR · Rand południowoafrykański</option><option value="NZD">NZD · Dolar nowozelandzki</option><option value="RON">RON · Lej rumuński</option><option value="BGN">BGN · Lew bułgarski</option><option value="ISK">ISK · Korona islandzka</option><option value="IDR">IDR · Rupia indonezyjska</option><option value="ILS">ILS · Nowy szekel izraelski</option><option value="MYR">MYR · Ringgit malezyjski</option><option value="PHP">PHP · Peso filipińskie</option><option value="OTHER">Inna waluta…</option>
+        <!-- PL: Zamknij listę walut. | ES-CO: Cierra la lista de monedas. -->
+        </select></div>
+        <!-- PL: Pokaż pole kodu tylko dla waluty spoza listy. | ES-CO: Muestra el código personalizado solo para otra moneda. -->
+        <div class="field full" id="customCurrencyField" hidden><label for="customCurrency">Kod waluty · 3 litery</label><input id="customCurrency" type="text" maxlength="3" pattern="[A-Za-z]{3}" autocomplete="off" placeholder="Np. AED"></div>
+        <!-- PL: Grupuj pole kursu, podgląd PLN i stan źródła. | ES-CO: Agrupa tasa, resultado PLN y estado de la fuente. -->
+        <div class="field full conversion-box">
+          <!-- PL: Umożliwiaj automatyczny lub ręczny wpis kursu. | ES-CO: Permite consultar o escribir la tasa manualmente. -->
+          <div class="field"><label for="exchangeRate">Kurs · PLN za 1 jednostkę</label><input id="exchangeRate" name="rate" type="number" min="0.0000001" step="any" placeholder="Pobieranie…" required></div>
+          <!-- PL: Pokaż wynik mnożenia kwoty przez kurs. | ES-CO: Muestra el importe multiplicado por la tasa. -->
+          <div class="pln-preview"><span>Równowartość w PLN</span><strong id="plnPreview">0,00 PLN</strong></div>
+          <!-- PL: Ogłoś źródło kursu albo instrukcję ręczną. | ES-CO: Anuncia la fuente de tasa o la instrucción manual. -->
+          <div class="rate-status" id="rateStatus" role="status">Kurs referencyjny zostanie pobrany automatycznie.</div>
+        <!-- PL: Zamknij panel przeliczenia. | ES-CO: Cierra el panel de conversión. -->
+        </div>
+        <!-- PL: Zapisz opcjonalny sposób płatności. | ES-CO: Registra la forma de pago opcional. -->
+        <div class="field full"><label for="expensePayment">Płatność <span style="font-weight:400">(opcjonalnie)</span></label><select id="expensePayment" name="payment"><option value="">Nie podano</option><option>Karta</option><option>Gotówka</option><option>Inna</option></select></div>
+      <!-- PL: Zamknij siatkę pól formularza. | ES-CO: Cierra la cuadrícula de campos. -->
+      </div>
+      <!-- PL: Umieść akcje anulowania i zapisu formularza. | ES-CO: Ubica cancelar y guardar. -->
+      <div class="form-footer">
+        <!-- PL: Zamknij modal bez zapisywania wydatku. | ES-CO: Cierra sin guardar el gasto. -->
+        <button class="quiet-button" id="cancelDialog" type="button">Anuluj</button>
+        <!-- PL: Wyślij zwalidowany wydatek do Supabase. | ES-CO: Envía el gasto validado a Supabase. -->
+        <button class="primary-button" type="submit">Zapisz wydatek</button>
+      <!-- PL: Zamknij pasek akcji. | ES-CO: Cierra las acciones. -->
+      </div>
+    <!-- PL: Zamknij formularz nowego wydatku. | ES-CO: Cierra el formulario de gasto. -->
+    </form>
+  <!-- PL: Zamknij modal wydatków. | ES-CO: Cierra el diálogo de gastos. -->
+  </dialog>
+  <!-- PL: Udostępnij komunikatom miejsce dla czytników ekranu. | ES-CO: Reserva una región accesible para mensajes. -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- PL: Załaduj moduł aplikacji skompilowany przez Vite. | ES-CO: Carga el módulo de la app procesado por Vite. -->
+  <script type="module" src="/src/main.js"></script>
+
+<!-- PL: Zakończ widoczną treść aplikacji. | ES-CO: Termina el contenido visible de la app. -->
+</body>
+</html>

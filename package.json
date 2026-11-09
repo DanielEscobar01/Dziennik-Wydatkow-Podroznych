@@ -1,0 +1,19 @@
+{
+  "name": "dziennik-wydatkow-podroznych",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "chart.js": "^4.6.1",
+    "read-excel-file": "^9.3.14"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
