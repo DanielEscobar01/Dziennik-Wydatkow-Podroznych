@@ -1045,7 +1045,7 @@ async function importWorkbook(file) {
       reservation_type: item.type,
       sort_order: item.sortOrder,
       source_ref: item.sourceRef,
-      title: item.title,
+      title: item.title || item.airlineName || item.flightNumber || item.route || 'Rezerwacja',
       city: item.city || null,
       check_in: item.checkIn || null,
       check_out: item.checkOut || null,
