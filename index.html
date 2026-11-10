@@ -165,7 +165,6 @@
     .reservation-route { margin-top: 5px; }
     .reservation-detail { display: grid; gap: 3px; }
     .flight-route-map { grid-column: 1 / -1; width: 100%; height: 156px; min-width: 0; border: 1px solid var(--line); background: #e8eee8; }
-    .flight-route-caption { grid-column: 1 / -1; margin: -10px 0 0; color: var(--muted); font-size: 10px; }
     .reservation-reference { overflow-wrap: anywhere; }
     .history-section { margin: 0 0 34px; }
     .history-section .section-heading { margin-bottom: 14px; }
@@ -173,45 +172,42 @@
     .history-filters input, .history-filters select { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 11px; }
     .history-filters input { flex: 1 1 220px; }
     .history-filters select { flex: 0 0 130px; }
-    .airport-board { overflow: hidden; border: 1px solid #25282a; border-radius: 9px; background: #101214; color: #ecebdc; }
-    .airport-board-head, .history-flight-row { display: grid; grid-template-columns: minmax(110px,.85fr) minmax(0,2fr) minmax(140px,.95fr); gap: 12px; align-items: center; }
-    .airport-board-head { min-height: 52px; padding: 10px 16px; border-bottom: 1px solid #36393a; color: #e7e5d7; font-size: 10px; letter-spacing: .06em; }
+    .airport-board { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--ink); }
+    .airport-board-head { display: none; }
+    .airport-board-head { min-height: 52px; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 10px; letter-spacing: .06em; }
     .airport-board-head span:nth-child(2) { text-align: center; }
     .history-flight-list { overflow: visible; }
-    .history-flight-entry + .history-flight-entry { border-top: 1px solid #303334; }
-    .history-flight-row { width: 100%; min-height: 60px; padding: 7px 13px; border: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 2px, transparent 2px 6px), #17191b; color: inherit; text-align: left; }
-    .history-flight-row { cursor: default; }
-    .history-flight-time { display: grid; gap: 4px; color: #f0e743; font: 600 12px ui-monospace, "Cascadia Mono", monospace; }
-    .history-flight-time small { color: #c1c3ba; font: 600 12px ui-monospace, "Cascadia Mono", monospace; }
-    .history-flight-route small, .history-flight-meta { color: #a7aaa5; font: 10px ui-monospace, "Cascadia Mono", monospace; }
-    .history-flight-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
-    .history-flight-airline { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-    .history-flight-airline > span:last-child { overflow-wrap: anywhere; }
-    .history-airline-logo-frame { display: inline-grid; flex: 0 0 76px; place-items: center; width: 76px; height: 28px; padding: 3px 5px; box-sizing: border-box; border: 1px solid #d8d8d8; border-radius: 3px; background: #fff; }
-    .history-airline-logo { display: block; width: auto; max-width: 100%; height: auto; max-height: 100%; object-fit: contain; }
-    .history-airline-code { display: inline-grid; place-items: center; min-width: 24px; height: 18px; padding: 0 3px; border: 1px solid #49504c; border-radius: 2px; color: #f0e743; font-size: 9px; font-weight: 700; }
+    .history-flight-entry { grid-template-columns: minmax(115px,.65fr) minmax(0,1.7fr) minmax(150px,.8fr); row-gap: 4px; }
+    .history-flight-entry > .history-flight-summary { grid-column: 3; grid-row: 1; align-self: start; justify-self: end; padding-top: 2px; }
+    .history-flight-title { gap: 5px; }
+    .history-flight-code { flex: 0 0 auto; margin: 0 1px 0 0; color: var(--ink); font-size: 11px !important; font-weight: 700; white-space: nowrap; }
+    .history-airline-name { min-width: 0; overflow-wrap: anywhere; }
+    .history-airline-logo-slot { display: grid; flex: 0 0 106px; place-items: center; width: 106px; height: 30px; overflow: hidden; }
+    .history-airline-logo { display: block; width: auto; height: auto; max-width: 100%; max-height: 30px; object-fit: contain; mix-blend-mode: multiply; }
+    .history-airline-code { display: inline-grid; place-items: center; min-width: 24px; height: 18px; padding: 0 3px; border: 1px solid #83949d; border-radius: 2px; color: var(--ink); font-size: 9px; font-weight: 700; }
     .history-flight-route { display: grid; grid-template-columns: minmax(0,1fr) 60px minmax(0,1fr); align-items: center; gap: 10px; min-width: 0; }
     .history-airport { display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: start; gap: 7px; width: min(100%,240px); min-width: 0; }
     .history-airport--origin { grid-template-columns: minmax(0,1fr) 34px; justify-self: end; text-align: right; }
     .history-airport--origin .history-airport-code { grid-column: 2; grid-row: 1; }
     .history-airport--origin .history-airport-details { grid-column: 1; grid-row: 1; text-align: right; }
     .history-airport--origin .history-airport-country { flex-direction: row-reverse; justify-content: flex-start; }
-    .history-airport-code { flex: 0 0 34px; color: #f0e743; font: 700 11px ui-monospace, "Cascadia Mono", monospace; }
+    .history-airport-code { flex: 0 0 34px; color: var(--green); font: 700 11px ui-monospace, "Cascadia Mono", monospace; }
     .history-airport-details { display: grid; gap: 2px; min-width: 0; }
-    .history-airport-city { color: #e4e3d8; font: 10px ui-monospace, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
-    .history-airport-country { display: flex; align-items: flex-start; gap: 5px; min-width: 0; color: #a7aaa5; font: 9px ui-monospace, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
+    .history-airport-city { color: var(--ink); font: 12px ui-monospace, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
+    .history-airport-country { display: flex; align-items: flex-start; gap: 5px; min-width: 0; color: var(--muted); font: 11px ui-monospace, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
     .history-airport-country > span { min-width: 0; }
-    .history-airport-flag { width: auto; height: 16px; max-width: 30px; flex: 0 0 auto; border: 2px solid #000; border-radius: 4px; background: #fff; object-fit: contain; }
-    .history-route-plane { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 0; color: #e5b34f; }
-    .history-route-plane::before, .history-route-plane::after { flex: 1 1 auto; border-top: 1px dashed #73766c; content: ""; }
-    .history-route-plane span { font: 24px/1 "Segoe UI Symbol", "Apple Symbols", sans-serif; }
-    .history-flight-number { display: grid; gap: 3px; min-width: 0; }
-    .history-flight-number strong { color: #f0e743; font: 700 13px ui-monospace, "Cascadia Mono", monospace; }
-    .history-flight-status { color: #67ce78; font: 700 9px ui-monospace, "Cascadia Mono", monospace; }
-    .history-flight-status.is-future { color: #e5b34f; }
-    .history-flight-map { height: 170px; margin: 8px 10px 10px; overflow: hidden; border: 1px solid #36393a; border-radius: 7px; background: #16191a; }
+    .history-airport-flag { width: auto; height: 20px; max-width: 38px; flex: 0 0 auto; border: 2px solid #000; border-radius: 4px; background: #fff; object-fit: contain; }
+    .history-route-plane { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); grid-template-rows:auto auto; align-items: center; column-gap: 3px; row-gap: 2px; min-width: 0; color: var(--green); }
+    .history-route-plane::before { grid-column: 1; grid-row: 1; border-top: 1px dashed #94a4ad; content: ""; }
+    .history-route-plane::after { grid-column: 3; grid-row: 1; border-top: 1px dashed #94a4ad; content: ""; }
+    .history-route-plane > span { grid-column: 2; grid-row: 1; font: 24px/1 "Segoe UI Symbol", "Apple Symbols", sans-serif; }
+    .history-route-plane .history-flight-duration { grid-column: 1 / -1; grid-row: 2; justify-self: center; color: #000; font-size: 9px; line-height: 1; white-space: nowrap; }
+    .history-flight-summary { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
+    .history-flight-status { color: var(--green); font: 700 9px ui-monospace, "Cascadia Mono", monospace; }
+    .history-flight-status.is-future { color: #8b4a1f; }
+    .history-flight-map { height: 156px; margin: 0; overflow: hidden; border-radius: 4px; }
     .history-flight-map[hidden] { display: none; }
-    .history-empty { padding: 20px 14px; color: #adb2ad; font-size: 12px; }
+    .history-empty { padding: 20px 14px; color: #637785; font-size: 12px; }
     .history-stat-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 14px 0 20px; }
     .history-stat { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
     .history-stat span { display: block; color: var(--muted); font-size: 11px; }
@@ -335,14 +331,11 @@
       .app-shell { grid-template-columns: 205px minmax(0, 1fr); } /* PL: Zwęż boczną nawigację. | ES-CO: Reduce el ancho de la navegación lateral. */
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* PL: Dopasuj cztery wskaźniki do węższej treści tabletu. | ES-CO: Adapta las estadísticas al ancho de tableta. */
       .airport-board-head { display: none; }
-      .history-flight-row { grid-template-columns: minmax(90px,.55fr) minmax(0,2fr); gap: 8px; padding: 10px; }
-      .history-flight-time { grid-column: 1; grid-row: 1; }
-      .history-flight-route { grid-column: 2; grid-row: 1; grid-template-columns: minmax(0,1fr) 48px minmax(0,1fr); gap: 6px; }
+      .history-flight-entry { grid-template-columns: minmax(0,1fr) max-content; column-gap: 12px; row-gap: 4px; }
+      .history-flight-entry > .reservation-date { grid-column: 1; grid-row: 1; }
+      .history-flight-entry > .reservation-main { grid-column: 1 / -1; grid-row: 2; }
+      .history-flight-entry > .history-flight-summary { grid-column: 2; grid-row: 1; }
       .history-airport { width: 100%; }
-      .history-flight-number { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding-top: 7px; border-top: 1px solid #303334; }
-      .history-flight-number strong { font-size: 12px; }
-      .history-flight-meta { flex: 1 1 auto; min-width: 100px; }
-      .history-flight-status { margin-left: auto; }
       .sidebar { padding-inline: 14px; } /* PL: Zmniejsz wewnętrzne odstępy panelu. | ES-CO: Reduce el espacio interno del panel. */
       main { padding-inline: 24px; } /* PL: Dopasuj margines treści do tabletu. | ES-CO: Ajusta el margen del contenido a la tableta. */
       .content-grid { grid-template-columns: minmax(0, 1fr); } /* PL: Ustaw listę i szczegóły jeden pod drugim. | ES-CO: Apila diario y detalle en una columna. */
@@ -380,22 +373,20 @@
       .day-map { aspect-ratio: 1 / 1; }
       .reservation-row { grid-template-columns: minmax(0,1fr) auto; gap: 7px 12px; padding: 13px 4px; }
       .airport-board-head { display: none; }
-      .history-flight-row { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 10px; }
-      .history-flight-time { grid-column: 1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
-      .history-flight-time small { font-size: 12px; }
-      .history-flight-route { grid-column: 1; grid-row: 2; grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr); gap: 6px; }
-      .history-flight-number { grid-column: 1; grid-row: 3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 9px; padding-top: 7px; border-top: 1px solid #303334; }
-      .history-flight-number strong { font-size: 12px; }
-      .history-flight-meta { flex: 1 1 auto; min-width: 100px; }
-      .history-flight-status { margin-left: auto; }
+      .history-flight-entry { grid-template-columns: minmax(0,1fr) max-content; column-gap: 10px; row-gap: 4px; padding: 13px 4px; }
+      .history-flight-entry > .reservation-date { grid-column: 1; grid-row: 1; }
+      .history-flight-entry > .reservation-main { grid-column: 1 / -1; grid-row: 2; }
+      .history-flight-entry > .history-flight-summary { grid-column: 2; grid-row: 1; }
+      .history-flight-route { grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr); gap: 6px; }
       .history-airport { grid-template-columns: 30px minmax(0,1fr); gap: 5px; width: 100%; }
       .history-airport--origin { grid-template-columns: minmax(0,1fr) 30px; }
       .history-airport-code { font-size: 9px; }
-      .history-airport-city { font-size: 8px; }
-      .history-airport-country { gap: 3px; font-size: 8px; }
-      .history-airport-flag { height: 13px; max-width: 24px; }
+      .history-airport-city { font-size: 10px; }
+      .history-airport-country { gap: 3px; font-size: 10px; }
+      .history-airport-flag { height: 16px; max-width: 30px; }
       .history-flight-route { grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr); gap: 4px; }
       .history-flight-route small { font-size: 8px; }
+      .history-flight-route .history-flight-duration { font-size: 9px; }
       .history-flight-number strong { font-size: 11px; }
       .history-flight-status { font-size: 8px; }
       .history-stat-row { gap: 7px; }

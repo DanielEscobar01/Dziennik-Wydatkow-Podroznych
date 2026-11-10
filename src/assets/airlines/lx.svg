@@ -1,15 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 34.795">
-<title>Swiss International Air Lines</title>
-<desc>Swiss International Air Lines logo</desc>
-<metadata xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:Airline="http://schema.org/Airline">
-<rdf:RDF>
-<Airline:name>Swiss International Air Lines</Airline:name>
-<Airline:iataCode>LX</Airline:iataCode>
-<Airline:url>https://airlinelogos.aero/LX</Airline:url>
-</rdf:RDF>
-</metadata>
-<g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="150px" height="34.795px" viewBox="0 0 150 34.795" enable-background="new 0 0 150 34.795" xml:space="preserve">
+<g id="_x23_e60005ff">
 	<path fill="#E60005" d="M27.869,0.046H46.63c-2.9,11.588-5.689,23.209-8.598,34.795H0v-0.362l0.003,0.354
 		C9.267,23.218,18.564,11.628,27.869,0.046 M25.765,6.751c0.004,2.492-0.006,4.987,0.006,7.48c-2.483,0.006-4.967-0.006-7.451,0.006
 		c0.013,2.139,0.013,4.275,0,6.413c2.484,0.013,4.968,0,7.451,0.007c-0.012,2.492-0.002,4.988-0.006,7.48
@@ -45,7 +39,7 @@
 	<path fill="#E60005" d="M103.9,28.581c-0.021-7.438-0.002-14.878-0.008-22.316c1.928,0,3.859,0,5.791,0
 		c-0.006,7.438,0.012,14.877-0.01,22.313C107.75,28.578,105.824,28.574,103.9,28.581z"/>
 </g>
-<g>
+<g id="_x23_ffffffff">
 	<path fill="#FFFFFF" d="M25.765,6.751c2.157-0.013,4.311-0.007,6.467-0.004c-0.012,2.496,0,4.991-0.006,7.487
 		c2.493-0.003,4.985-0.003,7.479-0.003c-0.004,2.143-0.004,4.284,0,6.422c-2.493,0.003-4.985,0-7.479,0
 		c0.006,2.495-0.006,4.991,0.006,7.486c-2.156,0.003-4.311,0.009-6.467-0.004c0.004-2.491-0.006-4.987,0.006-7.479

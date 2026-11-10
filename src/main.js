@@ -12,25 +12,30 @@ import '@fontsource/quicksand/latin-ext-600.css';
 import '@fontsource/quicksand/latin-ext-700.css';
 import { greatCircle } from '@turf/great-circle';
 import 'leaflet/dist/leaflet.css';
-import airlineAeromexicoLogo from 'simple-icons/icons/aeromexico.svg';
-import airlineAnaLogo from 'simple-icons/icons/ana.svg';
-import airlineAirFranceLogo from 'simple-icons/icons/airfrance.svg';
-import airlineAmericanLogo from 'simple-icons/icons/americanairlines.svg';
-import airlineAviancaLogo from 'simple-icons/icons/avianca.svg';
-import airlineBritishLogo from 'simple-icons/icons/britishairways.svg';
-import airlineCopaLogo from 'simple-icons/icons/copaairlines.svg';
-import airlineDeltaLogo from 'simple-icons/icons/delta.svg';
-import airlineEmiratesLogo from 'simple-icons/icons/emirates.svg';
-import airlineIberiaLogo from 'simple-icons/icons/iberia.svg';
-import airlineKlmLogo from 'simple-icons/icons/klm.svg';
-import airlineLufthansaLogo from 'simple-icons/icons/lufthansa.svg';
-import airlineLotLogo from 'simple-icons/icons/lotpolishairlines.svg';
-import airlineQatarLogo from 'simple-icons/icons/qatarairways.svg';
-import airlineRyanairLogo from 'simple-icons/icons/ryanair.svg';
-import airlineSouthwestLogo from 'simple-icons/icons/southwestairlines.svg';
-import airlineTurkishLogo from 'simple-icons/icons/turkishairlines.svg';
-import airlineUnitedLogo from 'simple-icons/icons/unitedairlines.svg';
-import airlineWizzLogo from 'simple-icons/icons/wizzair.svg';
+import {
+  siAeromexico,
+  siAirfrance,
+  siBritishairways,
+  siIberia,
+  siKlm,
+  siQatarairways,
+  siSouthwestairlines,
+  siUnitedairlines,
+  siWizzair,
+} from 'simple-icons';
+import airlineAmericanColorLogo from './assets/airlines/aa.png';
+import airlineAviancaColorLogo from './assets/airlines/av.png';
+import airlineCopaColorLogo from './assets/airlines/cm.webp';
+import airlineDeltaColorLogo from './assets/airlines/dl-trim.png';
+import airlineEmiratesColorLogo from './assets/airlines/ek.png';
+import airlineEnterAirLogo from './assets/airlines/ent-new.png';
+import airlineLufthansaColorLogo from './assets/airlines/lh.png';
+import airlineLotColorLogo from './assets/airlines/lo-trim.png';
+import airlineRyanairColorLogo from './assets/airlines/fr-trim.png';
+import airlineSeychellesColorLogo from './assets/airlines/hm-trim.png';
+import airlineSwissColorLogo from './assets/airlines/lx.svg';
+import airlineTurkishColorLogo from './assets/airlines/tk-trim.png';
+import airlineAnaLogo from './assets/airlines/nh.png';
 import airlineKoreanLogo from './assets/korean-air.svg';
 import airlineVivaLogo from './assets/airline-viva.svg';
 import countryFlagAssets from './country-flag-assets.js';
@@ -47,18 +52,24 @@ const chartColors = ['#16716b', '#4a7fa0', '#e5b34f', '#de7157', '#76a99b', '#d4
 const flagAssets = countryFlagAssets;
 const historyFlagAssets = countryFlagAssets;
 const downloadedHistoryAirlineLogos = Object.fromEntries(
-  Object.entries(import.meta.glob('./assets/airlines/*.{svg,png,jpg,jpeg}', { eager: true, import: 'default', query: '?url' }))
+  Object.entries(import.meta.glob('./assets/airlines/*.{svg,png,jpg,jpeg,webp}', { eager: true, import: 'default', query: '?url' }))
     .map(([path, url]) => [path.split('/').pop().replace(/\.[^.]+$/, '').toUpperCase(), url]),
 );
-const airlineLogoAssets = { ana: airlineAnaLogo, lot: airlineLotLogo, 'korean-air': airlineKoreanLogo };
+function colorizedAirlineIcon(icon) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#${icon.hex}" d="${icon.path}"/></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+const airlineLogoAssets = { ana: airlineAnaLogo, lot: airlineLotColorLogo, 'korean-air': airlineKoreanLogo };
 const historyAirlineLogos = {
   ...downloadedHistoryAirlineLogos,
-  AA: airlineAmericanLogo, AF: airlineAirFranceLogo, AM: airlineAeromexicoLogo, AV: airlineAviancaLogo,
-  BA: airlineBritishLogo, CM: airlineCopaLogo, DL: airlineDeltaLogo, EK: airlineEmiratesLogo,
-  FR: airlineRyanairLogo, IB: airlineIberiaLogo, KE: airlineKoreanLogo, KL: airlineKlmLogo,
-  LH: airlineLufthansaLogo, LO: airlineLotLogo, NH: airlineAnaLogo, QR: airlineQatarLogo,
-  TK: airlineTurkishLogo, UA: airlineUnitedLogo, W6: airlineWizzLogo, WN: airlineSouthwestLogo,
-  VH: airlineVivaLogo,
+  AA: airlineAmericanColorLogo, AF: colorizedAirlineIcon(siAirfrance), AM: colorizedAirlineIcon(siAeromexico),
+  AV: airlineAviancaColorLogo, BA: colorizedAirlineIcon(siBritishairways), CM: airlineCopaColorLogo,
+  DL: airlineDeltaColorLogo, EK: airlineEmiratesColorLogo, ENT: airlineEnterAirLogo, FR: airlineRyanairColorLogo,
+  IB: colorizedAirlineIcon(siIberia), KE: airlineKoreanLogo, KL: colorizedAirlineIcon(siKlm),
+  LH: airlineLufthansaColorLogo, LO: airlineLotColorLogo, LX: airlineSwissColorLogo, NH: airlineAnaLogo,
+  HM: airlineSeychellesColorLogo, QR: colorizedAirlineIcon(siQatarairways), TK: airlineTurkishColorLogo,
+  UA: colorizedAirlineIcon(siUnitedairlines), W6: colorizedAirlineIcon(siWizzair),
+  WN: colorizedAirlineIcon(siSouthwestairlines), VH: airlineVivaLogo, VV: airlineVivaLogo,
 };
 const historyAirlineNames = {
   '4C': 'LATAM Colombia', '4Y': 'Discover Airlines', '7C': 'Jeju Air', '9R': 'SATENA', A3: 'Aegean Airlines',
@@ -531,7 +542,7 @@ function renderReservations() {
     const price = escapeHTML(flight.priceText || '—');
     const total = flight.amountPln == null ? escapeHTML(flight.totalPriceText || 'Brak ceny w arkuszu') : `Łącznie ${money(flight.amountPln)}`;
     const logo = airlineLogoAssets[flight.airlineLogo];
-    return `<article class="reservation-row"><div class="reservation-date"><strong>${dateLabel(flight.flightDate, { day: 'numeric', month: 'short', year: 'numeric' })}</strong><span>${escapeHTML(flight.departureTime || '')} → ${escapeHTML(flight.arrivalTime || '')}</span></div><div class="reservation-main"><div class="airline-title">${logo ? `<img class="airline-logo" src="${logo}" alt="${escapeHTML(flight.airlineName)}">` : ''}<strong>${escapeHTML(flight.airlineName || flight.provider || 'Linia lotnicza')}</strong></div><span class="reservation-flight-number">${escapeHTML(flight.flightNumber)}</span><div class="reservation-detail reservation-route">${countryFlagMarkup(flight.route)}${escapeHTML(flight.route)}</div></div><div class="reservation-detail"><span>${escapeHTML(flight.provider || '')}${flight.bookingReference ? ` · ${escapeHTML(flight.bookingReference)}` : ''}</span></div><div class="reservation-price"><strong>${price}</strong><span>${total}</span></div><div class="flight-route-map" data-flight-map="${escapeHTML(flight.sourceRef)}" role="application" aria-label="Mapa de ruta: ${escapeHTML(flight.route)}"></div><p class="flight-route-caption">Trasa geodezyjna ma charakter orientacyjny i nie pokazuje rzeczywistej drogi lotu.</p></article>`;
+    return `<article class="reservation-row"><div class="reservation-date"><strong>${dateLabel(flight.flightDate, { day: 'numeric', month: 'short', year: 'numeric' })}</strong><span>${escapeHTML(flight.departureTime || '')} → ${escapeHTML(flight.arrivalTime || '')}</span></div><div class="reservation-main"><div class="airline-title">${logo ? `<img class="airline-logo" src="${logo}" alt="${escapeHTML(flight.airlineName)}">` : ''}<strong>${escapeHTML(flight.airlineName || flight.provider || 'Linia lotnicza')}</strong></div><span class="reservation-flight-number">${escapeHTML(flight.flightNumber)}</span><div class="reservation-detail reservation-route">${countryFlagMarkup(flight.route)}${escapeHTML(flight.route)}</div></div><div class="reservation-detail"><span>${escapeHTML(flight.provider || '')}${flight.bookingReference ? ` · ${escapeHTML(flight.bookingReference)}` : ''}</span></div><div class="reservation-price"><strong>${price}</strong><span>${total}</span></div><div class="flight-route-map" data-flight-map="${escapeHTML(flight.sourceRef)}" role="application" aria-label="Mapa de ruta: ${escapeHTML(flight.route)}"></div></article>`;
   }).join('') : '<p class="reservation-empty">Brak lotów w arkuszu.</p>';
   if (activeMainView === 'reservations' && !reservationsPage.hidden) renderFlightRouteMaps(flights);
 }
@@ -563,7 +574,13 @@ function historyFlightTime(value) {
 
 function historyFlightDate(value) {
   const date = String(value || '').slice(0, 10);
-  return date ? dateLabel(date, { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  if (!date) return '—';
+  const parts = new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' })
+    .formatToParts(new Date(`${date}T00:00:00`));
+  const day = parts.find((part) => part.type === 'day')?.value || '';
+  const month = parts.find((part) => part.type === 'month')?.value || '';
+  const year = parts.find((part) => part.type === 'year')?.value || '';
+  return `${day} ${month.charAt(0).toLocaleUpperCase('pl-PL')}${month.slice(1)} ${year}`;
 }
 
 function historyFlightAirline(flight) {
@@ -788,10 +805,11 @@ function renderPersonalFlights() {
     const isFuture = String(flight.flight_date || '').slice(0, 10) > today;
     const duration = Number(flight.duration_minutes) || 0;
     const durationText = duration ? `${Math.floor(duration / 60)}h ${String(duration % 60).padStart(2, '0')}m` : '—';
+    const airlineLogoClass = `history-airline-logo history-airline-logo--${String(airline.code || 'default').toLowerCase()}`;
     const airlineMark = airline.logo
-      ? `<span class="history-airline-logo-frame"><img class="history-airline-logo" src="${airline.logo}" alt=""></span>`
-      : `<span class="history-airline-code">${escapeHTML(airline.code || '—')}</span>`;
-    return `<article class="history-flight-entry"><div class="history-flight-row"><span class="history-flight-time"><strong>${historyFlightTime(flight.departure_time)}</strong><small>${historyFlightDate(flight.flight_date)}</small></span><span class="history-flight-route">${historyAirportName(flight.origin_name, flight.origin_iata, 'origin')}<span class="history-route-plane" aria-hidden="true"><span>✈</span></span>${historyAirportName(flight.destination_name, flight.destination_iata, 'destination')}</span><span class="history-flight-number"><strong>${escapeHTML(flight.flight_number || '—')}</strong><small class="history-flight-meta"><span class="history-flight-airline">${airlineMark}<span>${escapeHTML(airline.name)}</span></span><span>${durationText}</span></small><span class="history-flight-status${isFuture ? ' is-future' : ''}">${isFuture ? 'ZAPLANOWANY' : 'ODBYTY'}</span></span></div><div class="history-flight-map" data-history-map="${escapeHTML(id)}" aria-label="Mapa trasy ${escapeHTML(flight.origin_iata || '')} do ${escapeHTML(flight.destination_iata || '')}"></div></article>`;
+      ? `<span class="history-airline-logo-slot"><img class="${airlineLogoClass}" src="${airline.logo}" alt=""></span>`
+      : `<span class="history-airline-logo-slot"><span class="history-airline-code">${escapeHTML(airline.code || '—')}</span></span>`;
+    return `<article class="reservation-row history-flight-entry"><div class="reservation-date"><strong>${historyFlightDate(flight.flight_date)}</strong><span>${historyFlightTime(flight.departure_time)} → ${historyFlightTime(flight.arrival_time)}</span></div><div class="reservation-main"><div class="airline-title history-flight-title"><strong class="history-flight-code">${escapeHTML(flight.flight_number || '—')}</strong>${airlineMark}<strong class="history-airline-name">${escapeHTML(airline.name)}</strong></div><div class="history-flight-route reservation-route">${historyAirportName(flight.origin_name, flight.origin_iata, 'origin')}<span class="history-route-plane"><span aria-hidden="true">✈</span><small class="history-flight-duration">${durationText}</small></span>${historyAirportName(flight.destination_name, flight.destination_iata, 'destination')}</div></div><div class="history-flight-summary"><span class="history-flight-status${isFuture ? ' is-future' : ''}">${isFuture ? 'ZAPLANOWANY' : 'ODBYTY'}</span></div><div class="history-flight-map flight-route-map" data-history-map="${escapeHTML(id)}" aria-label="Mapa trasy ${escapeHTML(flight.origin_iata || '')} do ${escapeHTML(flight.destination_iata || '')}"></div></article>`;
   }).join('') : '<div class="history-empty">Brak lotów dla wybranych filtrów.</div>';
   renderPersonalFlightMaps();
 }
