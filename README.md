@@ -17,7 +17,9 @@ ES-CO: Cada campo de `package.json` se explica abajo, porque JSON no admite come
 - `scripts.preview`: PL — podgląda lokalnie kompilację produkcyjną; ES-CO — previsualiza localmente la compilación.
 - `dependencies.@supabase/supabase-js`: PL — klient przeglądarkowy Supabase Auth i bazy; ES-CO — cliente de navegador para Auth y la base de Supabase.
 - `dependencies.chart.js`: PL — rysuje wykresy dziennych wydatków i kategorii; ES-CO — dibuja gráficos diarios y por categoría.
-- `dependencies.read-excel-file`: PL — odczytuje skoroszyt lokalnie na potrzeby importu; ES-CO — lee el Excel localmente para importarlo.
+- `src/assets/flags/*.svg`: PL — lokalne flagi SVG pobrane z FlagCDN, nazwane według kodów ISO; ES-CO — banderas SVG locales descargadas de FlagCDN y nombradas por código ISO.
+- `src/assets/airlines/*.svg`: PL — lokalne logotypy linii pobrane z airlinelogos.aero; logo Viva Air Colombia pochodzi z Wikimedia Commons; ES-CO — logotipos locales descargados de airlinelogos.aero; el logo de Viva Air Colombia viene de Wikimedia Commons.
+- `dependencies.read-excel-file`: PL — parser techniczny zachowany dla historycznego formatu danych; interfejs nie udostępnia importu; ES-CO — parser técnico conservado para el formato histórico; la interfaz no ofrece importación.
 - `devDependencies.vite`: PL — narzędzie do serwera i kompilacji; ES-CO — herramienta de servidor y compilación.
 
 PL: `.env.local` zawiera URL projektu i klucz publishable. Git ignoruje ten plik; nigdy nie wpisuj tutaj klucza `secret` ani `service_role`.
@@ -28,17 +30,20 @@ ES-CO: `.env.example` muestra los nombres de variables requeridos, sin valores r
 
 ## Supabase / Baza danych
 
-PL: W Supabase otwórz **SQL Editor**, wklej zawartość `supabase/schema.sql` i uruchom ją raz. Skrypt tworzy tabelę, jawne uprawnienia dla `authenticated` i polityki RLS właściciela.
-ES-CO: En Supabase abre **SQL Editor**, pega el contenido de `supabase/schema.sql` y ejecútalo una vez. El script crea la tabla, permisos explícitos para `authenticated` y políticas RLS por propietario.
+PL: Po migracji historii podróży zastosuj `20261111_personal_daily_locations.sql` i `20261111_personal_daily_locations_multi_country.sql`; tabela lokalizacji ma RLS i jest widoczna wyłącznie dla właściciela.
+ES-CO: Después de la migración del historial de viajes, aplica `20261111_personal_daily_locations.sql` y `20261111_personal_daily_locations_multi_country.sql`; la tabla de ubicaciones usa RLS y solo es visible para su propietario.
 
-PL: Przy istniejącej bazie uruchom migracje w kolejności: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql`, a następnie `20261109_trip_reservations.sql`. Ostatnia tworzy prywatne rezerwacje hoteli i lotów powiązane z podróżą.
-ES-CO: En una base existente, ejecuta las migraciones en orden: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql` y luego `20261109_trip_reservations.sql`. La última crea reservas privadas de hoteles y vuelos vinculadas al viaje.
+PL: W Supabase otwórz **SQL Editor**, wklej zawartość `supabase/schema.sql` i uruchom ją raz, a następnie zastosuj `20261110_shared_account_pair.sql` i `20261110_personal_travel_history.sql`. Każda para kont musi mieć jawny wiersz w `account_links`; osobista historia lotów i pobytów pozostaje dostępna wyłącznie właścicielowi.
+ES-CO: En Supabase abre **SQL Editor**, ejecuta `supabase/schema.sql` una vez y luego aplica `20261110_shared_account_pair.sql` y `20261110_personal_travel_history.sql`. Cada pareja necesita una fila explícita en `account_links`; el historial personal de vuelos y estancias solo lo ve su propietario.
+
+PL: Przy istniejącej bazie uruchom migracje w kolejności: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql`, `20261109_trip_reservations.sql`, `20261110_shared_account_pair.sql`, `20261110_personal_travel_history.sql`. Pierwsza z listopada 2026 tworzy prywatną relację współdzielenia, a druga osobiste tabele historii lotów i pobytów.
+ES-CO: En una base existente, ejecuta las migraciones en orden: `20261109_excel_import.sql`, `20261109_multi_trip_model.sql`, `20261109_trip_reservations.sql`, `20261110_shared_account_pair.sql` y `20261110_personal_travel_history.sql`. Las dos últimas crean el vínculo privado entre cuentas y las tablas personales de vuelos y estancias.
 
 PL: W **Authentication → Providers → Email** upewnij się, że logowanie email/hasło jest włączone. Każde konto musi mieć ustawione hasło i potwierdzony adres email.
 ES-CO: En **Authentication → Providers → Email**, confirma que esté activo el acceso con correo y contraseña. Cada cuenta debe tener contraseña y correo confirmado.
 
-PL: Logowanie hasłem nie używa adresu **Redirect URL**. Po zalogowaniu Supabase Auth przełącza aplikację na konto i pobiera jego prywatne wydatki.
-ES-CO: El acceso con contraseña no usa una **Redirect URL**. Al autenticar, Supabase Auth abre la sesión y la app consulta los gastos privados de esa cuenta.
+PL: Logowanie hasłem nie używa adresu **Redirect URL**. Dane są widoczne wyłącznie po zalogowaniu; po utworzeniu relacji w `account_links` dwie wskazane konta współdzielą podróże i wydatki przez RLS. Pozostałe konta nadal nie mają dostępu.
+ES-CO: El acceso con contraseña no usa una **Redirect URL**. Los datos requieren iniciar sesión; al crear la relación en `account_links`, solo esas dos cuentas comparten viajes y gastos mediante RLS. Las demás cuentas siguen sin acceso.
 
 PL: Status synchronizacji pokazuje, ile wydatków zwróciła baza dla zalogowanego użytkownika. Wartość `0` oznacza pusty dziennik tego konta, a nie błąd pobierania. Wykresy korzystają z tych samych wierszy ograniczonych przez RLS.
 ES-CO: El estado de sincronización indica cuántos gastos devolvió la base para la cuenta activa. `0` significa que esa cuenta aún no tiene gastos visibles, no que la consulta falló. Los gráficos usan las mismas filas filtradas por RLS.
@@ -57,8 +62,8 @@ npm run dev
 PL: Otwórz `http://127.0.0.1:5173` i wpisz email oraz hasło konta Supabase. Dane są widoczne dopiero po zalogowaniu.
 ES-CO: Abre `http://127.0.0.1:5173` e ingresa el correo y la contraseña de Supabase. Los gastos solo se muestran después de iniciar sesión.
 
-PL: Po zalogowaniu wybierz **Importuj Excel** i wskaż skoroszyt. Import obejmuje tylko wiersze z dodatnią kwotą, zachowuje status i pomija źródła już zaimportowane dla tego konta.
-ES-CO: Después de iniciar sesión, pulsa **Importuj Excel** y selecciona el libro. Solo se importan filas con importe positivo; conserva el estado y omite filas ya importadas en esa cuenta.
+PL: Import plików Excel nie jest dostępny w interfejsie. Wcześniej zapisane podróże, wydatki i rezerwacje pozostają w Supabase; tworzenie nowych podróży z poziomu aplikacji nie jest obecnie dostępne.
+ES-CO: La importación de Excel no está disponible en la interfaz. Los viajes, gastos y reservas guardados permanecen en Supabase; crear viajes nuevos desde la app aún no está disponible.
 
 PL: Kurs walutowy jest zapisywany razem z wydatkiem. Tabela zachowuje kwotę lokalną, kod waluty, kurs i wynik w PLN.
 ES-CO: La tasa queda fijada al guardar el gasto. La tabla conserva el importe local, la moneda, la tasa y el equivalente en PLN.

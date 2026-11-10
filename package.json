@@ -13,7 +13,6 @@
     "@supabase/supabase-js": "^2.49.0",
     "@turf/great-circle": "^7.4.0",
     "chart.js": "^4.6.1",
-    "flag-icons": "^7.6.0",
     "leaflet": "^1.9.4",
     "read-excel-file": "^9.3.14",
     "simple-icons": "^16.37.0"
