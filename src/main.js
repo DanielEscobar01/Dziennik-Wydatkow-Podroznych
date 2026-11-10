@@ -47,8 +47,8 @@ const chartColors = ['#16716b', '#4a7fa0', '#e5b34f', '#de7157', '#76a99b', '#d4
 const flagAssets = countryFlagAssets;
 const historyFlagAssets = countryFlagAssets;
 const downloadedHistoryAirlineLogos = Object.fromEntries(
-  Object.entries(import.meta.glob('./assets/airlines/*.svg', { eager: true, import: 'default', query: '?url' }))
-    .map(([path, url]) => [path.split('/').pop().replace(/\.svg$/, '').toUpperCase(), url]),
+  Object.entries(import.meta.glob('./assets/airlines/*.{svg,png,jpg,jpeg}', { eager: true, import: 'default', query: '?url' }))
+    .map(([path, url]) => [path.split('/').pop().replace(/\.[^.]+$/, '').toUpperCase(), url]),
 );
 const airlineLogoAssets = { ana: airlineAnaLogo, lot: airlineLotLogo, 'korean-air': airlineKoreanLogo };
 const historyAirlineLogos = {
@@ -789,7 +789,7 @@ function renderPersonalFlights() {
     const duration = Number(flight.duration_minutes) || 0;
     const durationText = duration ? `${Math.floor(duration / 60)}h ${String(duration % 60).padStart(2, '0')}m` : '—';
     const airlineMark = airline.logo
-      ? `<img class="history-airline-logo" src="${airline.logo}" alt="">`
+      ? `<span class="history-airline-logo-frame"><img class="history-airline-logo" src="${airline.logo}" alt=""></span>`
       : `<span class="history-airline-code">${escapeHTML(airline.code || '—')}</span>`;
     return `<article class="history-flight-entry"><div class="history-flight-row"><span class="history-flight-time"><strong>${historyFlightTime(flight.departure_time)}</strong><small>${historyFlightDate(flight.flight_date)}</small></span><span class="history-flight-route">${historyAirportName(flight.origin_name, flight.origin_iata, 'origin')}<span class="history-route-plane" aria-hidden="true"><span>✈</span></span>${historyAirportName(flight.destination_name, flight.destination_iata, 'destination')}</span><span class="history-flight-number"><strong>${escapeHTML(flight.flight_number || '—')}</strong><small class="history-flight-meta"><span class="history-flight-airline">${airlineMark}<span>${escapeHTML(airline.name)}</span></span><span>${durationText}</span></small><span class="history-flight-status${isFuture ? ' is-future' : ''}">${isFuture ? 'ZAPLANOWANY' : 'ODBYTY'}</span></span></div><div class="history-flight-map" data-history-map="${escapeHTML(id)}" aria-label="Mapa trasy ${escapeHTML(flight.origin_iata || '')} do ${escapeHTML(flight.destination_iata || '')}"></div></article>`;
   }).join('') : '<div class="history-empty">Brak lotów dla wybranych filtrów.</div>';

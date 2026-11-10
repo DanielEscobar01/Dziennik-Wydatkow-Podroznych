@@ -187,7 +187,8 @@
     .history-flight-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
     .history-flight-airline { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
     .history-flight-airline > span:last-child { overflow-wrap: anywhere; }
-    .history-airline-logo { display: block; width: auto; max-width: 48px; height: 18px; object-fit: contain; }
+    .history-airline-logo-frame { display: inline-grid; flex: 0 0 76px; place-items: center; width: 76px; height: 28px; padding: 3px 5px; box-sizing: border-box; border: 1px solid #d8d8d8; border-radius: 3px; background: #fff; }
+    .history-airline-logo { display: block; width: auto; max-width: 100%; height: auto; max-height: 100%; object-fit: contain; }
     .history-airline-code { display: inline-grid; place-items: center; min-width: 24px; height: 18px; padding: 0 3px; border: 1px solid #49504c; border-radius: 2px; color: #f0e743; font-size: 9px; font-weight: 700; }
     .history-flight-route { display: grid; grid-template-columns: minmax(0,1fr) 60px minmax(0,1fr); align-items: center; gap: 10px; min-width: 0; }
     .history-airport { display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: start; gap: 7px; width: min(100%,240px); min-width: 0; }

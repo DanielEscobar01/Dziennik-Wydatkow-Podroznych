@@ -18,7 +18,7 @@ ES-CO: Cada campo de `package.json` se explica abajo, porque JSON no admite come
 - `dependencies.@supabase/supabase-js`: PL — klient przeglądarkowy Supabase Auth i bazy; ES-CO — cliente de navegador para Auth y la base de Supabase.
 - `dependencies.chart.js`: PL — rysuje wykresy dziennych wydatków i kategorii; ES-CO — dibuja gráficos diarios y por categoría.
 - `src/assets/flags/*.svg`: PL — lokalne flagi SVG pobrane z FlagCDN, nazwane według kodów ISO; ES-CO — banderas SVG locales descargadas de FlagCDN y nombradas por código ISO.
-- `src/assets/airlines/*.svg`: PL — lokalne logotypy linii pobrane z airlinelogos.aero; logo Viva Air Colombia pochodzi z Wikimedia Commons; ES-CO — logotipos locales descargados de airlinelogos.aero; el logo de Viva Air Colombia viene de Wikimedia Commons.
+- `src/assets/airlines/*`: PL — lokalne logotypy linii pobrane z airlinelogos.aero i adresów podanych przez użytkownika; logo Viva Air Colombia pochodzi z Wikimedia Commons; ES-CO — logotipos locales de airlinelogos.aero y de las direcciones compartidas por el usuario; el logo de Viva Air Colombia viene de Wikimedia Commons.
 - `dependencies.read-excel-file`: PL — parser techniczny zachowany dla historycznego formatu danych; interfejs nie udostępnia importu; ES-CO — parser técnico conservado para el formato histórico; la interfaz no ofrece importación.
 - `devDependencies.vite`: PL — narzędzie do serwera i kompilacji; ES-CO — herramienta de servidor y compilación.
 
