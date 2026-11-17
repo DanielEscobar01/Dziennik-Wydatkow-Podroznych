@@ -3,6 +3,26 @@
 PL: Aplikacja do prywatnego planowania wielu podróży i śledzenia wydatków. Interfejs jest po polsku.
 ES-CO: Aplicación para planear varios viajes y hacer seguimiento privado de gastos. La interfaz está en polaco.
 
+## Układ interfejsu / Distribución visual
+
+PL: Wszystkie widoki korzystają ze wspólnych zmiennych CSS w `index.html`: `--layout-gap`, `--section-gap`, `--panel-padding` i `--panel-radius`. Panele w jednym rzędzie mają równe kolumny; na telefonach układają się pionowo lub w symetryczne pary. Wielkości tekstu rozróżniają tytuły, wartości i opisy.
+ES-CO: Todas las vistas comparten las variables CSS `--layout-gap`, `--section-gap`, `--panel-padding` y `--panel-radius` de `index.html`. Los paneles de una fila usan columnas iguales; en móvil se apilan o forman pares simétricos. La escala tipográfica diferencia títulos, cifras y textos secundarios.
+
+PL: Podsumowanie dnia pokazuje wydatki bez wyliczania pozostałego salda dziennego.
+ES-CO: El resumen del día muestra los gastos sin calcular cuánto queda del presupuesto diario.
+
+PL: Jednodniowa wizyta w innym kraju rozdziela pobyt na odcinki przed wizytą i po powrocie. Dzień powrotu należy do późniejszego odcinka, bez podwójnego liczenia dni danego kraju. Historia pokazuje najnowsze odcinki na górze.
+ES-CO: Una visita de un día a otro país separa la estancia anterior del regreso. El día del regreso pertenece al tramo posterior, sin duplicar días del mismo país. El historial muestra primero los tramos más recientes.
+
+PL: Lista pobytów pokazuje tylko kraj, daty i liczbę dni; zapisane komentarze nie są wyświetlane.
+ES-CO: La lista de estancias muestra solo el país, las fechas y los días; los comentarios guardados no se muestran.
+
+PL: Podsumowanie nie pokazuje kart budżetu dziennego ani dostępnych środków. Średnia dzienna i najdroższy dzień pomijają kategorie `Loty` i `Transport`; średnia obejmuje tylko dni planu z wydatkami pozostałych kategorii. Łączna kwota i wykresy nadal uwzględniają wszystkie kategorie.
+ES-CO: El resumen no muestra tarjetas de presupuesto diario ni fondos disponibles. El promedio y el día más caro excluyen `Loty` y `Transport`; el promedio divide solo entre los días del itinerario con gastos de las demás categorías. El total general y los gráficos siguen incluyendo todas las categorías.
+
+PL: Karta `Transport łącznie` zastępuje liczbę dni z wydatkami i sumuje kwoty PLN z kategorii `Loty` i `Transport`, niezależnie od statusu płatności.
+ES-CO: La tarjeta `Transport łącznie` sustituye el contador de días con gastos y suma los importes PLN de `Loty` y `Transport`, sin filtrar por estado de pago.
+
 ## Konfiguracja projektu / Configuración del proyecto
 
 PL: Każde pole w `package.json` opisano poniżej, ponieważ poprawny plik JSON nie może zawierać komentarzy. `package-lock.json` generuje npm i nie należy edytować go ręcznie.

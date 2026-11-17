@@ -2,6 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 // PL: Importuj Chart.js z kontrolerami potrzebnymi do wykresów dziennych i kołowych. | ES-CO: Importa Chart.js con controladores para gráficos diarios y circulares.
 import Chart from 'chart.js/auto';
+import { buildDailyLocationRanges } from './daily-location-ranges.js';
+import { isTransportExpense, summarizeStayExpenses } from './stay-expenses.js';
 import '@fontsource/quicksand/latin-400.css';
 import '@fontsource/quicksand/latin-500.css';
 import '@fontsource/quicksand/latin-600.css';
@@ -83,7 +85,7 @@ const categoryArcLabels = {
     if (total <= 0) return;
     const { ctx } = chart;
     ctx.save();
-    ctx.font = '700 10px Quicksand, sans-serif';
+    ctx.font = '700 12px Quicksand, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     chart.getDatasetMeta(0).data.forEach((arc, index) => {
@@ -581,9 +583,6 @@ function renderTripContext() {
   document.querySelector('#tripSidebarDates').textContent = currentTrip ? `${dateLabel(currentTrip.startDate, { day: 'numeric', month: 'short' })} — ${dateLabel(currentTrip.endDate, { day: 'numeric', month: 'short' })}` : 'Zaimportuj podróż';
   document.querySelector('#tripSidebarFlags').innerHTML = tripFlagsMarkup();
   document.querySelector('#daysCount').textContent = `${datesInTrip().length} dni`;
-  const dailyBudgetValue = document.querySelector('#dailyBudgetValue');
-  dailyBudgetValue.textContent = expensesLoading ? '…' : money(currentTrip?.dailyBudget || 0);
-  dailyBudgetValue.classList.toggle('loading-shimmer', expensesLoading);
   viewTabs.hidden = !currentUser;
   reservationsTab.hidden = !(currentTrip?.reservations?.length);
   personalHistoryTab.hidden = !currentUser;
@@ -757,35 +756,7 @@ function renderPersonalHistory() {
 function renderDailyLocations() {
   if (!dailyLocationsList) return;
   const rows = personalTravelHistory.dailyLocations || [];
-  const countryDates = new Map();
-  rows.forEach((row) => {
-    const date = String(row.location_date || '').slice(0, 10);
-    const country = String(row.country || '').trim();
-    if (!date || !country) return;
-    const key = `${country}\u0000${date}`;
-    const entry = countryDates.get(key) || { country, date, contexts: new Set() };
-    const context = String(row.context || '').trim();
-    const contextDetails = context.startsWith(`${country}:`) ? context.slice(country.length + 1).trim() : context;
-    contextDetails.split(',').map((detail) => detail.trim()).filter(Boolean).forEach((detail) => entry.contexts.add(detail));
-    countryDates.set(key, entry);
-  });
-  const ranges = [];
-  const lastRangeByCountry = new Map();
-  [...countryDates.values()].sort((a, b) => a.country.localeCompare(b.country) || a.date.localeCompare(b.date)).forEach((entry) => {
-    const previous = lastRangeByCountry.get(entry.country);
-    const nextDate = previous ? new Date(`${previous.endDate}T00:00:00Z`) : null;
-    if (nextDate) nextDate.setUTCDate(nextDate.getUTCDate() + 1);
-    if (previous && nextDate.toISOString().slice(0, 10) === entry.date) {
-      previous.endDate = entry.date;
-      previous.days += 1;
-      entry.contexts.forEach((context) => previous.contexts.add(context));
-      return;
-    }
-    const range = { country: entry.country, startDate: entry.date, endDate: entry.date, days: 1, contexts: new Set(entry.contexts) };
-    ranges.push(range);
-    lastRangeByCountry.set(entry.country, range);
-  });
-  ranges.sort((a, b) => b.startDate.localeCompare(a.startDate) || a.country.localeCompare(b.country));
+  const ranges = buildDailyLocationRanges(rows);
   const dataYears = rows.map((row) => String(row.location_date || '').slice(0, 4)).filter(Boolean);
   const stayDates = personalTravelHistory.stays.map((stay) => String(stay.start_date || '').slice(0, 10)).filter(Boolean);
   const firstYear = Number((stayDates.sort()[0] || dataYears.sort()[0] || new Date().toISOString().slice(0, 10)).slice(0, 4));
@@ -828,8 +799,7 @@ function renderDailyLocations() {
     const period = startDate === endDate ? dateLabel(startDate, { day: 'numeric', month: 'short', year: 'numeric' }) : `${dateLabel(startDate, { day: 'numeric', month: 'short', year: 'numeric' })} – ${dateLabel(endDate, { day: 'numeric', month: 'short', year: 'numeric' })}`;
     const days = Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86400000) + 1;
     const dayWord = days === 1 ? 'dzień' : 'dni';
-    const contexts = [...range.contexts].filter(Boolean).join(' · ');
-    return `<article class="history-daily-row"><div class="history-daily-date"><strong>${period}</strong><small>${historyCountFormatter.format(days)} ${dayWord}</small></div><div class="history-daily-country"><strong>${historyCountryFlag(range.country)}${escapeHTML(range.country)}</strong></div><div class="history-daily-context"><span>${escapeHTML(contexts || 'Brak dodatkowego kontekstu')}</span></div></article>`;
+    return `<article class="history-daily-row"><div class="history-daily-date"><strong>${period}</strong><small>${historyCountFormatter.format(days)} ${dayWord}</small></div><div class="history-daily-country"><strong>${historyCountryFlag(range.country)}${escapeHTML(range.country)}</strong></div></article>`;
   }).join('') : '<p class="reservation-empty">Brak pobytów dla wybranego roku.</p>';
   showMoreDailyLocations.hidden = filtered.length <= visible.length;
   showMoreDailyLocations.textContent = `Pokaż wcześniejsze pobyty (${historyCountFormatter.format(filtered.length - visible.length)})`;
@@ -884,7 +854,7 @@ function renderPersonalFlights() {
     const searchText = `${flight.flight_number || ''} ${flight.origin_name || ''} ${flight.origin_iata || ''} ${flight.destination_name || ''} ${flight.destination_iata || ''} ${flight.airline || ''}`.toLowerCase();
     return (!selectedYear || date.startsWith(selectedYear)) && (!search || searchText.includes(search));
   });
-  document.querySelector('#personalFlightCount').textContent = `Liczba lotów: ${historyCountFormatter.format(shown.length)}`;
+  document.querySelector('#personalFlightCount').textContent = historyCountFormatter.format(shown.length);
   personalFlightList.innerHTML = shown.length ? shown.map((flight) => {
     const id = String(flight.source_row);
     const airline = historyFlightAirline(flight);
@@ -1164,26 +1134,17 @@ function renderSummary() {
   setMetric('#actualSpentTotal', money(actualSpent));
   // PL: Pokaż jeszcze nieopłacone koszty. | ES-CO: Muestra los gastos todavía pendientes de pago.
   setMetric('#pendingTotal', money(pending));
-  // PL: Odejmij faktyczne wydatki w podróży od salda po planowaniu. | ES-CO: Resta el gasto real del saldo ya calculado tras la planeación.
-  setMetric('#remainingTotal', money((currentTrip?.availableBeforeTrip || 0) - actualSpent));
   // PL: Pokaż liczbę zapisanych pozycji z poprawną odmianą polską. | ES-CO: Muestra el número de movimientos con el texto correspondiente.
   setMetric('#expenseCount', `${expenses.length} ${expenses.length === 1 ? 'wydatek' : 'wydatków'}`);
-  // PL: Oblicz wydatki dla każdego dnia z planu. | ES-CO: Calcula el gasto de cada día del itinerario.
-  const dailyTotals = datesInTrip().map((date) => ({ date, total: dayTotal(date) }));
-  // PL: Wybierz dni z co najmniej jednym wydatkiem. | ES-CO: Selecciona los días que tienen gastos.
-  const activeDays = dailyTotals.filter((day) => day.total > 0);
-  // PL: Oblicz średnią tylko dla dni z wydatkami, aby wynik był miarodajny. | ES-CO: Calcula el promedio solo en días con gastos.
-  setMetric('#averagePerDay', money(activeDays.length ? spent / activeDays.length : 0));
-  // PL: Pokaż liczbę dni z poprawną polską odmianą. | ES-CO: Muestra los días activos con el texto correcto.
-  setMetric('#activeDaysTotal', `${activeDays.length} ${activeDays.length === 1 ? 'dzień' : 'dni'}`);
-  // PL: Podaj liczbę wszystkich dni, które obejmuje plan podróży. | ES-CO: Indica la cantidad total de días del itinerario.
-  document.querySelector('#activeDayCount').textContent = `z ${datesInTrip().length} dni podróży`;
-  // PL: Znajdź dzień z największą sumą PLN. | ES-CO: Encuentra el día con mayor total en PLN.
-  const highestDay = activeDays.reduce((highest, day) => day.total > highest.total ? day : highest, { total: 0 });
+  const staySummary = summarizeStayExpenses(expenses, datesInTrip());
+  setMetric('#averagePerDay', money(staySummary.averagePerDay));
+  const transportTotal = expenses.filter(isTransportExpense).reduce((sum, item) => sum + Number(item.plnAmount), 0);
+  setMetric('#transportTotal', money(transportTotal));
+  const highestDay = staySummary.highestDay;
   // PL: Pokaż kwotę albo kreskę, gdy podróż nie ma jeszcze wydatków. | ES-CO: Muestra el valor o una raya si aún no hay gastos.
-  setMetric('#highestDayTotal', highestDay.total ? money(highestDay.total) : '—');
+  setMetric('#highestDayTotal', highestDay ? money(highestDay.total) : '—');
   // PL: Podaj datę i miejsce najdroższego dnia. | ES-CO: Indica fecha y destino del día más costoso.
-  setMetric('#highestDayLabel', highestDay.total ? `${dateLabel(highestDay.date, { day: 'numeric', month: 'short' })} · ${destinationForDate(highestDay.date)}` : 'Brak wydatków');
+  setMetric('#highestDayLabel', highestDay ? `${dateLabel(highestDay.date, { day: 'numeric', month: 'short' })} · ${destinationForDate(highestDay.date)} · bez transportu` : 'Brak wydatków bez transportu');
   // PL: Oblicz liczbę dni do początku wybranego wyjazdu. | ES-CO: Calcula los días hasta el inicio del viaje activo.
   const start = currentTrip ? new Date(`${currentTrip.startDate}T12:00:00`) : null;
   // PL: Ustaw bieżącą datę na południe, aby uniknąć błędu granicy dnia. | ES-CO: Fija la fecha actual al mediodía para evitar errores de límite.
@@ -1298,17 +1259,17 @@ function renderCharts() {
       animation: { duration: 0, easing: 'easeOutQuart', delay: (context) => chartMotionPreference.matches || context.type !== 'data' || context.mode !== 'default' ? 0 : Math.min(context.dataIndex * 35, 420) },
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 6, padding: 17, font: { family: 'Quicksand', size: 10 } } },
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 6, padding: 16, font: { family: 'Quicksand', size: 12 } } },
         tooltip: {
           backgroundColor: '#142b49', borderColor: '#345579', borderWidth: 1, cornerRadius: 12, padding: 12,
-          titleFont: { family: 'Quicksand', size: 12 }, bodyFont: { family: 'Quicksand', size: 11 },
+          titleFont: { family: 'Quicksand', size: 14 }, bodyFont: { family: 'Quicksand', size: 13 },
           filter: (context) => context.parsed.y !== 0,
           callbacks: { label: (context) => `${context.dataset.label}: ${money(context.parsed.y)}` },
         },
       },
       scales: {
-        x: { stacked: true, border: { display: false }, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { family: 'Quicksand', size: 10 } } },
-        y: { stacked: true, beginAtZero: true, border: { display: false, dash: [3, 5] }, ticks: { maxTicksLimit: 5, padding: 10, callback: (value) => `${new Intl.NumberFormat('pl-PL', { notation: 'compact' }).format(value)} zł`, font: { family: 'Quicksand', size: 10 } }, grid: { color: 'rgba(142,178,225,.09)', drawTicks: false } },
+        x: { stacked: true, border: { display: false }, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { family: 'Quicksand', size: 12 } } },
+        y: { stacked: true, beginAtZero: true, border: { display: false, dash: [3, 5] }, ticks: { maxTicksLimit: 5, padding: 10, callback: (value) => `${new Intl.NumberFormat('pl-PL', { notation: 'compact' }).format(value)} zł`, font: { family: 'Quicksand', size: 12 } }, grid: { color: 'rgba(142,178,225,.09)', drawTicks: false } },
       },
     },
   };
@@ -1413,28 +1374,24 @@ function markClass(category) {
   return '';
 }
 
-// PL: Pokaż wydatki, budżet i pozostałe saldo wybranego dnia. | ES-CO: Muestra gastos, presupuesto y saldo restante del día.
+// PL: Pokaż wydatki i budżet wybranego dnia. | ES-CO: Muestra gastos y presupuesto del día.
 function renderExpenses() {
   const current = dayExpenses(selectedDate).sort((a, b) => b.createdAt - a.createdAt);
   if (expensesLoading) {
     openDayDetailsButton.hidden = !currentTrip;
     document.querySelector('#selectedDayTitle').textContent = currentTrip && selectedDate ? `${dateLabel(selectedDate)} · ${destinationForDate(selectedDate)}` : 'Wczytywanie podróży…';
     document.querySelector('#dayBudgetLabel').textContent = 'Wczytywanie…';
-    document.querySelector('#dailyRemaining').textContent = 'Wczytywanie…';
     document.querySelector('#dayBudgetLabel').classList.add('loading-shimmer');
-    document.querySelector('#dailyRemaining').classList.add('loading-shimmer');
     const loading = '<li class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span>Wczytywanie wydatków…</span></li>';
     expenseList.innerHTML = loading;
     dayExpenseList.innerHTML = loading;
     return;
   }
   document.querySelector('#dayBudgetLabel').classList.remove('loading-shimmer');
-  document.querySelector('#dailyRemaining').classList.remove('loading-shimmer');
   if (!currentTrip || !selectedDate) {
     openDayDetailsButton.hidden = true;
     document.querySelector('#selectedDayTitle').textContent = 'Wybierz podróż';
     document.querySelector('#dayBudgetLabel').textContent = '0,00 PLN';
-    document.querySelector('#dailyRemaining').textContent = '0,00 PLN';
     const empty = '<li class="empty-state"><strong>Brak wybranej podróży</strong><p>Zaimportuj arkusz lub wybierz wyjazd z listy.</p></li>';
     expenseList.innerHTML = empty;
     dayExpenseList.innerHTML = empty;
@@ -1444,7 +1401,6 @@ function renderExpenses() {
   openDayDetailsButton.hidden = false;
   document.querySelector('#selectedDayTitle').textContent = `${dateLabel(selectedDate)} · ${destinationForDate(selectedDate)}`;
   document.querySelector('#dayBudgetLabel').textContent = `${formatter.format(dayTotal(selectedDate))} / ${formatter.format(dailyBudget)} PLN`;
-  document.querySelector('#dailyRemaining').textContent = money(dailyBudget - dayTotal(selectedDate));
   const empty = '<li class="empty-state"><strong>Dzień czeka na pierwszy wydatek</strong><p>Dodaj jedzenie, transport lub inny koszt z tego dnia.</p><button class="primary-button" data-add-expense type="button">＋ Dodaj wydatek</button></li>';
   const markup = current.length ? current.map((item) => {
     const mark = (item.category || 'Inne').slice(0, 1).toUpperCase();
