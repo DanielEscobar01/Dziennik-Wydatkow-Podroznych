@@ -48,7 +48,69 @@ const TABLE_NAME = 'expenses';
 const RESERVATION_CACHE_PREFIX = 'trip-reservations-preview';
 const currencyNames = { JPY: 'Japoński jen', KRW: 'Won południowokoreański', PLN: 'Polski złoty', EUR: 'Euro', USD: 'Dolar amerykański', GBP: 'Funt szterling', CHF: 'Frank szwajcarski', CZK: 'Korona czeska', HUF: 'Forint węgierski', SEK: 'Korona szwedzka', NOK: 'Korona norweska', DKK: 'Korona duńska', CAD: 'Dolar kanadyjski', AUD: 'Dolar australijski', SGD: 'Dolar singapurski', HKD: 'Dolar hongkoński', CNY: 'Juan chiński', INR: 'Rupia indyjska', THB: 'Bat tajski', TRY: 'Lira turecka', BRL: 'Real brazylijski', MXN: 'Peso meksykańskie', ZAR: 'Rand południowoafrykański', NZD: 'Dolar nowozelandzki', RON: 'Lej rumuński', BGN: 'Lew bułgarski', ISK: 'Korona islandzka', IDR: 'Rupia indonezyjska', ILS: 'Nowy szekel izraelski', MYR: 'Ringgit malezyjski', PHP: 'Peso filipińskie' };
 const expenseCategories = ['Hotel', 'Loty', 'Transport', 'Jedzenie', 'Atrakcje', 'Zakupy', 'Inne'];
-const chartColors = ['#16716b', '#4a7fa0', '#e5b34f', '#de7157', '#76a99b', '#d48b52', '#718797'];
+const chartColors = ['#4f91ff', '#50c8ef', '#f4c86b', '#f17ca5', '#55d4b0', '#ff936f', '#9bb0c9'];
+Chart.defaults.color = '#a4b4ca';
+Chart.defaults.borderColor = 'rgba(142, 178, 225, .16)';
+const chartMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const chartRevealObservers = new WeakMap();
+const chartReveal = {
+  id: 'chartReveal',
+  afterInit(chart) {
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      chart.canvas.closest('.chart-panel').classList.add('chart-revealed');
+      chart.reset();
+      chart.update();
+    }, { threshold: .2 });
+    chartRevealObservers.set(chart, observer);
+    observer.observe(chart.canvas);
+  },
+  beforeUpdate(chart) {
+    chart.options.animation.duration = !chartMotionPreference.matches && chart.canvas.closest('.chart-panel').classList.contains('chart-revealed') ? 1100 : 0;
+    chart.options.transitions.active.animation.duration = chartMotionPreference.matches ? 0 : 220;
+  },
+  afterDestroy(chart) {
+    chartRevealObservers.get(chart)?.disconnect();
+    chartRevealObservers.delete(chart);
+  },
+};
+const categoryArcLabels = {
+  id: 'categoryArcLabels',
+  afterDatasetsDraw(chart) {
+    const values = chart.data.datasets[0].data;
+    const total = values.reduce((sum, value) => sum + value, 0);
+    if (total <= 0) return;
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = '700 10px Quicksand, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    chart.getDatasetMeta(0).data.forEach((arc, index) => {
+      const share = Math.round(values[index] / total * 100);
+      if (share < 8 || arc.circumference < .3) return;
+      const angle = (arc.startAngle + arc.endAngle) / 2;
+      const radius = (arc.innerRadius + arc.outerRadius) / 2;
+      const x = arc.x + Math.cos(angle) * radius;
+      const y = arc.y + Math.sin(angle) * radius;
+      ctx.fillStyle = '#071326';
+      ctx.beginPath();
+      ctx.roundRect(x - 16, y - 10, 32, 20, 10);
+      ctx.fill();
+      ctx.fillStyle = '#f3f7ff';
+      ctx.fillText(`${share}%`, x, y);
+    });
+    ctx.restore();
+  },
+};
+function setCategoryChartCenter(index) {
+  const dataset = categoryChart?.data.datasets[0];
+  if (!dataset) return;
+  document.querySelector('.category-chart-center span').textContent = index === undefined ? 'ŁĄCZNIE WYDANO' : categoryChart.data.labels[index];
+  document.querySelector('#categoryChartCenter').textContent = money(index === undefined
+    ? dataset.data.reduce((sum, value) => sum + value, 0)
+    : dataset.data[index]);
+}
 const flagAssets = countryFlagAssets;
 const historyFlagAssets = countryFlagAssets;
 const downloadedHistoryAirlineLogos = Object.fromEntries(
@@ -121,6 +183,7 @@ const flightReservationsList = document.querySelector('#flightReservations');
 const dateInput = document.querySelector('#expenseDate');
 const currencyInput = document.querySelector('#expenseCurrency');
 const customCurrencyInput = document.querySelector('#customCurrency');
+const customCurrencyField = document.querySelector('#customCurrencyField');
 const amountInput = document.querySelector('#expenseAmount');
 const rateInput = document.querySelector('#exchangeRate');
 const statusInput = document.querySelector('#expenseStatus');
@@ -128,6 +191,8 @@ const tripSelector = document.querySelector('#tripSelector');
 const tripSelectorShell = document.querySelector('#tripSelectorShell');
 let currentUser = null;
 let expenses = [];
+let expensesLoading = false;
+let editingExpenseId = null;
 let trips = [];
 let reservationPreviewByTrip = new Map();
 let currentTrip = null;
@@ -148,6 +213,13 @@ let savingExpense = false;
 let savingExpenseIds = new Set();
 let dailyChart = null;
 let categoryChart = null;
+chartMotionPreference.addEventListener('change', () => {
+  [dailyChart, categoryChart].forEach((chart) => {
+    if (!chart) return;
+    chart.stop();
+    chart.update('none');
+  });
+});
 let leafletLibrary = null;
 let leafletLoadPromise = null;
 let leafletMap = null;
@@ -407,12 +479,15 @@ async function loadPersonalTravelHistory(ownerId, force = false) {
 
 // PL: Załaduj podróże i ich dni dla bieżącego użytkownika. | ES-CO: Carga viajes y días del usuario autenticado.
 async function loadTrips() {
-  if (!currentUser) { trips = []; currentTrip = null; expenses = []; personalTravelHistory = { flights: [], stays: [], poland: null, dailyLocations: [] }; personalHistoryOwnerId = null; renderAuthState(); render(); return; }
+  if (!currentUser) { trips = []; currentTrip = null; expenses = []; expensesLoading = false; personalTravelHistory = { flights: [], stays: [], poland: null, dailyLocations: [] }; personalHistoryOwnerId = null; renderAuthState(); render(); return; }
   const ownerId = currentUser.id;
+  expenses = [];
+  expensesLoading = true;
   document.querySelector('#syncStatus').textContent = 'Pobieranie podróży…';
+  render();
   const { data, error } = await supabase.from('trips').select('id,user_id,name,start_date,end_date,daily_budget_pln,available_before_trip_pln,source_ref,trip_days(id,trip_date,destination,country,daily_budget_pln)').order('start_date', { ascending: false });
   if (!currentUser || currentUser.id !== ownerId) return;
-  if (error) { trips = []; currentTrip = null; expenses = []; renderTripSelector(); render(); showToast('Nie udało się pobrać podróży. Sprawdź migrację Supabase.'); return; }
+  if (error) { trips = []; currentTrip = null; expenses = []; expensesLoading = false; renderTripSelector(); render(); showToast('Nie udało się pobrać podróży. Sprawdź migrację Supabase.'); return; }
   trips = (data || []).map((row) => ({ id: row.id, userId: row.user_id, name: row.name, startDate: row.start_date, endDate: row.end_date, dailyBudget: Number(row.daily_budget_pln), availableBeforeTrip: Number(row.available_before_trip_pln), sourceRef: row.source_ref, days: (row.trip_days || []).map((day) => ({ id: day.id, date: day.trip_date, destination: day.destination, country: day.country || '', dailyBudget: day.daily_budget_pln == null ? null : Number(day.daily_budget_pln) })).sort((a, b) => a.date.localeCompare(b.date)) }));
   await loadTripReservations(ownerId);
   await loadPersonalTravelHistory(ownerId, true);
@@ -421,7 +496,7 @@ async function loadTrips() {
   selectedDate = initialSelectedDate();
   renderTripSelector();
   if (currentTrip) await loadExpenses();
-  else { expenses = []; document.querySelector('#syncStatus').textContent = 'Zaimportuj pierwszą podróż'; render(); }
+  else { expenses = []; expensesLoading = false; document.querySelector('#syncStatus').textContent = 'Zaimportuj pierwszą podróż'; render(); }
 }
 
 // PL: Pobierz wydatki z Supabase dla bieżącego właściciela. | ES-CO: Consulta en Supabase los gastos del usuario actual.
@@ -429,13 +504,15 @@ async function loadExpenses() {
   // PL: Usuń poprzednie dane z pamięci przed zmianą użytkownika lub odświeżeniem. | ES-CO: Limpia datos previos antes de cambiar de usuario o recargar.
   expenses = [];
   // PL: Nie wysyłaj zapytania bez sesji. | ES-CO: No consultes la tabla sin sesión.
-  if (!currentUser || !currentTrip) { render(); return; }
+  if (!currentUser || !currentTrip) { expensesLoading = false; render(); return; }
+  expensesLoading = true;
   // PL: Pokaż, że dziennik pobiera rekordy bieżącego użytkownika. | ES-CO: Indica que se están cargando los gastos del usuario.
   const syncStatus = document.querySelector('#syncStatus');
   // PL: Wyczyść znacznik sukcesu z poprzedniego odczytu. | ES-CO: Limpia el indicador de éxito anterior.
   syncStatus.classList.remove('synced');
   // PL: Ogłoś rozpoczęcie odczytu z bazy. | ES-CO: Anuncia que comenzó la consulta a la base.
   syncStatus.textContent = 'Pobieranie…';
+  render();
   // PL: Zapamiętaj właściciela, który zainicjował to zapytanie. | ES-CO: Guarda el usuario que inició esta consulta.
   const ownerId = currentUser.id;
   // PL: Zachowaj identyfikator wyjazdu z chwili rozpoczęcia zapytania. | ES-CO: Conserva el viaje consultado para descartar resultados antiguos.
@@ -446,6 +523,7 @@ async function loadExpenses() {
   if (!currentUser || currentUser.id !== ownerId || !currentTrip || currentTrip.id !== tripId) return;
   // PL: Pokaż stan błędu i pozwól ponowić zapytanie, gdy baza odrzuci odczyt. | ES-CO: Muestra el error y permite reintentar si falla la consulta.
   if (error) {
+    expensesLoading = false;
     // PL: Oznacz ostatnią próbę jako nieudaną bez wyświetlania danych technicznych. | ES-CO: Indica que falló sin mostrar detalles técnicos.
     syncStatus.textContent = 'Błąd synchronizacji';
     // PL: Narysuj aktualne podsumowanie bez udawania, że odczyt się powiódł. | ES-CO: Renderiza el resumen sin aparentar que la consulta funcionó.
@@ -459,6 +537,7 @@ async function loadExpenses() {
   }
   // PL: Przekształć nazwy kolumn SQL na nazwy używane przez widok. | ES-CO: Convierte columnas SQL a los nombres usados por la interfaz.
   expenses = (data || []).map((row) => ({ id: row.id, userId: row.user_id, tripId: row.trip_id, date: row.expense_date, category: row.category, description: row.description, amount: Number(row.amount_local), currency: row.currency_code, rate: Number(row.pln_per_unit), plnAmount: Number(row.amount_pln), payment: row.payment_method || '', rateDate: row.rate_date, status: row.expense_status || 'W Podróży', sourceRef: row.source_ref || null, createdAt: new Date(row.created_at).getTime() }));
+  expensesLoading = false;
   // PL: Pokaż faktyczną liczbę wydatków zwróconych przez RLS. | ES-CO: Muestra cuántos gastos devolvió realmente RLS.
   syncStatus.textContent = `Wczytano ${expenses.length} wydatków`;
   // PL: Oznacz odczyt jako zakończony. | ES-CO: Marca la consulta como sincronizada.
@@ -502,7 +581,9 @@ function renderTripContext() {
   document.querySelector('#tripSidebarDates').textContent = currentTrip ? `${dateLabel(currentTrip.startDate, { day: 'numeric', month: 'short' })} — ${dateLabel(currentTrip.endDate, { day: 'numeric', month: 'short' })}` : 'Zaimportuj podróż';
   document.querySelector('#tripSidebarFlags').innerHTML = tripFlagsMarkup();
   document.querySelector('#daysCount').textContent = `${datesInTrip().length} dni`;
-  document.querySelector('#dailyBudgetValue').textContent = money(currentTrip?.dailyBudget || 0);
+  const dailyBudgetValue = document.querySelector('#dailyBudgetValue');
+  dailyBudgetValue.textContent = expensesLoading ? '…' : money(currentTrip?.dailyBudget || 0);
+  dailyBudgetValue.classList.toggle('loading-shimmer', expensesLoading);
   viewTabs.hidden = !currentUser;
   reservationsTab.hidden = !(currentTrip?.reservations?.length);
   personalHistoryTab.hidden = !currentUser;
@@ -768,6 +849,11 @@ function renderPolandTime() {
   document.querySelector('#polandOutsideForecast').textContent = forecast ? `Do ${dateLabel(analysis.forecast_end_date)}: ${historyCountFormatter.format(forecast.days_outside_total)} dni` : 'Brak prognozy';
   const percent = (value) => `${new Intl.NumberFormat('pl-PL', { style: 'percent', maximumFractionDigits: 1 }).format(Number(value) || 0)}`;
   document.querySelector('#polandPresenceCurrent').textContent = current ? percent(current.presence_ratio) : '—';
+  const presencePercent = Math.max(0, Math.min(100, (Number(current?.presence_ratio) || 0) * 100));
+  document.querySelector('#polandPresenceRing').toggleAttribute('hidden', !current);
+  document.querySelector('#polandPresenceRing').setAttribute('aria-label', current ? `W Polsce: ${percent(current.presence_ratio)} analizowanego okresu` : 'Brak analizy pobytu w Polsce');
+  document.querySelector('#polandPresenceArc').setAttribute('stroke-dasharray', `${presencePercent} 100`);
+  document.querySelector('#polandPresenceArc').setAttribute('visibility', presencePercent > 0 ? 'visible' : 'hidden');
   document.querySelector('#polandPresenceForecast').textContent = forecast ? `Prognoza: ${percent(forecast.presence_ratio)}` : 'Brak prognozy';
   document.querySelector('#polandPrivateCurrent').textContent = current ? historyCountFormatter.format(current.private_days_outside) : '—';
   document.querySelector('#polandPrivateForecast').textContent = forecast ? `Prognoza: ${historyCountFormatter.format(forecast.private_days_outside)} dni` : 'Brak prognozy';
@@ -778,7 +864,7 @@ function renderPolandTime() {
   document.querySelector('#polandLongestStreak').textContent = current ? `Najdłuższy pobyt: ${historyCountFormatter.format(current.longest_polish_streak)} dni · Wyjazd: ${historyCountFormatter.format(current.longest_private_trip)} dni` : 'Brak danych';
   document.querySelector('#polandYearlyList').innerHTML = yearly.length ? yearly.slice().sort((a, b) => Number(b.year) - Number(a.year)).map((row) => {
     const presencePercent = Math.max(0, Math.min(100, (Number(row.presence_ratio) || 0) * 100));
-    return `<div class="poland-year-row"><strong>${historyCountFormatter.format(row.year)}</strong><div class="poland-year-copy"><div class="history-bar poland-presence-bar"><span style="width:${presencePercent}%"></span></div><span>${percent(row.presence_ratio)} obecności w Polsce</span></div><span class="poland-year-presence-days"><strong>${historyCountFormatter.format(row.presence_days)}</strong><small>dni w Polsce</small></span><small class="poland-year-note">Prywatne: ${historyCountFormatter.format(row.private_days)} · Służbowe: ${historyCountFormatter.format(row.business_days)} · Wspólne: ${historyCountFormatter.format(row.shared_days)}</small></div>`;
+    return `<div class="poland-year-row"><strong>${historyCountFormatter.format(row.year)}</strong><div class="poland-year-copy"><div class="history-bar poland-presence-bar" role="img" aria-label="Obecność w Polsce: ${percent(row.presence_ratio)}"><span style="width:${presencePercent}%"></span></div><span>${percent(row.presence_ratio)} w Polsce</span></div><span class="poland-year-presence-days"><strong>${historyCountFormatter.format(row.presence_days)}</strong><small>dni w Polsce</small></span><small class="poland-year-note"><span>Prywatne: ${historyCountFormatter.format(row.private_days)}</span><span>Służbowe: ${historyCountFormatter.format(row.business_days)}</span><span>Wspólne: ${historyCountFormatter.format(row.shared_days)}</span></small></div>`;
   }).join('') : '<p class="reservation-empty">Brak rocznych danych o pobycie.</p>';
 }
 
@@ -1019,8 +1105,12 @@ async function renderDayPage() {
   document.querySelector('#dayPageTitle').textContent = dateLabel(selectedDate, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   document.querySelector('#dayPageLocation').textContent = destination;
   document.querySelector('#dayPageFlags').innerHTML = countryFlagMarkup(country);
-  document.querySelector('#dayPageTotal').textContent = money(dayTotal(selectedDate));
-  document.querySelector('#dayPageCount').textContent = `${dayCount} ${dayCount === 1 ? 'wydatek' : 'wydatków'}`;
+  const dayPageTotal = document.querySelector('#dayPageTotal');
+  const dayPageCount = document.querySelector('#dayPageCount');
+  dayPageTotal.textContent = expensesLoading ? '…' : money(dayTotal(selectedDate));
+  dayPageCount.textContent = expensesLoading ? 'Wczytywanie…' : `${dayCount} ${dayCount === 1 ? 'wydatek' : 'wydatków'}`;
+  dayPageTotal.classList.toggle('loading-shimmer', expensesLoading);
+  dayPageCount.classList.toggle('loading-shimmer', expensesLoading);
   document.querySelector('#dayPageBudget').textContent = money(dailyBudgetForDate(selectedDate));
   dayMapElement.hidden = !coordinates;
   if (!coordinates) {
@@ -1057,6 +1147,11 @@ async function renderDayPage() {
 
 // PL: Aktualizuj sumę wydatków, saldo i licznik dni do podróży. | ES-CO: Actualiza gastos totales, saldo y cuenta regresiva.
 function renderSummary() {
+  const setMetric = (selector, value) => {
+    const element = document.querySelector(selector);
+    element.textContent = expensesLoading ? '…' : value;
+    element.classList.toggle('loading-shimmer', expensesLoading);
+  };
   // PL: Zsumuj wartości zapisane w PLN. | ES-CO: Suma los importes guardados en PLN.
   const spent = expenses.reduce((sum, item) => sum + Number(item.plnAmount), 0);
   // PL: Zsumuj wydatki oznaczone jako poniesione w podróży. | ES-CO: Suma los gastos marcados como realizados durante el viaje.
@@ -1064,31 +1159,31 @@ function renderSummary() {
   // PL: Zsumuj pozycje, które nie zostały opłacone lub będą płatne w hotelu. | ES-CO: Suma valores pendientes o pagaderos en el hotel.
   const pending = expenses.filter((item) => item.status === 'Nieopłacone' || item.status === 'Płatne w Hotelu').reduce((sum, item) => sum + Number(item.plnAmount), 0);
   // PL: Pokaż łączną kwotę wydaną. | ES-CO: Muestra el total gastado.
-  document.querySelector('#spentTotal').textContent = money(spent);
+  setMetric('#spentTotal', money(spent));
   // PL: Pokaż kwotę wydaną ze statusem podróży. | ES-CO: Muestra cuánto se ha gastado durante el viaje.
-  document.querySelector('#actualSpentTotal').textContent = money(actualSpent);
+  setMetric('#actualSpentTotal', money(actualSpent));
   // PL: Pokaż jeszcze nieopłacone koszty. | ES-CO: Muestra los gastos todavía pendientes de pago.
-  document.querySelector('#pendingTotal').textContent = money(pending);
+  setMetric('#pendingTotal', money(pending));
   // PL: Odejmij faktyczne wydatki w podróży od salda po planowaniu. | ES-CO: Resta el gasto real del saldo ya calculado tras la planeación.
-  document.querySelector('#remainingTotal').textContent = money((currentTrip?.availableBeforeTrip || 0) - actualSpent);
+  setMetric('#remainingTotal', money((currentTrip?.availableBeforeTrip || 0) - actualSpent));
   // PL: Pokaż liczbę zapisanych pozycji z poprawną odmianą polską. | ES-CO: Muestra el número de movimientos con el texto correspondiente.
-  document.querySelector('#expenseCount').textContent = `${expenses.length} ${expenses.length === 1 ? 'wydatek' : 'wydatków'}`;
+  setMetric('#expenseCount', `${expenses.length} ${expenses.length === 1 ? 'wydatek' : 'wydatków'}`);
   // PL: Oblicz wydatki dla każdego dnia z planu. | ES-CO: Calcula el gasto de cada día del itinerario.
   const dailyTotals = datesInTrip().map((date) => ({ date, total: dayTotal(date) }));
   // PL: Wybierz dni z co najmniej jednym wydatkiem. | ES-CO: Selecciona los días que tienen gastos.
   const activeDays = dailyTotals.filter((day) => day.total > 0);
   // PL: Oblicz średnią tylko dla dni z wydatkami, aby wynik był miarodajny. | ES-CO: Calcula el promedio solo en días con gastos.
-  document.querySelector('#averagePerDay').textContent = money(activeDays.length ? spent / activeDays.length : 0);
+  setMetric('#averagePerDay', money(activeDays.length ? spent / activeDays.length : 0));
   // PL: Pokaż liczbę dni z poprawną polską odmianą. | ES-CO: Muestra los días activos con el texto correcto.
-  document.querySelector('#activeDaysTotal').textContent = `${activeDays.length} ${activeDays.length === 1 ? 'dzień' : 'dni'}`;
+  setMetric('#activeDaysTotal', `${activeDays.length} ${activeDays.length === 1 ? 'dzień' : 'dni'}`);
   // PL: Podaj liczbę wszystkich dni, które obejmuje plan podróży. | ES-CO: Indica la cantidad total de días del itinerario.
   document.querySelector('#activeDayCount').textContent = `z ${datesInTrip().length} dni podróży`;
   // PL: Znajdź dzień z największą sumą PLN. | ES-CO: Encuentra el día con mayor total en PLN.
   const highestDay = activeDays.reduce((highest, day) => day.total > highest.total ? day : highest, { total: 0 });
   // PL: Pokaż kwotę albo kreskę, gdy podróż nie ma jeszcze wydatków. | ES-CO: Muestra el valor o una raya si aún no hay gastos.
-  document.querySelector('#highestDayTotal').textContent = highestDay.total ? money(highestDay.total) : '—';
+  setMetric('#highestDayTotal', highestDay.total ? money(highestDay.total) : '—');
   // PL: Podaj datę i miejsce najdroższego dnia. | ES-CO: Indica fecha y destino del día más costoso.
-  document.querySelector('#highestDayLabel').textContent = highestDay.total ? `${dateLabel(highestDay.date, { day: 'numeric', month: 'short' })} · ${destinationForDate(highestDay.date)}` : 'Brak wydatków';
+  setMetric('#highestDayLabel', highestDay.total ? `${dateLabel(highestDay.date, { day: 'numeric', month: 'short' })} · ${destinationForDate(highestDay.date)}` : 'Brak wydatków');
   // PL: Oblicz liczbę dni do początku wybranego wyjazdu. | ES-CO: Calcula los días hasta el inicio del viaje activo.
   const start = currentTrip ? new Date(`${currentTrip.startDate}T12:00:00`) : null;
   // PL: Ustaw bieżącą datę na południe, aby uniknąć błędu granicy dnia. | ES-CO: Fija la fecha actual al mediodía para evitar errores de límite.
@@ -1101,10 +1196,17 @@ function renderSummary() {
   document.querySelector('#countdownNumber').textContent = difference === null ? '—' : Math.max(0, difference);
   // PL: Zmień podpis licznika przed podróżą i w jej trakcie. | ES-CO: Cambia el texto del contador antes y durante el viaje.
   document.querySelector('#countdownLabel').innerHTML = difference === null ? 'wybierz<br>podróż' : difference > 0 ? 'dni do<br>rozpoczęcia podróży' : 'dni<br>podróży';
+  document.querySelector('.stats').setAttribute('aria-busy', String(expensesLoading));
 }
 
 // PL: Aktualizuj wykresy dzienne i kategorii wyłącznie danymi bieżącego użytkownika. | ES-CO: Actualiza gráficas solo con datos del usuario activo.
 function renderCharts() {
+  const setMetric = (selector, value) => {
+    const element = document.querySelector(selector);
+    element.textContent = expensesLoading ? '…' : value;
+    element.classList.toggle('loading-shimmer', expensesLoading);
+  };
+  document.querySelectorAll('.chart-panel').forEach((panel) => panel.setAttribute('aria-busy', String(expensesLoading)));
   // PL: Pobierz wszystkie daty podróży i podsumuj każdą kategorię. | ES-CO: Obtén las fechas del viaje y suma cada categoría.
   const dates = datesInTrip();
   // PL: Oblicz sumy kategorii na podstawie kwot utrwalonych w PLN. | ES-CO: Calcula totales por categoría usando valores PLN guardados.
@@ -1112,28 +1214,47 @@ function renderCharts() {
   // PL: Przelicz sumę wydatków dziennie dla nagłówka wykresu. | ES-CO: Calcula el total diario para el encabezado.
   const dailyTotal = expenses.reduce((sum, item) => sum + Number(item.plnAmount), 0);
   // PL: Pokaż liczbę rekordów widocznych w bieżącym dzienniku. | ES-CO: Muestra los registros visibles en el diario actual.
-  document.querySelector('#analyticsCount').textContent = `${expenses.length} wydatków`;
+  setMetric('#analyticsCount', `${expenses.length} wydatków`);
   // PL: Pokaż całkowitą kwotę wydatków na wykresie dziennym. | ES-CO: Muestra el total del gráfico diario.
-  document.querySelector('#dailyChartTotal').textContent = money(dailyTotal);
+  setMetric('#dailyChartTotal', money(dailyTotal));
   // PL: Pokaż tę samą sumę nad wykresem kategorii. | ES-CO: Muestra el total sobre el gráfico de categorías.
-  document.querySelector('#categoryChartTotal').textContent = money(dailyTotal);
+  setMetric('#categoryChartTotal', money(dailyTotal));
+  setMetric('#categoryChartCenter', money(dailyTotal));
+  document.querySelector('.category-chart-center span').textContent = 'ŁĄCZNIE WYDANO';
+  document.querySelector('.category-chart-center').hidden = expensesLoading || expenses.length === 0;
+  const categoryBreakdown = document.querySelector('#categoryBreakdown');
+  const categoryEntries = expenseCategories
+    .map((category, index) => ({ category, index, amount: categoryTotals[index], color: chartColors[index] }))
+    .filter((entry) => entry.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+  categoryBreakdown.innerHTML = expensesLoading
+    ? '<li class="category-breakdown-empty">Wczytywanie wydatków…</li>'
+    : categoryEntries.length
+      ? categoryEntries.map((entry, order) => {
+        const share = dailyTotal > 0 ? Math.round(entry.amount / dailyTotal * 100) : 0;
+        return `<li style="--category-color:${entry.color};--category-share:${share}%;--category-delay:${order * 70}ms"><button class="category-breakdown-button" type="button" data-category-index="${entry.index}" aria-label="${entry.category}: ${money(entry.amount)}, ${share}%"><span class="category-breakdown-name"><span class="category-dot"></span>${entry.category}</span><span class="category-breakdown-value"><strong>${money(entry.amount)}</strong><small>${share}%</small></span></button><span class="category-share-track" aria-hidden="true"><span></span></span></li>`;
+      }).join('')
+      : '<li class="category-breakdown-empty">Kategorie pojawią się po dodaniu wydatków.</li>';
   // PL: Przełącz komunikaty pustego stanu według obecności wydatków. | ES-CO: Alterna mensajes vacíos según haya gastos.
   // PL: Ukryj canvas dzienny, dopóki użytkownik nie ma rekordów. | ES-CO: Oculta el lienzo diario mientras no haya gastos.
-  document.querySelector('#dailyChart').hidden = expenses.length === 0;
+  document.querySelector('#dailyChart').hidden = expensesLoading || expenses.length === 0;
   // PL: Ukryj canvas kategorii, dopóki nie ma danych do podziału. | ES-CO: Oculta el lienzo por categoría si no hay datos.
-  document.querySelector('#categoryChart').hidden = expenses.length === 0;
+  document.querySelector('#categoryChart').hidden = expensesLoading || expenses.length === 0;
   // PL: Pokaż lub schowaj instrukcję dla dziennego wykresu. | ES-CO: Muestra u oculta la guía del gráfico diario.
-  document.querySelector('#dailyChartEmpty').hidden = expenses.length > 0;
+  document.querySelector('#dailyChartEmpty').hidden = !expensesLoading && expenses.length > 0;
   // PL: Ukryj komunikat koła, jeśli istnieją dane do podziału. | ES-CO: Oculta el mensaje circular cuando hay categorías.
-  document.querySelector('#categoryChartEmpty').hidden = expenses.length > 0;
+  document.querySelector('#categoryChartEmpty').hidden = !expensesLoading && expenses.length > 0;
+  document.querySelector('#dailyChartEmpty').textContent = expensesLoading ? 'Wczytywanie wydatków…' : 'Dodaj wydatki, aby zobaczyć wykres dzienny.';
+  document.querySelector('#categoryChartEmpty').textContent = expensesLoading ? 'Wczytywanie wydatków…' : 'Kategorie pojawią się po dodaniu wydatków.';
   // PL: Nie twórz wykresów dla ukrytego panelu niezalogowanego użytkownika. | ES-CO: No crea gráficas para el panel oculto sin sesión.
   // PL: Zniszcz ukryte instancje, aby poprawnie odtworzyć wykres po dodaniu pierwszego rekordu.
   // ES-CO: Destruye gráficos ocultos para recrearlos bien al agregar el primer gasto.
-  if (!currentUser || !currentTrip || expenses.length === 0) {
+  if (expensesLoading || !currentUser || !currentTrip || expenses.length === 0) {
     // PL: Zwolnij wykres dzienny, jeśli nie ma co rysować. | ES-CO: Libera el gráfico diario si no hay datos.
     if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
     // PL: Zwolnij wykres kategorii, jeśli konto jest puste. | ES-CO: Libera el gráfico por categoría si está vacío.
     if (categoryChart) { categoryChart.destroy(); categoryChart = null; }
+    document.querySelectorAll('.chart-panel').forEach((panel) => panel.classList.remove('chart-revealed'));
     // PL: Zakończ bez tworzenia fałszywej skali dla samych zer. | ES-CO: Evita dibujar una escala engañosa de ceros.
     return;
   }
@@ -1144,9 +1265,20 @@ function renderCharts() {
     // PL: Zsumuj kwoty PLN tej kategorii dla każdej daty podróży. | ES-CO: Suma el PLN de esta categoría para cada fecha.
     data: dates.map((date) => expenses.filter((item) => item.date === date && item.category === category).reduce((sum, item) => sum + Number(item.plnAmount), 0)),
     // PL: Użyj stałego koloru kategorii z palety aplikacji. | ES-CO: Usa un color estable de la paleta por categoría.
-    backgroundColor: chartColors[categoryIndex],
+    backgroundColor: ({ chart }) => {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return chartColors[categoryIndex];
+      const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      gradient.addColorStop(0, chartColors[categoryIndex]);
+      gradient.addColorStop(1, `${chartColors[categoryIndex]}80`);
+      return gradient;
+    },
+    hoverBackgroundColor: chartColors[categoryIndex],
+    maxBarThickness: 22,
+    categoryPercentage: .7,
+    barPercentage: .85,
     // PL: Zaokrąglij górę słupków, zachowując czytelne stosy. | ES-CO: Redondea las barras sin perder el apilado.
-    borderRadius: 3,
+    borderRadius: 5,
     // PL: Nie pomijaj obramowania segmentów słupka. | ES-CO: Conserva los bordes de cada segmento.
     borderSkipped: false
   }));
@@ -1154,32 +1286,94 @@ function renderCharts() {
   const labels = dates.map((date) => dateLabel(date, { day: 'numeric', month: 'short' }));
   // PL: Utwórz wykres stosowy albo zaktualizuj istniejący. | ES-CO: Crea el gráfico apilado o actualiza el existente.
   const dailyConfig = {
+    plugins: [chartReveal],
     // PL: Wybierz wykres słupkowy dla porównania dni. | ES-CO: Usa barras para comparar los días.
     type: 'bar',
     // PL: Przekaż daty i wartości kategorii. | ES-CO: Pasa fechas y valores por categoría.
     data: { labels, datasets: dailyDatasets },
     // PL: Dopasuj wykres do kontenera i dodaj opisy kwot. | ES-CO: Adapta el gráfico y agrega etiquetas de importes.
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 7, padding: 14, font: { family: 'Quicksand', size: 9 } } }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${money(context.parsed.y)}` } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 9, font: { family: 'Quicksand', size: 9 } } }, y: { stacked: true, beginAtZero: true, ticks: { callback: (value) => `${formatter.format(value)} PLN`, font: { family: 'Quicksand', size: 9 } }, grid: { color: '#e5ecef' } } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 0, easing: 'easeOutQuart', delay: (context) => chartMotionPreference.matches || context.type !== 'data' || context.mode !== 'default' ? 0 : Math.min(context.dataIndex * 35, 420) },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 6, padding: 17, font: { family: 'Quicksand', size: 10 } } },
+        tooltip: {
+          backgroundColor: '#142b49', borderColor: '#345579', borderWidth: 1, cornerRadius: 12, padding: 12,
+          titleFont: { family: 'Quicksand', size: 12 }, bodyFont: { family: 'Quicksand', size: 11 },
+          filter: (context) => context.parsed.y !== 0,
+          callbacks: { label: (context) => `${context.dataset.label}: ${money(context.parsed.y)}` },
+        },
+      },
+      scales: {
+        x: { stacked: true, border: { display: false }, grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { family: 'Quicksand', size: 10 } } },
+        y: { stacked: true, beginAtZero: true, border: { display: false, dash: [3, 5] }, ticks: { maxTicksLimit: 5, padding: 10, callback: (value) => `${new Intl.NumberFormat('pl-PL', { notation: 'compact' }).format(value)} zł`, font: { family: 'Quicksand', size: 10 } }, grid: { color: 'rgba(142,178,225,.09)', drawTicks: false } },
+      },
+    },
   };
   // PL: Zaktualizuj istniejącą instancję, aby uniknąć nakładania canvasów. | ES-CO: Actualiza la instancia existente para no duplicar el canvas.
   if (dailyChart) { dailyChart.data = dailyConfig.data; dailyChart.update(); }
   // PL: Utwórz pierwszą instancję wykresu dziennego. | ES-CO: Crea la primera instancia del gráfico diario.
   else dailyChart = new Chart(document.querySelector('#dailyChart'), dailyConfig);
   // PL: Przygotuj serię sum według kategorii. | ES-CO: Prepara los totales agrupados por categoría.
-  const categoryData = { labels: expenseCategories, datasets: [{ data: categoryTotals, backgroundColor: chartColors, borderColor: '#ffffff', borderWidth: 3, hoverOffset: 5 }] };
-  // PL: Ustaw czytelny wykres pierścieniowy z legendą i wartościami PLN. | ES-CO: Configura una dona con leyenda y valores PLN.
-  const categoryConfig = { type: 'doughnut', data: categoryData, options: { responsive: true, maintainAspectRatio: false, cutout: '66%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 7, padding: 12, font: { family: 'Quicksand', size: 9 } } }, tooltip: { callbacks: { label: (context) => `${context.label}: ${money(context.parsed)}` } } } } };
+  const categoryData = { labels: expenseCategories, datasets: [{ data: categoryTotals, backgroundColor: chartColors, borderWidth: 0, spacing: 7, borderRadius: 10, hoverOffset: 7 }] };
+  // PL: Ustaw wykres pierścieniowy i pokazuj kwotę oraz udział kategorii po najechaniu. | ES-CO: Configura una dona y muestra monto y participación al pasar el cursor.
+  const categoryConfig = {
+    type: 'doughnut',
+    plugins: [chartReveal, categoryArcLabels],
+    data: categoryData,
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '78%', layout: { padding: 14 },
+      animation: { duration: 0, easing: 'easeOutQuart', animateRotate: true, animateScale: true },
+      onHover: (_event, elements) => {
+        const activeButton = categoryBreakdown.querySelector('button:is(:hover, :focus)');
+        setCategoryChartCenter(activeButton ? Number(activeButton.dataset.categoryIndex) : elements[0]?.index);
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#142b49', borderColor: '#345579', borderWidth: 1, cornerRadius: 12, padding: 12,
+          callbacks: { label: (context) => {
+            const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+            const share = total > 0 ? Math.round(context.parsed / total * 100) : 0;
+            return `${context.label}: ${money(context.parsed)} (${share}%)`;
+          } },
+        },
+      },
+    },
+  };
   // PL: Aktualizuj koło kategorii po każdym odświeżeniu danych. | ES-CO: Actualiza la dona después de cada carga.
   if (categoryChart) { categoryChart.data = categoryData; categoryChart.update(); }
   // PL: Utwórz pierwszą instancję wykresu kategorii. | ES-CO: Crea la primera instancia del gráfico por categoría.
   else categoryChart = new Chart(document.querySelector('#categoryChart'), categoryConfig);
+  categoryBreakdown.querySelectorAll('button').forEach((button) => {
+    const highlight = () => {
+      const index = Number(button.dataset.categoryIndex);
+      categoryChart.setActiveElements([{ datasetIndex: 0, index }]);
+      setCategoryChartCenter(index);
+      categoryChart.update('active');
+    };
+    const clearHighlight = () => {
+      categoryChart.setActiveElements([]);
+      setCategoryChartCenter();
+      categoryChart.update('active');
+    };
+    button.addEventListener('pointerenter', highlight);
+    button.addEventListener('focus', highlight);
+    button.addEventListener('click', highlight);
+    button.addEventListener('pointerleave', clearHighlight);
+    button.addEventListener('blur', clearHighlight);
+  });
 }
 
 // PL: Zbuduj listę dni z sumą PLN i wykorzystaniem budżetu dziennego. | ES-CO: Construye la lista de días con totales y uso del presupuesto.
 function renderDays() {
   // PL: Pokaż pierwszy import, gdy konto nie ma jeszcze wyjazdu. | ES-CO: Invita a importar el primer viaje cuando aún no existe.
   if (!currentTrip) {
-    dayList.innerHTML = '<div class="empty-state"><strong>Brak podróży</strong><p>Nie ma jeszcze podróży przypisanych do tego konta.</p></div>';
+    dayList.innerHTML = expensesLoading
+      ? '<div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span>Wczytywanie podróży…</span></div>'
+      : '<div class="empty-state"><strong>Brak podróży</strong><p>Nie ma jeszcze podróży przypisanych do tego konta.</p></div>';
     return;
   }
   // PL: Wygeneruj każdy dzień z daty, destynacji, liczby wydatków i paska budżetu. | ES-CO: Genera cada día con fecha, destino, cantidad de gastos y barra de presupuesto.
@@ -1198,7 +1392,9 @@ function renderDays() {
     const dailyBudget = dailyBudgetForDate(date);
     const percentage = dailyBudget > 0 ? Math.min(100, Math.max(0, total / dailyBudget * 100)) : 0;
     // PL: Zwróć dostępny przycisk dnia z bezpiecznymi wartościami tekstowymi. | ES-CO: Devuelve un botón por día con valores de texto controlados.
-    return `<button class="day-row${date === selectedDate ? ' selected' : ''}" type="button" data-date="${date}" aria-pressed="${date === selectedDate}"><span class="day-date"><b>${day.getDate()}</b><small>${month}</small></span><span><span class="day-place-line">${countryFlagMarkup(countryForDate(date))}<span class="day-place">${escapeHTML(destinationForDate(date))}</span></span><span class="day-week">${weekday} · ${count} ${count === 1 ? 'wydatek' : 'wydatków'}</span></span><span class="day-total"><b>${money(total)}</b><small>z ${formatter.format(dailyBudget)} PLN</small><span class="budget-track"><span style="width:${percentage}%"></span></span></span></button>`;
+    const countMarkup = expensesLoading ? '<span class="loading-shimmer">…</span>' : `${count} ${count === 1 ? 'wydatek' : 'wydatków'}`;
+    const totalMarkup = expensesLoading ? '<b class="loading-shimmer">…</b>' : `<b>${money(total)}</b>`;
+    return `<button class="day-row${date === selectedDate ? ' selected' : ''}" type="button" data-date="${date}" aria-pressed="${date === selectedDate}"><span class="day-date"><b>${day.getDate()}</b><small>${month}</small></span><span><span class="day-place-line">${countryFlagMarkup(countryForDate(date))}<span class="day-place">${escapeHTML(destinationForDate(date))}</span></span><span class="day-week">${weekday} · ${countMarkup}</span></span><span class="day-total">${totalMarkup}<small>z ${formatter.format(dailyBudget)} PLN</small><span class="budget-track"${expensesLoading ? ' hidden' : ''}><span style="width:${percentage}%"></span></span></span></button>`;
   }).join('');
   // PL: Obsłuż wybór dnia i odśwież jego podsumowanie bez przeładowania. | ES-CO: Maneja la selección del día y actualiza el detalle sin recargar.
   dayList.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
@@ -1220,6 +1416,20 @@ function markClass(category) {
 // PL: Pokaż wydatki, budżet i pozostałe saldo wybranego dnia. | ES-CO: Muestra gastos, presupuesto y saldo restante del día.
 function renderExpenses() {
   const current = dayExpenses(selectedDate).sort((a, b) => b.createdAt - a.createdAt);
+  if (expensesLoading) {
+    openDayDetailsButton.hidden = !currentTrip;
+    document.querySelector('#selectedDayTitle').textContent = currentTrip && selectedDate ? `${dateLabel(selectedDate)} · ${destinationForDate(selectedDate)}` : 'Wczytywanie podróży…';
+    document.querySelector('#dayBudgetLabel').textContent = 'Wczytywanie…';
+    document.querySelector('#dailyRemaining').textContent = 'Wczytywanie…';
+    document.querySelector('#dayBudgetLabel').classList.add('loading-shimmer');
+    document.querySelector('#dailyRemaining').classList.add('loading-shimmer');
+    const loading = '<li class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span>Wczytywanie wydatków…</span></li>';
+    expenseList.innerHTML = loading;
+    dayExpenseList.innerHTML = loading;
+    return;
+  }
+  document.querySelector('#dayBudgetLabel').classList.remove('loading-shimmer');
+  document.querySelector('#dailyRemaining').classList.remove('loading-shimmer');
   if (!currentTrip || !selectedDate) {
     openDayDetailsButton.hidden = true;
     document.querySelector('#selectedDayTitle').textContent = 'Wybierz podróż';
@@ -1242,13 +1452,14 @@ function renderExpenses() {
     const rateText = `1 ${item.currency} = ${rateFormatter.format(Number(item.rate))} PLN`;
     const pending = item.status === 'Płatne w Hotelu' || item.status === 'Nieopłacone';
     const paidAction = pending ? `<button class="paid-button" type="button" data-paid="${escapeHTML(item.id)}" ${savingExpenseIds.has(item.id) ? 'disabled' : ''}>${savingExpenseIds.has(item.id) ? 'Zapisywanie…' : '✓ Oznacz jako opłacone'}</button>` : '';
-    return `<li class="expense-item"><span class="category-mark ${markClass(item.category)}" aria-hidden="true">${escapeHTML(mark)}</span><span class="expense-copy"><span class="expense-title-line">${countryFlagMarkup(countryForDate(item.date))}<span class="expense-title">${escapeHTML(item.description)}</span></span><span class="expense-meta">${escapeHTML(item.category)} · ${escapeHTML(item.status || 'W Podróży')} · ${escapeHTML(item.payment || 'Nie podano')}</span><span class="expense-rate">${escapeHTML(rateText)}</span></span><span class="expense-amount"><b>${money(item.plnAmount)}</b><small>${localMoney(item.amount, item.currency)}</small></span>${paidAction}<button class="delete-button" type="button" data-delete="${escapeHTML(item.id)}" aria-label="Usuń: ${escapeHTML(item.description)}">Usuń</button></li>`;
+    return `<li class="expense-item"><span class="category-mark ${markClass(item.category)}" aria-hidden="true">${escapeHTML(mark)}</span><span class="expense-copy"><span class="expense-title-line">${countryFlagMarkup(countryForDate(item.date))}<span class="expense-title">${escapeHTML(item.description)}</span></span><span class="expense-meta">${escapeHTML(item.category)} · ${escapeHTML(item.status || 'W Podróży')} · ${escapeHTML(item.payment || 'Nie podano')}</span><span class="expense-rate">${escapeHTML(rateText)}</span></span><span class="expense-amount"><b>${money(item.plnAmount)}</b><small>${localMoney(item.amount, item.currency)}</small></span><span class="expense-actions">${paidAction}<button class="edit-button" type="button" data-edit="${escapeHTML(item.id)}" aria-label="Edytuj: ${escapeHTML(item.description)}">Edytuj</button><button class="delete-button" type="button" data-delete="${escapeHTML(item.id)}" aria-label="Usuń: ${escapeHTML(item.description)}">Usuń</button></span></li>`;
   }).join('') : empty;
   expenseList.innerHTML = markup;
   dayExpenseList.innerHTML = markup;
   [expenseList, dayExpenseList].forEach((list) => {
     list.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => deleteExpense(button.dataset.delete)));
     list.querySelectorAll('[data-paid]').forEach((button) => button.addEventListener('click', () => markExpensePaid(button.dataset.paid, button)));
+    list.querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => openEditExpenseDialog(button.dataset.edit)));
     list.querySelectorAll('[data-add-expense]').forEach((button) => button.addEventListener('click', openExpenseDialog));
   });
 }
@@ -1281,6 +1492,9 @@ async function markExpensePaid(id, button) {
 function openExpenseDialog() {
   // PL: Wyczyść pola, pozostawiając domyślne wartości formularza. | ES-CO: Limpia los campos y restablece los valores predeterminados.
   expenseForm.reset();
+  editingExpenseId = null;
+  document.querySelector('#dialogTitle').textContent = 'Nowy wydatek';
+  expenseForm.querySelector('button[type="submit"]').textContent = 'Zapisz wydatek';
   // PL: Ustaw status podróży jako domyślny dla nowego wydatku. | ES-CO: Usa el estado de viaje como predeterminado.
   statusInput.value = 'W Podróży';
   // PL: Ustaw datę wybranego dnia podróży. | ES-CO: Establece la fecha del día seleccionado.
@@ -1288,12 +1502,37 @@ function openExpenseDialog() {
   // PL: Wybierz jen jako domyślną walutę japońskiego odcinka. | ES-CO: Selecciona yen como moneda inicial del viaje.
   currencyInput.value = 'JPY';
   // PL: Ukryj pole własnej waluty, jeśli pozostało widoczne po poprzednim wpisie. | ES-CO: Oculta la moneda personalizada si quedó visible.
-  customCurrencyInput.hidden = true;
+  customCurrencyField.hidden = true;
   // PL: Pokaż okno formularza. | ES-CO: Abre el diálogo del formulario.
   expenseDialog.showModal();
   // PL: Pobierz referencyjny kurs PLN dla jena. | ES-CO: Consulta la tasa de referencia a PLN para el yen.
   fetchRate();
   // PL: Przenieś fokus do opisu dla wygodnej obsługi klawiaturą. | ES-CO: Enfoca la descripción para facilitar el uso con teclado.
+  setTimeout(() => document.querySelector('#expenseDescription').focus(), 0);
+}
+
+function openEditExpenseDialog(id) {
+  const item = expenses.find((expense) => expense.id === id);
+  if (!item || !currentUser || !currentTrip || item.tripId !== currentTrip.id) return;
+  expenseForm.reset();
+  editingExpenseId = item.id;
+  document.querySelector('#dialogTitle').textContent = 'Edytuj wydatek';
+  expenseForm.querySelector('button[type="submit"]').textContent = 'Zapisz zmiany';
+  dateInput.value = item.date;
+  document.querySelector('#expenseCategory').value = item.category;
+  statusInput.value = item.status;
+  document.querySelector('#expenseDescription').value = item.description;
+  amountInput.value = String(item.amount);
+  const supportedCurrency = [...currencyInput.options].some((option) => option.value === item.currency);
+  currencyInput.value = supportedCurrency ? item.currency : 'OTHER';
+  customCurrencyInput.value = supportedCurrency ? '' : item.currency;
+  customCurrencyField.hidden = supportedCurrency;
+  rateInput.value = String(item.rate);
+  document.querySelector('#expensePayment').value = item.payment;
+  currentRateDate = item.rateDate || item.date;
+  document.querySelector('#rateStatus').textContent = `Zachowano kurs zapisany przy wydatku · ${currentRateDate}. Możesz go zmienić ręcznie.`;
+  updatePreview();
+  expenseDialog.showModal();
   setTimeout(() => document.querySelector('#expenseDescription').focus(), 0);
 }
 
@@ -1418,25 +1657,37 @@ async function saveExpense(event) {
   // PL: Pokaż stan oczekiwania bez zmiany zawartości formularza. | ES-CO: Muestra espera sin alterar el formulario.
   submitButton.disabled = true;
   // PL: Przygotuj kolumny zgodne ze schematem SQL i przypisz właściciela. | ES-CO: Prepara las columnas SQL y asigna el dueño autenticado.
-  const row = { user_id: ownerId, trip_id: tripId, expense_date: String(data.get('date')), category: String(data.get('category')), description, amount_local: amount, currency_code: currency, pln_per_unit: rate, amount_pln: amountPln, payment_method: String(data.get('payment') || '') || null, rate_date: currentRateDate || String(data.get('date')), expense_status: String(data.get('status') || 'W Podróży'), source_ref: null };
+  const expenseValues = { expense_date: String(data.get('date')), category: String(data.get('category')), description, amount_local: amount, currency_code: currency, pln_per_unit: rate, amount_pln: amountPln, payment_method: String(data.get('payment') || '') || null, rate_date: currentRateDate || String(data.get('date')), expense_status: String(data.get('status') || 'W Podróży') };
+  const editedExpenseId = editingExpenseId;
   // PL: Obsłuż odpowiedź zapisu oraz wyjątki sieciowe jednym blokiem. | ES-CO: Maneja respuesta y errores de red en un solo bloque.
   try {
     // PL: Wstaw rekord i odczytaj wartości zaakceptowane przez bazę. | ES-CO: Inserta el gasto y lee los valores aceptados por la base.
-    const { data: saved, error } = await supabase.from(TABLE_NAME).insert(row).select('id,user_id,trip_id,expense_date,category,description,amount_local,currency_code,pln_per_unit,amount_pln,payment_method,rate_date,expense_status,source_ref,created_at').single();
+    const columns = 'id,user_id,trip_id,expense_date,category,description,amount_local,currency_code,pln_per_unit,amount_pln,payment_method,rate_date,expense_status,source_ref,created_at';
+    let saved;
+    let error;
+    if (editedExpenseId) {
+      ({ data: saved, error } = await supabase.from(TABLE_NAME).update(expenseValues).eq('id', editedExpenseId).eq('user_id', ownerId).eq('trip_id', tripId).select(columns).maybeSingle());
+    } else {
+      ({ data: saved, error } = await supabase.from(TABLE_NAME).insert({ user_id: ownerId, trip_id: tripId, ...expenseValues, source_ref: null }).select(columns).single());
+    }
     // PL: Nie pokazuj odpowiedzi w innej sesji niż ta, która ją rozpoczęła. | ES-CO: No muestres resultados en una sesión distinta a la inicial.
-    if (!currentUser || currentUser.id !== ownerId) return;
+    if (!currentUser || currentUser.id !== ownerId || !currentTrip || currentTrip.id !== tripId) return;
     // PL: Pozostaw formularz otwarty i pokaż błąd zwrócony przez bazę. | ES-CO: Mantén el formulario abierto y muestra el error de la base.
-    if (error) { showToast('Nie udało się zapisać wydatku. Sprawdź konfigurację bazy i spróbuj ponownie.'); return; }
+    if (error) { showToast(editedExpenseId ? 'Nie udało się zaktualizować wydatku. Spróbuj ponownie.' : 'Nie udało się zapisać wydatku. Sprawdź konfigurację bazy i spróbuj ponownie.'); return; }
+    if (!saved) { await loadExpenses(); showToast('Wydatek został zmieniony w innym miejscu.'); return; }
     // PL: Przekształć zapisany wiersz SQL do formatu używanego przez widok. | ES-CO: Convierte la fila SQL al formato de la interfaz.
-    expenses.push({ id: saved.id, userId: saved.user_id, tripId: saved.trip_id, date: saved.expense_date, category: saved.category, description: saved.description, amount: Number(saved.amount_local), currency: saved.currency_code, rate: Number(saved.pln_per_unit), plnAmount: Number(saved.amount_pln), payment: saved.payment_method || '', rateDate: saved.rate_date, status: saved.expense_status || 'W Podróży', sourceRef: saved.source_ref || null, createdAt: new Date(saved.created_at).getTime() });
+    const savedExpense = { id: saved.id, userId: saved.user_id, tripId: saved.trip_id, date: saved.expense_date, category: saved.category, description: saved.description, amount: Number(saved.amount_local), currency: saved.currency_code, rate: Number(saved.pln_per_unit), plnAmount: Number(saved.amount_pln), payment: saved.payment_method || '', rateDate: saved.rate_date, status: saved.expense_status || 'W Podróży', sourceRef: saved.source_ref || null, createdAt: new Date(saved.created_at).getTime() };
+    if (editedExpenseId) expenses = expenses.map((item) => item.id === editedExpenseId ? savedExpense : item);
+    else expenses.push(savedExpense);
     // PL: Zaznacz dzień zapisanego wydatku. | ES-CO: Selecciona el día del gasto guardado.
-    selectedDate = row.expense_date;
+    selectedDate = saved.expense_date;
     // PL: Odśwież podsumowania, dziennik i szczegóły. | ES-CO: Actualiza resumen, diario y detalle.
     render();
+    editingExpenseId = null;
     // PL: Zamknij formularz i potwierdź zapis. | ES-CO: Cierra el formulario y confirma el guardado.
     expenseDialog.close();
     // PL: Pokaż potwierdzenie po polsku. | ES-CO: Muestra la confirmación en polaco.
-    showToast('Wydatek zapisany w Supabase.');
+    showToast(editedExpenseId ? 'Wydatek zaktualizowany w Supabase.' : 'Wydatek zapisany w Supabase.');
   // PL: Zgłoś błąd transportowy, który nie dotarł jako odpowiedź Supabase. | ES-CO: Informa fallas de red que no llegaron como respuesta Supabase.
   } catch (error) {
     // PL: Zachowaj formularz otwarty, aby można było ponowić próbę. | ES-CO: Mantén el formulario abierto para poder reintentar.
@@ -1668,7 +1919,7 @@ loginForm.addEventListener('submit', async (event) => {
 // PL: Zmień widoczność pola własnej waluty po zmianie wyboru. | ES-CO: Muestra o esconde el campo de moneda personalizada.
 currencyInput.addEventListener('change', () => {
   // PL: Pokaż pole kodu waluty tylko dla opcji „inna”. | ES-CO: Muestra el campo del código solo para la opción “otra”.
-  customCurrencyInput.hidden = currencyInput.value !== 'OTHER';
+  customCurrencyField.hidden = currencyInput.value !== 'OTHER';
   // PL: Pobierz kurs dla aktualnie wybranego kodu. | ES-CO: Consulta la tasa para el código elegido.
   fetchRate();
 });
@@ -1696,6 +1947,7 @@ tripSelector.addEventListener('change', async () => {
   selectedDate = initialSelectedDate();
   // PL: Wyczyść wydatki poprzedniego wyjazdu przed ponownym odczytem. | ES-CO: Limpia gastos del viaje anterior antes de consultar.
   expenses = [];
+  expensesLoading = true;
   // PL: Zaktualizuj nagłówek i pokaż stan ładowania. | ES-CO: Actualiza el encabezado y muestra carga.
   render();
   // PL: Pobierz wiersze przypisane do nowego trip_id. | ES-CO: Consulta filas asociadas al nuevo trip_id.
@@ -1744,7 +1996,7 @@ supabase.auth.onAuthStateChange((_event, session) => {
     // PL: Podmień aktualnego właściciela na użytkownika z nowej sesji. | ES-CO: Reemplaza el usuario activo por el de la nueva sesión.
     currentUser = session?.user || null;
     // PL: Wyczyść prywatne wydatki od razu po wylogowaniu. | ES-CO: Borra gastos privados inmediatamente al cerrar sesión.
-    if (!currentUser) { trips = []; currentTrip = null; expenses = []; clearReservationPreview(); }
+    if (!currentUser) { trips = []; currentTrip = null; expenses = []; expensesLoading = false; clearReservationPreview(); }
     // PL: Zmień widoczność aplikacji zgodnie z nową sesją. | ES-CO: Cambia la vista según la sesión nueva.
     renderAuthState();
     // PL: Pobierz dane użytkownika po zalogowaniu albo wyczyść widok. | ES-CO: Carga los datos al entrar o limpia la pantalla al salir.

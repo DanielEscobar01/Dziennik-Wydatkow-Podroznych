@@ -8,30 +8,30 @@
   <!-- PL: Dopasuj szerokość strony do ekranu telefonu. | ES-CO: Ajusta el ancho de la página a pantallas móviles. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PL: Ustaw kolor paska przeglądarki mobilnej. | ES-CO: Define el color de la barra del navegador móvil. -->
-  <meta name="theme-color" content="#eef3f6">
+  <meta name="theme-color" content="#071326">
   <!-- PL: Nadaj karcie strony polską nazwę. | ES-CO: Define el título polaco de la pestaña. -->
   <title>Dziennik wydatków</title>
   <!-- PL: Rozpocznij style układu, kolorów i responsywności. | ES-CO: Inicia estilos de diseño, colores y adaptación. -->
   <style>
     :root {
-      color-scheme: light; /* PL: Ustaw jasny wariant elementów przeglądarki. | ES-CO: Define el modo claro de los controles del navegador. */
-      --paper: #eef3f6; /* PL: Ustaw chłodne, jasne tło aplikacji. | ES-CO: Define un fondo claro y frío para la aplicación. */
-      --surface: #ffffff; /* PL: Ustaw czystą biel paneli i formularzy. | ES-CO: Define blanco limpio para paneles y formularios. */
-      --ink: #192d3b; /* PL: Ustaw głęboki granatowo-grafitowy tekst. | ES-CO: Define un texto oscuro entre azul y grafito. */
-      --muted: #637785; /* PL: Ustaw stonowany kolor pomocniczych opisów. | ES-CO: Define un color secundario más suave. */
-      --line: #d8e2e8; /* PL: Ustaw chłodny kolor obramowań. | ES-CO: Define un borde de tono frío. */
-      --green: #16716b; /* PL: Ustaw morski kolor podstawowych akcji. | ES-CO: Define el teal para las acciones principales. */
-      --mint: #d9efeb; /* PL: Ustaw jasne tło zielonych znaczników. | ES-CO: Define el fondo claro de los indicadores verdes. */
-      --orange: #de7157; /* PL: Ustaw koralowy kolor wydatków i akcentów. | ES-CO: Define coral para gastos y acentos. */
-      --yellow: #e5b34f; /* PL: Ustaw złoty kolor informacji budżetowych. | ES-CO: Define un acento dorado para presupuesto. */
-      --blue: #4a7fa0; /* PL: Ustaw niebieski kolor kategorii transportu. | ES-CO: Define azul para categorías de transporte. */
-      --shadow: 0 18px 48px rgba(25, 45, 59, .1); /* PL: Ustaw miękki cień zgodny z nową paletą. | ES-CO: Define una sombra suave acorde a la paleta. */
+      color-scheme: dark;
+      --paper: #071326;
+      --surface: #0d1b32;
+      --ink: #f3f7ff;
+      --muted: #9aacc4;
+      --line: rgba(142, 178, 225, .16);
+      --green: #4b8ff6;
+      --mint: #142848;
+      --orange: #f17ca5;
+      --yellow: #f4c86b;
+      --blue: #50c8ef;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .38);
       font-family: "Quicksand", "Segoe UI", sans-serif; /* PL: Ustaw Quicksand jako font całej aplikacji. | ES-CO: Define Quicksand como tipografía de toda la aplicación. */
       font-synthesis: none; /* PL: Wyłącz sztuczne odmiany brakujących znaków fontu. | ES-CO: Evita sintetizar variantes tipográficas inexistentes. */
     }
 
     * { box-sizing: border-box; } /* PL: Wliczaj padding i obramowanie do wymiarów elementu. | ES-CO: Incluye bordes y relleno dentro del tamaño del elemento. */
-    body { margin: 0; background: var(--paper); color: var(--ink); min-width: 320px; } /* PL: Usuń margines przeglądarki i ustaw minimalną szerokość. | ES-CO: Quita el margen del navegador y fija un ancho mínimo. */
+    body { margin: 0; background: radial-gradient(ellipse at 68% -12%, rgba(62, 134, 246, .18), transparent 48%), var(--paper); color: var(--ink); min-width: 320px; }
     button, input, select { font: inherit; } /* PL: Dziedzicz font formularzy z całej strony. | ES-CO: Hereda la tipografía en los controles. */
     button { cursor: pointer; } /* PL: Sygnalizuj możliwość kliknięcia przycisku. | ES-CO: Indica que los botones se pueden pulsar. */
     .app-shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; } /* PL: Podziel ekran na nawigację i elastyczną treść. | ES-CO: Divide la pantalla entre navegación y contenido adaptable. */
@@ -90,7 +90,7 @@
     /* PL: Zmień kolor kropki po pomyślnym pobraniu wydatków. | ES-CO: Cambia el punto cuando se cargan los gastos. */
     .sync-status.synced::before { background: var(--green); }
     /* PL: Ułóż wykresy obok siebie z możliwością zwężenia. | ES-CO: Organiza los gráficos en columnas adaptables. */
-    .chart-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr); gap: 14px; margin: 17px 0 34px; }
+    .chart-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, 1fr); align-items: start; gap: 14px; margin: 17px 0 34px; }
     /* PL: Opraw każdy wykres w osobny panel zaokrąglony. | ES-CO: Enmarca cada gráfico en un panel redondeado. */
     .chart-panel { min-width: 0; overflow: hidden; margin: 0; padding: 17px 18px 13px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
     /* PL: Wyrównaj nazwę wykresu i jego sumę. | ES-CO: Alinea el título del gráfico con su total. */
@@ -100,11 +100,34 @@
     /* PL: Wyróżnij sumę wybranego okresu. | ES-CO: Resalta el total del periodo mostrado. */
     .chart-total { color: var(--green); font-size: 12px; font-weight: 700; white-space: nowrap; }
     /* PL: Ustal wysokość obszaru rysowania wykresu. | ES-CO: Define la altura del área del gráfico. */
-    .chart-wrap { position: relative; min-width: 0; height: 245px; overflow: hidden; }
+    .chart-wrap { position: relative; min-width: 0; height: 290px; overflow: hidden; }
     /* PL: Nie pozwól, aby canvas wykresu przekraczał szerokość panelu. | ES-CO: Evita que el canvas supere el ancho del panel. */
     .chart-wrap canvas { display: block; max-width: 100%; }
     /* PL: Ustaw proporcje wykresu kołowego. | ES-CO: Define proporciones para el gráfico de categorías. */
-    .category-chart-wrap { width: min(100%, 340px); margin: 0 auto; }
+    .category-chart-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(125px, .95fr); align-items: center; gap: 12px; }
+    .category-chart-wrap { width: 100%; height: 290px; margin: 0 auto; overflow: visible; background: radial-gradient(circle, rgba(48, 132, 255, .13), transparent 65%); }
+    .category-chart-center { position: absolute; z-index: 1; inset: 0; display: grid; align-content: center; justify-items: center; padding: 18px; pointer-events: none; text-align: center; }
+    .category-chart-center span { max-width: 100%; color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+    .category-chart-center strong { max-width: 100%; margin-top: 7px; color: #eef7ff; font-size: clamp(12px, 1.25vw, 18px); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .category-breakdown { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+    .category-breakdown li { display: grid; gap: 7px; min-width: 0; padding: 10px 0; }
+    .category-breakdown-button { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 5px 2px; border: 0; border-radius: 6px; background: transparent; color: inherit; text-align: left; transition: background .2s, transform .2s; }
+    .category-breakdown-button:hover, .category-breakdown-button:focus-visible { background: rgba(93, 168, 255, .09); transform: translateX(2px); }
+    .category-breakdown-button:focus-visible { outline: 2px solid #8bc6ff; outline-offset: 3px; }
+    .category-share-track { display: block; height: 4px; overflow: hidden; border-radius: 8px; background: rgba(142, 178, 225, .1); }
+    .category-share-track > span { display: block; width: var(--category-share); height: 100%; border-radius: inherit; background: var(--category-color); transform-origin: left; }
+    .chart-revealed .category-share-track > span { animation: category-share-enter .9s cubic-bezier(.16, 1, .3, 1) var(--category-delay) both; }
+    .chart-revealed .category-chart-center { animation: chart-center-enter .65s ease-out .25s both; }
+    .chart-revealed .category-breakdown li { animation: category-row-enter .5s ease-out var(--category-delay) both; }
+    @keyframes category-share-enter { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes chart-center-enter { from { opacity: 0; transform: translateY(6px) scale(.96); } to { opacity: 1; transform: none; } }
+    @keyframes category-row-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .category-breakdown-name { display: flex; align-items: center; gap: 7px; min-width: 0; color: var(--muted); font-size: 10px; }
+    .category-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--category-color); }
+    .category-breakdown-value { display: grid; justify-items: end; gap: 2px; white-space: nowrap; }
+    .category-breakdown-value strong { font-size: 10px; }
+    .category-breakdown-value small { color: var(--muted); font-size: 9px; }
+    .category-breakdown-empty { justify-content: center !important; color: var(--muted); font-size: 10px; text-align: center; }
     /* PL: Wyśrodkuj komunikat, gdy konto nie ma wydatków. | ES-CO: Centra el mensaje cuando no hay gastos. */
     .chart-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 18px; border-radius: 8px; background: var(--surface); color: var(--muted); font-size: 11px; text-align: center; }
     /* PL: Ukryj komunikat pustego stanu, gdy są dane. | ES-CO: Oculta el mensaje vacío cuando hay datos. */
@@ -112,7 +135,7 @@
     /* PL: Dopasuj wykresy do jednej kolumny na tabletach. | ES-CO: Apila los gráficos en tabletas. */
     @media (max-width: 920px) { .chart-grid { grid-template-columns: minmax(0, 1fr); } }
     /* PL: Zmień statystyki na dwie kolumny i zmniejsz panele na telefonie. | ES-CO: Muestra estadísticas en dos columnas en celular. */
-    @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .stat { min-height: 94px; padding: 13px 12px; } .stat-value { font-size: 18px; } .chart-panel { padding: 14px 12px 10px; } .chart-wrap { height: 230px; } .category-chart-wrap { height: 240px; } }
+    @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .stat { min-height: 94px; padding: 13px 12px; } .stat-value { font-size: 18px; } .chart-panel { padding: 14px 12px 10px; } .chart-wrap { height: 230px; } .category-chart-content { grid-template-columns: 1fr; gap: 4px; } .category-chart-wrap { height: 205px; } }
     .content-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: clamp(24px, 4vw, 54px); align-items: start; } /* PL: Zestaw listę dni i panel szczegółów w dwóch kolumnach. | ES-CO: Organiza días y detalle en dos columnas. */
     .trip-summary { display: grid; gap: 7px; padding: 16px 8px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .trip-summary-label { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
@@ -143,8 +166,9 @@
     .day-pagination { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
     .expense-title-line { display: flex; align-items: center; gap: 7px; min-width: 0; }
     .expense-title-line .expense-title { flex: 1; }
-    .paid-button { grid-column: 2 / 4; justify-self: start; padding: 5px 0 0; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; }
+    .paid-button { padding: 3px 0 0; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; }
     .paid-button:disabled { opacity: .6; cursor: wait; }
+    .edit-button { padding: 3px 0 0; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; }
     .trip-photo { display: none; }
     .reservation-section { margin: 0 0 38px; }
     .reservation-groups { display: grid; gap: 27px; margin-top: 20px; }
@@ -201,7 +225,7 @@
     .history-route-plane::before { grid-column: 1; grid-row: 1; border-top: 1px dashed #94a4ad; content: ""; }
     .history-route-plane::after { grid-column: 3; grid-row: 1; border-top: 1px dashed #94a4ad; content: ""; }
     .history-route-plane > span { grid-column: 2; grid-row: 1; font: 24px/1 "Segoe UI Symbol", "Apple Symbols", sans-serif; }
-    .history-route-plane .history-flight-duration { grid-column: 1 / -1; grid-row: 2; justify-self: center; color: #000; font-size: 9px; line-height: 1; white-space: nowrap; }
+    .history-route-plane .history-flight-duration { grid-column: 1 / -1; grid-row: 2; justify-self: center; color: var(--muted); font-size: 9px; line-height: 1; white-space: nowrap; }
     .history-flight-summary { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
     .history-flight-status { color: var(--green); font: 700 9px ui-monospace, "Cascadia Mono", monospace; }
     .history-flight-status.is-future { color: #8b4a1f; }
@@ -216,24 +240,66 @@
     .history-stat small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
     .poland-analysis-range { margin: 0 0 10px; color: var(--muted); font-size: 10px; }
     .poland-year-list { display: grid; border-top: 1px solid var(--line); }
-    .poland-year-row { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .poland-year-row { display: grid; grid-template-columns: 52px minmax(0,1fr) 82px; gap: 10px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--line); }
     .poland-year-row > strong { font-size: 12px; }
-    .poland-year-copy { display: grid; gap: 4px; min-width: 0; }
+    .poland-year-copy { display: grid; gap: 8px; min-width: 0; }
     .poland-year-copy span, .poland-year-note { color: var(--muted); font-size: 10px; }
-    .history-bar.poland-presence-bar span { background: #2874a6; }
+    #polandHistoryPage { --poland-inside: #78ad94; --poland-outside: #bd8188; }
+    .history-bar.poland-presence-bar { height: 9px; border-radius: 12px; background: var(--poland-outside); }
+    .history-bar.poland-presence-bar span { border-radius: inherit; background: var(--poland-inside); }
     .poland-year-presence-days { display: grid; justify-items: end; gap: 3px; white-space: nowrap; }
     .poland-year-presence-days strong { font-size: 12px; }
     .poland-year-presence-days small { color: var(--muted); font-size: 9px; }
-    .poland-year-note { grid-column: 2 / -1; }
+    .poland-year-note { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+    .poland-year-note span { padding: 4px 7px; border-radius: 5px; background: rgba(142, 178, 225, .07); }
+    #polandHistoryPage > .section-heading { align-items: start; margin-bottom: 24px; }
+    #polandAnalysisRange { line-height: 1.7; }
+    .poland-overview { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 1.6fr); gap: 18px; align-items: stretch; }
+    .poland-presence-card, .poland-year-card, .poland-travel-details { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg, #11213c, #0d1b32 75%); }
+    .poland-presence-card { display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; background: radial-gradient(circle at center, rgba(48, 132, 255, .13), transparent 70%), var(--surface); }
+    .poland-presence-card h2 { margin: 0; font-size: 13px; }
+    .poland-presence-card > small { color: var(--muted); font-size: 11px; }
+    .poland-presence-visual { position: relative; width: min(100%, 210px); aspect-ratio: 1; display: grid; place-items: center; }
+    .poland-presence-visual svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .poland-ring-track { stroke: var(--poland-outside); }
+    .poland-ring-progress { stroke: var(--poland-inside); stroke-linecap: round; }
+    .poland-presence-value { display: grid; gap: 3px; }
+    .poland-presence-value strong { font-size: 36px; letter-spacing: -.05em; }
+    .poland-presence-value span { color: var(--muted); font-size: 10px; }
+    .poland-overview-details { display: grid; align-content: center; gap: 14px; min-width: 0; }
+    .poland-primary-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .poland-primary-metrics .history-stat { padding: 23px 20px; border-radius: 16px; }
+    .poland-primary-metrics .history-stat:first-child { border-top-color: var(--poland-inside); }
+    .poland-primary-metrics .history-stat:last-child { border-top-color: var(--poland-outside); }
+    .poland-primary-metrics .history-stat strong { margin-block: 10px; font-size: clamp(26px, 3vw, 40px); font-variant-numeric: tabular-nums; }
+    .poland-primary-metrics .history-stat small { line-height: 1.6; }
+    .poland-streak-note { margin: 0; padding: 15px 18px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 11px; line-height: 1.8; }
+    .poland-year-card { margin-top: 22px; }
+    .poland-year-card .section-heading { margin-bottom: 14px; flex-wrap: wrap; }
+    .poland-year-card h3 { margin: 0; font-size: 19px; }
+    .poland-year-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0; color: var(--muted); font-size: 10px; }
+    .poland-year-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .poland-year-legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--poland-inside); }
+    .poland-year-legend span:last-child i { background: var(--poland-outside); }
+    .poland-travel-details .history-bar span { background: var(--poland-outside); }
+    .poland-travel-details summary { cursor: pointer; color: var(--ink); font-size: 14px; font-weight: 700; }
+    .poland-travel-details summary small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .poland-travel-details[open] summary { margin-bottom: 20px; }
+    #polandHistoryPage:not([hidden]) .poland-ring-progress { animation: poland-ring-fill 1.1s cubic-bezier(.16, 1, .3, 1) both; }
+    @keyframes poland-ring-fill { from { stroke-dasharray: 0 100; } }
     .history-year-list, .history-country-list { display: grid; border-top: 1px solid var(--line); }
     .history-year-row, .history-country-row { display: grid; grid-template-columns: minmax(90px,1fr) minmax(90px,2fr) auto; align-items: center; gap: 14px; min-height: 48px; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .history-year-row { grid-template-columns: 54px minmax(0,1fr) 85px; }
+    .history-year-row > span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .history-country-row { grid-template-columns: minmax(0,1.2fr) minmax(0,2fr) 170px; }
     .history-year-row strong, .history-country-row strong { font-size: 12px; }
-    .history-bar { height: 7px; overflow: hidden; background: #e3e9e6; }
+    .history-bar { height: 7px; overflow: hidden; border-radius: 8px; background: #e3e9e6; }
     .history-bar span { display: block; height: 100%; background: var(--green); }
     .history-country-name { display: grid; grid-template-columns: 64px minmax(0,1fr); align-items: center; gap: 6px; min-width: 0; }
     .history-country-name > .history-country-flag, .history-daily-country .history-country-flag { justify-self: center; }
     .history-country-flag { width: auto; height: 22px; max-width: 56px; flex: 0 0 auto; border: 2px solid #000; border-radius: 4px; background: #fff; object-fit: contain; }
-    .history-country-detail { color: var(--muted); font-size: 10px; text-align: right; }
+    .history-country-name strong { overflow-wrap: anywhere; }
+    .history-country-detail { min-width: 0; color: var(--muted); font-size: 10px; text-align: right; font-variant-numeric: tabular-nums; }
     .history-daily-header, .history-daily-row { display: grid; grid-template-columns: minmax(110px,.7fr) minmax(130px,1fr) minmax(0,2fr); gap: 14px; }
     .history-daily-header { padding: 10px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; font-weight: 700; }
     .history-daily-row { align-items: start; padding: 11px 0; border-top: 1px solid var(--line); }
@@ -283,7 +349,13 @@
     .expense-amount { min-width: 0; padding-left: 4px; text-align: right; white-space: nowrap; } /* PL: Utrzymuj kwoty w osobnej, niełamanej kolumnie. | ES-CO: Mantiene los importes alineados sin partirlos. */
     .expense-amount b { display: block; font-size: 12px; white-space: nowrap; } /* PL: Wyróżnij zapisaną kwotę PLN bez zawijania. | ES-CO: Resalta el valor PLN sin saltos de línea. */
     .expense-amount small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; } /* PL: Pokaż pod spodem wartość w walucie lokalnej. | ES-CO: Muestra debajo el valor en moneda local. */
-    .delete-button { grid-column: 2 / 4; justify-self: end; padding: 3px 0 0; border: 0; background: transparent; color: #a64c31; font-size: 10px; } /* PL: Umieść akcję usunięcia pod opisem po prawej. | ES-CO: Ubica la acción de borrar debajo de la descripción. */
+    .expense-actions { grid-column: 2 / 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0 12px; }
+    .delete-button { padding: 3px 0 0; border: 0; background: transparent; color: #a64c31; font-size: 10px; } /* PL: Umieść akcję usunięcia pod opisem po prawej. | ES-CO: Ubica la acción de borrar debajo de la descripción. */
+    .loading-state { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 100px; color: var(--muted); font-size: 12px; }
+    .loading-spinner { width: 18px; height: 18px; border: 2px solid #d5e0e5; border-top-color: var(--green); border-radius: 50%; animation: loading-spin .75s linear infinite; }
+    .loading-shimmer { display: inline-block; min-width: 5ch; border-radius: 4px; color: transparent !important; background: linear-gradient(90deg, #e8eeeb 25%, #f6f8f6 50%, #e8eeeb 75%); background-size: 200% 100%; animation: loading-shimmer 1.3s ease-in-out infinite; }
+    @keyframes loading-spin { to { transform: rotate(360deg); } }
+    @keyframes loading-shimmer { to { background-position: -200% 0; } }
     .empty-state { padding: 38px 12px; color: var(--muted); text-align: center; } /* PL: Wyśrodkuj instrukcję pustego dnia. | ES-CO: Centra la invitación cuando no hay gastos. */
     .empty-state strong { display: block; margin-bottom: 6px; color: var(--ink); font-family: "Quicksand", sans-serif; font-size: 19px; font-weight: 700; } /* PL: Wyróżnij tytuł pustego stanu fontem Quicksand. | ES-CO: Resalta el estado vacío con Quicksand. */
     .empty-state p { margin: 0 auto 15px; max-width: 230px; font-size: 11px; line-height: 1.55; } /* PL: Ogranicz szerokość krótkiej instrukcji. | ES-CO: Limita el ancho de la instrucción breve. */
@@ -326,6 +398,82 @@
     .auth-card input { height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--ink); }
     /* PL: Zachowaj miejsce na komunikat logowania. | ES-CO: Reserva espacio para mensajes de acceso. */
     .auth-status { min-height: 20px; font-size: 11px !important; }
+
+    .sidebar { border-color: var(--line); background: #071226; }
+    .brand-mark { border: 0; background: linear-gradient(145deg, #61ceff, #397cff); box-shadow: 0 6px 20px rgba(55, 124, 255, .3); }
+    .nav-label { color: #7c90aa; }
+    .nav-link { border-radius: 10px; color: #9aacc4; transition: background .18s ease, color .18s ease; }
+    .nav-link:hover { background: rgba(66, 143, 246, .1); color: var(--ink); }
+    .nav-link.active { background: rgba(67, 139, 255, .17); color: #a9d2ff; }
+    main { width: min(1480px, 100%); padding-top: 32px; }
+    .topbar { margin-bottom: 25px; }
+    .trip-picker select { color: var(--ink); }
+    .trip-picker option { background: #0d1b32; color: var(--ink); }
+    .quiet-button { border-color: var(--line); background: rgba(255,255,255,.025); color: #d6e5fa; }
+    .quiet-button:hover { background: rgba(88, 168, 255, .12); }
+    .primary-button { border: 0; background: linear-gradient(120deg, #3979ef, #2aabdc); box-shadow: 0 7px 22px rgba(55, 124, 255, .24); }
+    .primary-button:hover { background: linear-gradient(120deg, #4b8ff6, #38b8e4); }
+    .eyebrow { color: #71c7ff; }
+    h1 { letter-spacing: -.035em; }
+    .trip-countdown { border: 1px solid rgba(244, 200, 107, .22); border-left: 3px solid var(--yellow); border-radius: 12px; background: linear-gradient(120deg, rgba(244, 200, 107, .08), #142039 70%); }
+    .stats { gap: 13px; margin: 24px 0 30px; }
+    .stat { min-height: 112px; border-radius: 13px; background: linear-gradient(145deg, #11213c, #0d1b32 72%); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+    .stat:nth-child(1) { border-top-color: rgba(75, 143, 246, .72); }
+    .stat:nth-child(2) { border-top-color: rgba(80, 200, 239, .62); }
+    .stat:nth-child(3) { border-top-color: rgba(241, 124, 165, .62); }
+    .stat-label { color: #a4b4ca; }
+    .stat-value { font-size: clamp(15px, 1.65vw, 22px); letter-spacing: -.045em; white-space: nowrap; }
+    .sync-status { color: #a4b4ca; }
+    .chart-grid { gap: 16px; margin-top: 16px; }
+    .chart-panel { border-radius: 20px; background: radial-gradient(ellipse at 80% 0%, rgba(52, 126, 223, .11), transparent 65%), linear-gradient(145deg, #11213c, #0d1b32 75%); box-shadow: inset 0 1px 0 rgba(168, 209, 255, .04), 0 12px 30px rgba(0,0,0,.15); }
+    .chart-panel-head { margin-bottom: 20px; }
+    .chart-total { padding: 6px 9px; border: 1px solid rgba(112, 184, 255, .13); border-radius: 20px; background: rgba(69, 144, 246, .07); font-size: 10px; }
+    .chart-total { color: #8bc6ff; }
+    .chart-empty { background: rgba(13, 27, 50, .96); }
+    .section-heading { border-bottom-color: var(--line); }
+    .content-grid { gap: clamp(24px, 3vw, 40px); }
+    .day-row { border-bottom-color: rgba(142, 178, 225, .1); }
+    .day-row:hover { border-radius: 10px; background: rgba(79, 152, 255, .08); }
+    .day-row.selected { border-radius: 11px; background: #122441; box-shadow: inset 3px 0 #4f9cff, 0 8px 24px rgba(0,0,0,.14); }
+    .day-date { background: #1a2e4a; }
+    .day-row.selected .day-date { background: linear-gradient(145deg, #4b8ff6, #2875d8); }
+    .budget-track { background: #263751; }
+    .expense-panel { padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(145deg, #11213c, #0d1b32 75%); box-shadow: 0 12px 30px rgba(0,0,0,.14); }
+    .expense-panel .section-heading { border-bottom-color: var(--line); }
+    .expense-item { border-bottom-color: rgba(142, 178, 225, .1); }
+    .category-mark { background: #193157; color: #8dc2ff; }
+    .category-mark.orange { background: rgba(241, 124, 165, .14); color: #ff9fbd; }
+    .category-mark.blue { background: rgba(80, 200, 239, .13); color: #83ddf6; }
+    .expense-rate, .paid-button, .edit-button { color: #8fbfff; }
+    .delete-button { color: #ff91ae; }
+    .empty-state strong { color: var(--ink); }
+    .loading-spinner { border-color: #253853; border-top-color: #68acff; }
+    .loading-shimmer { background: linear-gradient(90deg, #182d4b 25%, #223d60 50%, #182d4b 75%); background-size: 200% 100%; }
+    .history-stat, .airport-board { border-radius: 12px; }
+    .airport-board { background: #0d1b32; }
+    .history-bar { background: #263751; }
+    .history-flight-status.is-future { color: #ffc477; }
+    .history-empty { color: var(--muted); }
+    .history-more-button { border-radius: 8px; }
+    .trip-summary { border-color: var(--line); }
+    .day-page-heading { border-bottom-color: var(--line); }
+    .day-map, .flight-route-map { background: #0d1b32; }
+    .detail-heading { border-bottom-color: var(--line); }
+    .polish-map-label { box-shadow: 0 1px 5px rgba(0,0,0,.45); }
+    dialog { border-radius: 16px; background: #0d1b32; box-shadow: 0 28px 90px rgba(0,0,0,.65); }
+    dialog::backdrop { background: rgba(3, 10, 23, .76); }
+    .dialog-head { border-bottom-color: var(--line); }
+    .field label { color: #c3d1e5; }
+    .field input, .field select, .auth-card input { border-color: #29415e; background: #08172b; color: var(--ink); }
+    .field input::placeholder, .auth-card input::placeholder { color: #7c90aa; }
+    .field input:focus, .field select:focus, .auth-card input:focus { border-color: #5c9dff; box-shadow: 0 0 0 3px rgba(70, 140, 246, .17); }
+    .conversion-box { border: 1px solid rgba(142, 178, 225, .12); border-radius: 10px; background: #122441; }
+    .pln-preview strong { color: #8bc6ff; }
+    .toast { border: 1px solid var(--line); border-radius: 10px; background: #142744; }
+    .auth-panel { background: radial-gradient(ellipse at 55% 0%, rgba(62, 134, 246, .18), transparent 52%), var(--paper); }
+    .auth-card { border-radius: 16px; background: linear-gradient(145deg, #11213c, #0d1b32 75%); }
+    .auth-card input { color-scheme: dark; }
+    .country-flag, .history-airport-flag, .history-country-flag { border-color: #29415e; }
 
     @media (max-width: 920px) { /* PL: Przełącz układ na jedną kolumnę na tabletach. | ES-CO: Cambia a una columna en tabletas. */
       .app-shell { grid-template-columns: 205px minmax(0, 1fr); } /* PL: Zwęż boczną nawigację. | ES-CO: Reduce el ancho de la navegación lateral. */
@@ -394,10 +542,30 @@
       .history-stat span, .history-stat small { font-size: 9px; }
       .history-stat strong { font-size: 18px; }
       #topForeignCountry { font-size: 14px; line-height: 1.2; }
-      .poland-year-row { grid-template-columns: 42px minmax(0,1fr) auto; gap: 7px; }
+      .poland-year-row { grid-template-columns: 38px minmax(0,1fr) 67px; gap: 9px; }
       .poland-year-copy span, .poland-year-note { font-size: 9px; }
-      .history-year-row { grid-template-columns: minmax(70px,1fr) minmax(65px,1fr) auto; gap: 7px; font-size: 10px; }
-      .history-country-row { grid-template-columns: minmax(150px,1.6fr) minmax(50px,.7fr) auto; gap: 7px; font-size: 10px; }
+      .history-year-row { grid-template-columns: 40px minmax(0,1fr) 64px; gap: 10px; font-size: 10px; }
+      .history-country-row { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 7px 14px; padding: 13px 0; }
+      .history-country-row .history-country-name { grid-column: 1; grid-row: 1 / 3; grid-template-columns: 44px minmax(0,1fr); }
+      .history-country-row .history-bar { grid-column: 2; grid-row: 2; }
+      .history-country-row .history-country-detail { grid-column: 2; grid-row: 1; text-align: left; }
+      .history-country-row .history-country-name strong { font-size: 11px; }
+      .poland-overview { grid-template-columns: minmax(0,1fr); gap: 14px; }
+      .poland-presence-card { padding: 18px; }
+      .poland-presence-visual { width: 180px; }
+      .poland-primary-metrics { gap: 10px; }
+      .poland-primary-metrics .history-stat { padding: 16px 12px; }
+      .poland-primary-metrics .history-stat strong { font-size: 30px; }
+      .poland-primary-metrics .history-stat span, .poland-primary-metrics .history-stat small { font-size: 10px; }
+      .poland-year-card, .poland-travel-details { padding: 16px 13px; }
+      .poland-travel-details .history-stat-row { grid-template-columns: minmax(0,1fr); }
+      .poland-travel-details .history-stat { padding: 14px; }
+      .poland-streak-note { padding: 12px; font-size: 10px; }
+      #polandTimeSection > .history-stat-row { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+      #polandTimeSection > .history-stat-row .history-stat { padding: 15px 12px; }
+      #polandTimeSection > .history-stat-row .history-stat:last-child { grid-column: 1 / -1; }
+      #polandTimeSection > .history-stat-row .history-stat span, #polandTimeSection > .history-stat-row .history-stat small { font-size: 10px; }
+      #polandTimeSection > .history-stat-row .history-stat strong { font-size: 26px; }
       .history-country-detail { font-size: 9px; }
       .history-daily-header { display: none; }
       .history-daily-row { grid-template-columns: minmax(88px,.7fr) minmax(0,1.3fr); gap: 6px 10px; }
@@ -417,8 +585,33 @@
       .expense-form { padding-inline: 17px; } /* PL: Zmniejsz boczne paddingi modalu. | ES-CO: Reduce el relleno lateral del diálogo. */
       .dialog-head { padding-inline: 17px; } /* PL: Dopasuj nagłówek modalu do formularza. | ES-CO: Alinea el encabezado con el formulario. */
     }
+    @media (max-width: 640px) {
+      .view-tabs { position: sticky; top: 0; z-index: 5; flex-wrap: nowrap; gap: 18px; overflow-x: auto; margin: -10px -17px 20px; padding: 0 17px; background: rgba(7, 19, 38, .96); scrollbar-width: none; }
+      .view-tabs::-webkit-scrollbar, .chart-grid::-webkit-scrollbar { display: none; }
+      .view-tab { flex: 0 0 auto; white-space: nowrap; }
+      .hero-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+      .hero-row > div { min-width: 0; }
+      h1 { font-size: clamp(27px, 7.5vw, 35px); }
+      .subheading { font-size: 11px; }
+      .trip-countdown { width: 88px; min-width: 0; gap: 8px; padding: 9px 8px; }
+      .count-number { font-size: 25px; }
+      .trip-countdown span:last-child { font-size: 9px; }
+      .stat { min-height: 76px; padding: 10px 11px; }
+      .stat-label { margin-bottom: 5px; font-size: 9px; }
+      .stat-value { font-size: clamp(14px, 4.2vw, 17px); }
+      .stat-detail { margin-top: 4px; font-size: 8px; }
+      .chart-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; margin: 16px 0 27px; }
+      .chart-panel { min-width: 0; }
+      .chart-panel:nth-child(2) { order: -1; }
+      .category-chart-content { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+      .category-chart-wrap { height: 230px; }
+      .category-breakdown li { gap: 4px; padding: 6px 0; }
+    }
     @media (prefers-reduced-motion: reduce) { /* PL: Szanuj preferencję ograniczenia animacji. | ES-CO: Respeta la preferencia de reducir movimiento. */
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } /* PL: Wyłącz płynne przewijanie i skróć przejścia. | ES-CO: Desactiva desplazamiento suave y reduce transiciones. */
+      .loading-spinner, .loading-shimmer { animation-duration: .01ms !important; }
+      .chart-revealed .category-share-track > span, .chart-revealed .category-chart-center, .chart-revealed .category-breakdown li { animation: none; }
+      #polandHistoryPage:not([hidden]) .poland-ring-progress { animation: none; }
     }
   /* PL: Zakończ definicje CSS dokumentu. | ES-CO: Termina las reglas CSS del documento. */
   </style>
@@ -586,7 +779,14 @@
           <!-- PL: Pokaż udział każdej kategorii w łącznej sumie. | ES-CO: Muestra el aporte de cada categoría al total. -->
           <figure class="chart-panel">
             <figcaption class="chart-panel-head"><h3>Według kategorii</h3><span class="chart-total" id="categoryChartTotal">0,00 PLN</span></figcaption>
-            <div class="chart-wrap category-chart-wrap"><canvas id="categoryChart" aria-label="Suma wydatków według kategorii"></canvas><p class="chart-empty" id="categoryChartEmpty">Kategorie pojawią się po dodaniu wydatków.</p></div>
+            <div class="category-chart-content">
+              <div class="chart-wrap category-chart-wrap">
+                <canvas id="categoryChart" aria-label="Suma wydatków według kategorii"></canvas>
+                <div class="category-chart-center" aria-hidden="true"><span>ŁĄCZNIE WYDANO</span><strong id="categoryChartCenter">0,00 PLN</strong></div>
+                <p class="chart-empty" id="categoryChartEmpty">Kategorie pojawią się po dodaniu wydatków.</p>
+              </div>
+              <ul class="category-breakdown" id="categoryBreakdown" aria-label="Kwoty i udział wydatków według kategorii"></ul>
+            </div>
           </figure>
         </div>
       </section>
@@ -657,20 +857,40 @@
       </section>
 
       <section id="polandHistoryPage" hidden aria-labelledby="polandHistoryPageTitle">
-        <div class="section-heading"><div><h1 id="polandHistoryPageTitle">Czas w Polsce</h1><p>Osobista analiza pobytu i wyjazdów</p></div></div>
-        <section class="history-section" aria-labelledby="daysOutsideTitle">
-          <div class="section-heading"><div><h2 id="daysOutsideTitle">Dni poza Polską</h2><p>Zarejestrowane pobyty do dziś</p></div></div>
-          <div class="history-stat-row"><article class="history-stat"><span>Dni poza Polską</span><strong id="daysOutsideTotal">0</strong><small>Bez przyszłych pobytów</small></article><article class="history-stat"><span>Pobyty poza Polską</span><strong id="foreignStaysTotal">0</strong><small>Zarejestrowane okresy</small></article><article class="history-stat"><span>Najczęstszy kraj</span><strong id="topForeignCountry">—</strong><small id="topForeignCountryDays">0 dni</small></article></div>
-          <div id="daysOutsideByYear" class="history-year-list"></div>
-        </section>
+        <div class="section-heading"><div><span class="eyebrow">POBYT I PODRÓŻE</span><h1 id="polandHistoryPageTitle">Czas w Polsce</h1><p id="polandAnalysisRange">Okres analizy</p></div></div>
 
         <section id="polandTimeSection" class="history-section" aria-labelledby="polandTimeTitle">
-          <div class="section-heading"><div><h2 id="polandTimeTitle">Czas w Polsce</h2><p id="polandAnalysisRange">Okres analizy</p></div></div>
-          <div class="history-stat-row"><article class="history-stat"><span>W Polsce</span><strong id="polandDaysCurrent">0</strong><small id="polandDaysForecast">Prognoza: 0 dni</small></article><article class="history-stat"><span>Poza Polską</span><strong id="polandOutsideCurrent">0</strong><small id="polandOutsideForecast">Prognoza: 0 dni</small></article><article class="history-stat"><span>Obecność w Polsce</span><strong id="polandPresenceCurrent">0%</strong><small id="polandPresenceForecast">Prognoza: 0%</small></article></div>
-          <div class="history-stat-row"><article class="history-stat"><span>Wyjazdy prywatne</span><strong id="polandPrivateCurrent">0</strong><small id="polandPrivateForecast">Prognoza: 0 dni</small></article><article class="history-stat"><span>Wyjazdy służbowe</span><strong id="polandBusinessCurrent">0</strong><small id="polandBusinessForecast">Prognoza: 0 dni</small></article><article class="history-stat"><span>Dni wspólne w Polsce</span><strong id="polandSharedCurrent">0</strong><small id="polandSharedForecast">Prognoza: 0 dni</small><small id="polandLongestStreak">Najdłuższy pobyt: 0 dni</small></article></div>
-          <div class="section-heading"><div><h3>Rok po roku</h3><p>Obecność i wyjazdy</p></div></div>
-          <div id="polandYearlyList" class="poland-year-list"></div>
+          <div class="poland-overview">
+            <article class="poland-presence-card">
+              <h2 id="polandTimeTitle">Obecność w Polsce</h2>
+              <div class="poland-presence-visual">
+                <svg id="polandPresenceRing" viewBox="0 0 200 200" role="img" aria-label="Obecność w Polsce" hidden>
+                  <circle class="poland-ring-track" cx="100" cy="100" r="82" fill="none" stroke-width="12"/>
+                  <circle class="poland-ring-progress" id="polandPresenceArc" cx="100" cy="100" r="82" fill="none" stroke-width="12" pathLength="100" stroke-dasharray="0 100"/>
+                </svg>
+                <div class="poland-presence-value"><strong id="polandPresenceCurrent">—</strong><span>analizowanego okresu</span></div>
+              </div>
+              <small id="polandPresenceForecast">Brak prognozy</small>
+            </article>
+            <div class="poland-overview-details">
+              <div class="poland-primary-metrics">
+                <article class="history-stat"><span>W Polsce · dni</span><strong id="polandDaysCurrent">—</strong><small id="polandDaysForecast">Brak prognozy</small></article>
+                <article class="history-stat"><span>Poza Polską · dni</span><strong id="polandOutsideCurrent">—</strong><small id="polandOutsideForecast">Brak prognozy</small></article>
+              </div>
+              <p class="poland-streak-note" id="polandLongestStreak">Brak danych</p>
+            </div>
+          </div>
+          <div class="history-stat-row"><article class="history-stat"><span>Wyjazdy prywatne · dni</span><strong id="polandPrivateCurrent">—</strong><small id="polandPrivateForecast">Brak prognozy</small></article><article class="history-stat"><span>Wyjazdy służbowe · dni</span><strong id="polandBusinessCurrent">—</strong><small id="polandBusinessForecast">Brak prognozy</small></article><article class="history-stat"><span>Dni wspólne w Polsce</span><strong id="polandSharedCurrent">—</strong><small id="polandSharedForecast">Brak prognozy</small></article></div>
+          <div class="poland-year-card">
+            <div class="section-heading"><div><h3>Rok po roku</h3><p>Udział pobytu w analizie rocznej</p></div><p class="poland-year-legend"><span><i aria-hidden="true"></i>W Polsce</span><span><i aria-hidden="true"></i>Poza Polską</span></p></div>
+            <div id="polandYearlyList" class="poland-year-list"></div>
+          </div>
         </section>
+        <details class="history-section poland-travel-details">
+          <summary id="daysOutsideTitle">Szczegóły wyjazdów<small>Zarejestrowane pobyty i dni poza Polską według roku</small></summary>
+          <div class="history-stat-row"><article class="history-stat"><span>Dni poza Polską</span><strong id="daysOutsideTotal">0</strong><small>Bez przyszłych pobytów</small></article><article class="history-stat"><span>Pobyty poza Polską</span><strong id="foreignStaysTotal">0</strong><small>Zarejestrowane okresy</small></article><article class="history-stat"><span>Najczęstszy kraj</span><strong id="topForeignCountry">—</strong><small id="topForeignCountryDays">0 dni</small></article></div>
+          <div id="daysOutsideByYear" class="history-year-list"></div>
+        </details>
       </section>
 
       <section id="countriesHistoryPage" hidden aria-labelledby="countriesHistoryPageTitle">
