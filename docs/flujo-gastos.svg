@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1740" viewBox="0 0 1900 1740" role="img" aria-labelledby="title description">
+  <title id="title">Flujo de funciones para gastos, importación y exportación</title>
+  <desc id="description">Describe la cadena para crear o editar gastos, consultar tasas, guardar con Supabase, marcar o borrar gastos y las rutas de importación Excel y exportación CSV.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#46617f"/></marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #20344d; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #52677e; }
+      .head { font-size: 16px; font-weight: 700; }
+      .body { font-size: 13px; fill: #455d78; }
+      .small { font-size: 12px; fill: #52677e; }
+      .panel { fill: #f7faff; stroke: #8da7c3; stroke-width: 2; }
+      .node { fill: #fff; stroke: #5a7fad; stroke-width: 2; rx: 12; }
+      .green { fill: #edf8f1; stroke: #4a9366; stroke-width: 2; rx: 12; }
+      .orange { fill: #fff5e8; stroke: #c17a31; stroke-width: 2; rx: 12; }
+      .purple { fill: #f4effa; stroke: #8969ad; stroke-width: 2; rx: 12; }
+      .note { fill: #fff7e8; stroke: #c17a31; stroke-width: 2; rx: 12; }
+      .arrow { fill: none; stroke: #46617f; stroke-width: 2.5; marker-end: url(#arrow); }
+      .green-arrow { fill: none; stroke: #4a9366; stroke-width: 2.5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1900" height="1740" fill="#fff"/>
+  <text class="title" x="48" y="52">Gastos: formularios, validación, guardado y archivos</text>
+  <text class="subtitle" x="48" y="80">Cada flecha representa el flujo principal entre funciones; los cuadros laterales describen ramas opcionales.</text>
+
+  <rect class="panel" x="48" y="112" width="870" height="1560" rx="18"/>
+  <text class="head" x="78" y="152">A · Crear o editar un gasto</text>
+  <rect class="node" x="92" y="190" width="340" height="105" rx="12"/>
+  <text class="head" x="262" y="226" text-anchor="middle">openExpenseDialog()</text>
+  <text class="small" x="262" y="255" text-anchor="middle">Formulario nuevo; fecha del día elegido</text>
+  <rect class="node" x="534" y="190" width="340" height="105" rx="12"/>
+  <text class="head" x="704" y="226" text-anchor="middle">openEditExpenseDialog(id)</text>
+  <text class="small" x="704" y="255" text-anchor="middle">Rellena el formulario desde expenses</text>
+  <rect class="node" x="172" y="350" width="620" height="105" rx="12"/>
+  <text class="head" x="482" y="386" text-anchor="middle">Formulario del gasto</text>
+  <text class="body" x="482" y="415" text-anchor="middle">Fecha · categoría · descripción · importe · moneda · tasa · estado · pago</text>
+  <path class="arrow" d="M262 295 V330 H350 V340"/>
+  <path class="arrow" d="M704 295 V330 H610 V340"/>
+
+  <rect class="orange" x="172" y="500" width="620" height="140" rx="12"/>
+  <text class="head" x="482" y="538" text-anchor="middle">selectedCurrencyCode() → fetchRate()</text>
+  <text class="body" x="482" y="567" text-anchor="middle">PLN: fija tasa 1. Para otra moneda: consulta Frankfurter.</text>
+  <text class="small" x="482" y="594" text-anchor="middle">Fecha pasada: tasa histórica · fecha futura: tasa más reciente</text>
+  <text class="small" x="482" y="617" text-anchor="middle">Si falla: deja que la persona escriba una tasa manual</text>
+  <path class="arrow" d="M482 455 V490"/>
+
+  <rect class="node" x="172" y="685" width="620" height="100" rx="12"/>
+  <text class="head" x="482" y="722" text-anchor="middle">updatePreview()</text>
+  <text class="body" x="482" y="751" text-anchor="middle">Importe local × tasa = vista previa en PLN; aún no guarda</text>
+  <path class="arrow" d="M482 640 V675"/>
+  <text class="small" x="500" y="670">importe / tasa cambian</text>
+
+  <rect class="node" x="172" y="830" width="620" height="140" rx="12"/>
+  <text class="head" x="482" y="868" text-anchor="middle">saveExpense(event)</text>
+  <text class="body" x="482" y="897" text-anchor="middle">Valida sesión, viaje, descripción, moneda e importes positivos</text>
+  <text class="small" x="482" y="925" text-anchor="middle">Redondea importe (2), tasa (8) y PLN (2); evita doble envío</text>
+  <text class="small" x="482" y="948" text-anchor="middle">Elige INSERT para nuevo o UPDATE para editar</text>
+  <path class="arrow" d="M482 785 V820"/>
+
+  <rect class="green" x="172" y="1015" width="620" height="120" rx="12"/>
+  <text class="head" x="482" y="1053" text-anchor="middle">Supabase Data API → PostgreSQL + RLS</text>
+  <text class="body" x="482" y="1082" text-anchor="middle">Guarda expenses con user_id, trip_id, tasa y valores de pago</text>
+  <text class="small" x="482" y="1108" text-anchor="middle">La base decide si esa sesión puede escribir la fila</text>
+  <path class="green-arrow" d="M482 970 V1005"/>
+
+  <rect class="green" x="172" y="1180" width="620" height="135" rx="12"/>
+  <text class="head" x="482" y="1218" text-anchor="middle">Actualiza estado y confirma</text>
+  <text class="body" x="482" y="1247" text-anchor="middle">Mapea la fila guardada → expenses → selectedDate</text>
+  <text class="small" x="482" y="1275" text-anchor="middle">render() · cierra el diálogo · showToast()</text>
+  <path class="green-arrow" d="M482 1135 V1170"/>
+
+  <rect class="note" x="92" y="1360" width="782" height="245" rx="12"/>
+  <text class="head" x="120" y="1400">Acciones sobre gastos ya guardados</text>
+  <text class="body" x="120" y="1435">• markExpensePaid(id): UPDATE de expense_status; si otra sesión cambió la fila, recarga.</text>
+  <text class="body" x="120" y="1472">• deleteExpense(id): DELETE; elimina del estado solo tras confirmación de Supabase.</text>
+  <text class="body" x="120" y="1509">• openEditExpenseDialog(id): reutiliza el formulario y saveExpense() para UPDATE.</text>
+  <text class="body" x="120" y="1546">• renderExpenses() conecta data-paid, data-delete, data-edit y data-add-expense.</text>
+  <text class="small" x="120" y="1579">Los errores se muestran; no se presenta una escritura fallida como exitosa.</text>
+
+  <rect class="panel" x="948" y="112" width="604" height="750" rx="18"/>
+  <text class="head" x="978" y="152">B · Importación Excel (código existente)</text>
+  <rect class="orange" x="1000" y="190" width="500" height="90" rx="12"/>
+  <text class="head" x="1250" y="225" text-anchor="middle">importWorkbook(file)</text>
+  <text class="small" x="1250" y="253" text-anchor="middle">Función implementada; la interfaz actual no tiene botón</text>
+  <rect class="node" x="1000" y="320" width="500" height="105" rx="12"/>
+  <text class="head" x="1250" y="357" text-anchor="middle">parseExpenseWorkbook(file)</text>
+  <text class="body" x="1250" y="386" text-anchor="middle">read-excel-file lee localmente Dziennik y Podsumowanie</text>
+  <text class="small" x="1250" y="408" text-anchor="middle">Valida columnas; prepara viaje, días, hoteles, vuelos y gastos</text>
+  <rect class="node" x="1000" y="465" width="500" height="85" rx="12"/>
+  <text class="head" x="1250" y="500" text-anchor="middle">Previsualiza y pide confirmación</text>
+  <text class="small" x="1250" y="526" text-anchor="middle">Cancela sin guardar si la persona no confirma</text>
+  <rect class="green" x="1000" y="590" width="500" height="135" rx="12"/>
+  <text class="head" x="1250" y="627" text-anchor="middle">Upsert en Supabase</text>
+  <text class="body" x="1250" y="656" text-anchor="middle">trips → trip_days → trip_reservations → expenses</text>
+  <text class="small" x="1250" y="684" text-anchor="middle">source_ref evita duplicados; la lectura local no sube el Excel</text>
+  <rect class="node" x="1000" y="765" width="500" height="65" rx="12"/>
+  <text class="head" x="1250" y="805" text-anchor="middle">loadTrips() vuelve a cargar la vista</text>
+  <path class="arrow" d="M1250 280 V310"/>
+  <path class="arrow" d="M1250 425 V455"/>
+  <path class="green-arrow" d="M1250 550 V580"/>
+  <path class="green-arrow" d="M1250 725 V755"/>
+
+  <rect class="panel" x="948" y="900" width="604" height="772" rx="18"/>
+  <text class="head" x="978" y="940">C · Exportación CSV</text>
+  <rect class="node" x="1000" y="985" width="500" height="105" rx="12"/>
+  <text class="head" x="1250" y="1022" text-anchor="middle">Botón Exportar → exportCSV()</text>
+  <text class="body" x="1250" y="1051" text-anchor="middle">Usa la lista expenses ya cargada en memoria</text>
+  <text class="small" x="1250" y="1073" text-anchor="middle">No vuelve a consultar Supabase</text>
+  <rect class="node" x="1000" y="1130" width="500" height="115" rx="12"/>
+  <text class="head" x="1250" y="1168" text-anchor="middle">Construye el archivo en el navegador</text>
+  <text class="body" x="1250" y="1197" text-anchor="middle">CSV con ; · comillas escapadas · BOM UTF-8</text>
+  <text class="small" x="1250" y="1222" text-anchor="middle">Incluye importe local, moneda, tasa, PLN y pago</text>
+  <rect class="green" x="1000" y="1290" width="500" height="100" rx="12"/>
+  <text class="head" x="1250" y="1327" text-anchor="middle">Descarga local</text>
+  <text class="body" x="1250" y="1356" text-anchor="middle">wydatki-podrozne.csv · el archivo no se sube</text>
+  <path class="arrow" d="M1250 1090 V1120"/>
+  <path class="arrow" d="M1250 1245 V1280"/>
+  <rect class="note" x="1000" y="1435" width="500" height="180" rx="12"/>
+  <text class="head" x="1025" y="1475">Estado que se actualiza al final</text>
+  <text class="body" x="1025" y="1510">render() actualiza resumen, días, gastos y gráficos.</text>
+  <text class="small" x="1025" y="1540">Las vistas comparten el mismo arreglo expenses en memoria.</text>
+  <text class="small" x="1025" y="1570">La sesión de Supabase determina qué datos pudo cargar.</text>
+</svg>

@@ -1,0 +1,117 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="travel-ledger-sequence" name="Secuencia simple">
+    <mxGraphModel dx="1500" dy="1080" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#1A1A1A;" value="FLUJO SIMPLE — iniciar sesión, cargar y guardar un gasto" vertex="1">
+          <mxGeometry height="35" width="1250" x="30" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#536780;" value="La aplicación corre en el navegador; no hay un servidor propio de la aplicación." vertex="1">
+          <mxGeometry height="25" width="1200" x="30" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#3A6BB5;strokeWidth=2;fontSize=13;fontStyle=1;fontColor=#1A1A1A;" value="Persona" vertex="1">
+          <mxGeometry height="58" width="180" x="10" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="browser" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#3A6BB5;strokeWidth=2;fontSize=13;fontStyle=1;fontColor=#1A1A1A;" value="Navegador&lt;br&gt;index.html + main.js" vertex="1">
+          <mxGeometry height="58" width="180" x="250" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEFD3;strokeColor=#4D9A2E;strokeWidth=2;fontSize=13;fontStyle=1;fontColor=#1A1A1A;" value="Supabase Auth" vertex="1">
+          <mxGeometry height="58" width="180" x="490" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEFD3;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#1A1A1A;" value="API de datos de Supabase&lt;br&gt;Automática (PostgREST)" vertex="1">
+          <mxGeometry height="58" width="180" x="730" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEFD3;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#1A1A1A;" value="Base de datos Supabase&lt;br&gt;PostgreSQL + RLS" vertex="1">
+          <mxGeometry height="58" width="180" x="970" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0D7;strokeColor=#C67300;strokeWidth=2;fontSize=12;fontStyle=1;fontColor=#1A1A1A;" value="Frankfurter&lt;br&gt;API externa de tasas" vertex="1">
+          <mxGeometry height="58" width="180" x="1230" y="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lifeUser" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="148" as="sourcePoint" /><mxPoint x="100" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="lifeBrowser" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="148" as="sourcePoint" /><mxPoint x="340" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="lifeAuth" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="580" y="148" as="sourcePoint" /><mxPoint x="580" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="lifeAPI" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="148" as="sourcePoint" /><mxPoint x="820" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="lifeDB" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1060" y="148" as="sourcePoint" /><mxPoint x="1060" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="lifeFX" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#A8B6C8;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1320" y="148" as="sourcePoint" /><mxPoint x="1320" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m01" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="1. Abre el sitio">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="190" as="sourcePoint" /><mxPoint x="340" y="190" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m02" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="2. Comprueba sesión guardada">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="230" as="sourcePoint" /><mxPoint x="580" y="230" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m03" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="3. Devuelve sesión o ninguna">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="580" y="270" as="sourcePoint" /><mxPoint x="340" y="270" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="loginNote" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CC;strokeColor=#B7950B;strokeWidth=2;fontSize=12;fontColor=#1A1A1A;spacingLeft=12;spacingRight=12;" value="&lt;b&gt;Solo si no hay sesión:&lt;/b&gt;&lt;br&gt;la persona ingresa email y contraseña; Supabase Auth los verifica." vertex="1">
+          <mxGeometry height="60" width="660" x="250" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="m04" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="4. Envía credenciales">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="390" as="sourcePoint" /><mxPoint x="340" y="390" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m05" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="5. Solicita inicio de sesión">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="430" as="sourcePoint" /><mxPoint x="580" y="430" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m06" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="6. Devuelve sesión autenticada">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="580" y="470" as="sourcePoint" /><mxPoint x="340" y="470" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m07" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="7. Pide viajes y gastos">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="525" as="sourcePoint" /><mxPoint x="820" y="525" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m08" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="8. Consulta la base de datos">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="565" as="sourcePoint" /><mxPoint x="1060" y="565" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m09" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="9. PostgreSQL aplica RLS y devuelve filas permitidas">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1060" y="605" as="sourcePoint" /><mxPoint x="820" y="605" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m10" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="10. Devuelve datos al navegador">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="645" as="sourcePoint" /><mxPoint x="340" y="645" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m11" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#536780;" value="11. El navegador muestra resumen, días y gastos." vertex="1">
+          <mxGeometry height="25" width="600" x="350" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="fxNote" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0D7;strokeColor=#C67300;strokeWidth=2;fontSize=12;fontColor=#1A1A1A;spacingLeft=12;spacingRight=12;" value="&lt;b&gt;Conversión opcional:&lt;/b&gt; si la moneda no es PLN, el navegador consulta Frankfurter por una tasa de referencia. Se puede corregir manualmente." vertex="1">
+          <mxGeometry height="60" width="1160" x="250" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="m12" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#C67300;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="12. Consulta tasa hacia PLN">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="790" as="sourcePoint" /><mxPoint x="1320" y="790" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m13" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#C67300;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="13. Devuelve tasa y fecha">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1320" y="830" as="sourcePoint" /><mxPoint x="340" y="830" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m14" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#465E7D;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="14. Envía el gasto">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="870" as="sourcePoint" /><mxPoint x="340" y="870" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m15" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="15. Envía cambio con sesión">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="340" y="905" as="sourcePoint" /><mxPoint x="820" y="905" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m16" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=block;endFill=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="16. Inserta o actualiza el gasto">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="940" as="sourcePoint" /><mxPoint x="1060" y="940" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m17" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="17. Devuelve resultado autorizado">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1060" y="975" as="sourcePoint" /><mxPoint x="820" y="975" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m18" edge="1" parent="1" style="edgeStyle=none;html=1;endArrow=open;dashed=1;strokeColor=#4D9A2E;strokeWidth=2;fontSize=12;fontColor=#243B5A;labelBackgroundColor=#FBFCFE;" value="18. Devuelve resultado al navegador">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1010" as="sourcePoint" /><mxPoint x="340" y="1010" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="finalNote" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#536780;" value="El navegador actualiza la pantalla con el gasto guardado." vertex="1">
+          <mxGeometry height="25" width="600" x="350" y="1030" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -14,33 +14,51 @@
   <!-- PL: Rozpocznij style układu, kolorów i responsywności. | ES-CO: Inicia estilos de diseño, colores y adaptación. -->
   <style>
     :root {
+      /* PL: Włącz natywny ciemny wygląd kontrolek przeglądarki. | ES-CO: Activa el tema oscuro nativo de los controles del navegador. */
       color-scheme: dark;
+      /* PL: Ustaw bazowy kolor tła strony. | ES-CO: Define el color base del fondo de la página. */
       --paper: #071326;
+      /* PL: Ustal kolor paneli i kart. | ES-CO: Establece el color de paneles y tarjetas. */
       --surface: #0d1b32;
+      /* PL: Ustal podstawowy kolor tekstu. | ES-CO: Establece el color principal del texto. */
       --ink: #f3f7ff;
+      /* PL: Zdefiniuj przygaszony kolor tekstów pomocniczych. | ES-CO: Define el color atenuado de los textos secundarios. */
       --muted: #9aacc4;
+      /* PL: Określ subtelny kolor obramowań. | ES-CO: Define un color sutil para los bordes. */
       --line: rgba(142, 178, 225, .16);
+      /* PL: Ustal akcent podstawowych działań interfejsu. | ES-CO: Establece el color de acento para acciones principales. */
       --green: #4b8ff6;
+      /* PL: Zdefiniuj kolor wspierający powierzchnie i wyróżnienia. | ES-CO: Define un color complementario para superficies y énfasis. */
       --mint: #142848;
+      /* PL: Zarezerwuj kolor akcentu dla etykiet. | ES-CO: Reserva un color de acento para las etiquetas. */
       --orange: #f17ca5;
+      /* PL: Ustaw kolor ostrzeżeń i informacji o terminie. | ES-CO: Establece el color de avisos y fechas límite. */
       --yellow: #f4c86b;
+      /* PL: Ustal dodatkowy kolor akcentu dla wykresów. | ES-CO: Establece un color de acento adicional para los gráficos. */
       --blue: #50c8ef;
+      /* PL: Nadaj panelom wspólny cień. | ES-CO: Aplica una sombra común a los paneles. */
       --shadow: 0 20px 60px rgba(0, 0, 0, .38);
+      /* PL: Ustal standardowy odstęp układów. | ES-CO: Define el espacio estándar entre elementos del diseño. */
       --layout-gap: 16px;
+      /* PL: Ustal odstęp między głównymi sekcjami strony. | ES-CO: Define la separación entre las secciones principales. */
       --section-gap: 32px;
+      /* PL: Ustal wewnętrzny margines paneli. | ES-CO: Define el relleno interior de los paneles. */
       --panel-padding: 24px;
+      /* PL: Ujednolić promień zaokrąglenia paneli. | ES-CO: Unifica el radio de las esquinas de los paneles. */
       --panel-radius: 16px;
       font-family: "Quicksand", "Segoe UI", sans-serif; /* PL: Ustaw Quicksand jako font całej aplikacji. | ES-CO: Define Quicksand como tipografía de toda la aplicación. */
       font-synthesis: none; /* PL: Wyłącz sztuczne odmiany brakujących znaków fontu. | ES-CO: Evita sintetizar variantes tipográficas inexistentes. */
     }
 
     * { box-sizing: border-box; } /* PL: Wliczaj padding i obramowanie do wymiarów elementu. | ES-CO: Incluye bordes y relleno dentro del tamaño del elemento. */
+    /* PL: Nadaj stronie neutralny początek bez marginesów przeglądarki i z ciemnym tłem. | ES-CO: Elimina márgenes del navegador y aplica el fondo oscuro de la página. */
     body { margin: 0; background: radial-gradient(ellipse at 68% -12%, rgba(62, 134, 246, .18), transparent 48%), var(--paper); color: var(--ink); min-width: 320px; }
     button, input, select { font: inherit; } /* PL: Dziedzicz font formularzy z całej strony. | ES-CO: Hereda la tipografía en los controles. */
     button { cursor: pointer; } /* PL: Sygnalizuj możliwość kliknięcia przycisku. | ES-CO: Indica que los botones se pueden pulsar. */
     .app-shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; } /* PL: Podziel ekran na nawigację i elastyczną treść. | ES-CO: Divide la pantalla entre navegación y contenido adaptable. */
     .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 20px 24px; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #e7eef2; } /* PL: Przyklej panel nawigacji i ułóż jego elementy pionowo. | ES-CO: Fija la navegación lateral y ordena sus elementos verticalmente. */
     .brand { display: flex; align-items: center; gap: 11px; padding: 0 5px; color: inherit; text-decoration: none; } /* PL: Wyrównaj znak i nazwę aplikacji w jednym wierszu. | ES-CO: Alinea el símbolo y el nombre de la app en una fila. */
+    /* PL: Wyrównaj symbol marki w stałym kwadratowym polu. | ES-CO: Alinea el símbolo de marca en un cuadro de tamaño fijo. */
     .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.55); border-radius: 10px; background: var(--green); color: white; font-family: "Quicksand", sans-serif; font-size: 18px; font-weight: 700; }
     .brand-copy { display: grid; gap: 2px; } /* PL: Ułóż nazwę i opis marki w dwóch wierszach. | ES-CO: Organiza el nombre y la descripción en dos líneas. */
     .brand-copy strong { font-size: 13px; letter-spacing: .04em; } /* PL: Wyróżnij nazwę marki małym kapitalikiem. | ES-CO: Resalta el nombre de marca con mayúsculas espaciadas. */
@@ -59,13 +77,18 @@
     .local-note { margin: 13px 3px 0; color: var(--muted); font-size: 10px; line-height: 1.5; } /* PL: Wyjaśnij lokalizację i kopię zapasową danych. | ES-CO: Explica dónde quedan los datos y cómo respaldarlos. */
 
     main { width: min(1240px, 100%); margin: 0 auto; padding: 28px clamp(20px, 4vw, 56px) 60px; } /* PL: Ogranicz szerokość treści i wyśrodkuj ją na ekranie. | ES-CO: Limita el ancho y centra el contenido. */
+    /* PL: Zorganizuj pasek nagłówka na treść i przyciski akcji. | ES-CO: Organiza la barra superior entre contenido y botones de acción. */
     .topbar { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: var(--layout-gap); margin-bottom: var(--section-gap); }
+    /* PL: Ułóż nawigację okruszkową w elastycznym wierszu. | ES-CO: Organiza las migas de navegación en una fila adaptable. */
     .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: 12px; }
+    /* PL: Ustaw selektor podróży obok innych elementów nagłówka. | ES-CO: Coloca el selector del viaje junto a los demás elementos del encabezado. */
     .trip-picker { position: relative; display: inline-flex; align-items: center; max-width: 230px; vertical-align: middle; }
     .trip-picker[hidden] { display: none; }
     .trip-picker select { max-width: 100%; padding: 4px 20px 4px 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline-offset: 3px; appearance: none; -webkit-appearance: none; background: transparent; color: var(--ink); font: 600 12px "Quicksand", sans-serif; cursor: pointer; }
     .trip-picker::after { position: absolute; top: 50%; right: 7px; width: 6px; height: 6px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); content: ""; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+    /* PL: Rozmieść przyciski nagłówka w jednym rzędzie. | ES-CO: Organiza los botones del encabezado en una sola fila. */
     .top-actions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); align-items: stretch; gap: 8px; }
+    /* PL: Ułóż zakładki widoków w równych kolumnach. | ES-CO: Distribuye las pestañas de vista en columnas iguales. */
     .view-tabs { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 0; margin: 0 0 var(--section-gap); border-bottom: 1px solid var(--line); }
     .view-tab { min-width: 0; padding: 16px 8px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-align: center; }
     .view-tab[aria-selected="true"] { border-color: var(--green); color: var(--ink); font-weight: 700; }

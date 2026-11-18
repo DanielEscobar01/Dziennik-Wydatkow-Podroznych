@@ -3,6 +3,11 @@
 PL: Aplikacja do prywatnego planowania wielu podróży i śledzenia wydatków. Interfejs jest po polsku.
 ES-CO: Aplicación para planear varios viajes y hacer seguimiento privado de gastos. La interfaz está en polaco.
 
+## Architektura i przepływ danych / Arquitectura y flujo de datos
+
+PL: Przewodnik po modułach aplikacji, przepływach logowania i wydatków, bazie danych oraz diagramach architektury i sekwencji znajduje się w [`docs/arquitectura-y-flujo.md`](./docs/arquitectura-y-flujo.md).
+ES-CO: La guía que explica los módulos, el acceso, el flujo de gastos y la base de datos, con diagramas de arquitectura y secuencia, está en [`docs/arquitectura-y-flujo.md`](./docs/arquitectura-y-flujo.md).
+
 ## Układ interfejsu / Distribución visual
 
 PL: Wszystkie widoki korzystają ze wspólnych zmiennych CSS w `index.html`: `--layout-gap`, `--section-gap`, `--panel-padding` i `--panel-radius`. Panele w jednym rzędzie mają równe kolumny; na telefonach układają się pionowo lub w symetryczne pary. Wielkości tekstu rozróżniają tytuły, wartości i opisy.

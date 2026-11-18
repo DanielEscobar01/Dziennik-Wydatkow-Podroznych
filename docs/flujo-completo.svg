@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2300" height="3340" viewBox="0 0 2300 3340" role="img" aria-labelledby="title description">
+  <title id="title">Mapa completa del funcionamiento de la aplicación</title>
+  <desc id="description">Diagrama maestro desde la publicación estática y autenticación hasta los viajes, gastos, reservas, mapas e historia personal. Cada sección apunta al diagrama detallado del proceso.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L12,5 L0,10 Z" fill="#46617f"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #20344d; }
+      .title { font-size: 34px; font-weight: 700; }
+      .subtitle { font-size: 17px; fill: #52677e; }
+      .lane-title { font-size: 19px; font-weight: 700; }
+      .box-title { font-size: 16px; font-weight: 700; }
+      .body { font-size: 14px; fill: #455d78; }
+      .small { font-size: 12px; fill: #52677e; }
+      .lane { fill: #f7faff; stroke: #8da7c3; stroke-width: 2; }
+      .sub-lane { fill: #fbfdff; stroke: #c4d2e0; stroke-width: 1.5; }
+      .node { fill: #ffffff; stroke: #5a7fad; stroke-width: 2; }
+      .green { fill: #edf8f1; stroke: #4a9366; stroke-width: 2; }
+      .orange { fill: #fff5e8; stroke: #c17a31; stroke-width: 2; }
+      .purple { fill: #f4effa; stroke: #8969ad; stroke-width: 2; }
+      .note { fill: #fff7e8; stroke: #c17a31; stroke-width: 1.5; }
+      .reference { fill: #edf2ff; stroke: #6b83b5; stroke-width: 1.5; }
+      .arrow { fill: none; stroke: #46617f; stroke-width: 2.5; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #8193a9; stroke-width: 2; stroke-dasharray: 8 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="2300" height="3340" fill="#ffffff"/>
+  <text class="title" x="55" y="58">Mapa maestro — cómo funciona toda la aplicación</text>
+  <text class="subtitle" x="55" y="93">Sigue el recorrido de arriba hacia abajo. Cada proceso incluye una referencia a su diagrama pequeño y detallado.</text>
+
+  <rect class="node" x="55" y="112" width="28" height="24" rx="5"/>
+  <text class="small" x="94" y="130">Código / interfaz</text>
+  <rect class="green" x="260" y="112" width="28" height="24" rx="5"/>
+  <text class="small" x="299" y="130">Supabase / datos guardados</text>
+  <rect class="orange" x="565" y="112" width="28" height="24" rx="5"/>
+  <text class="small" x="604" y="130">Servicio externo o función opcional</text>
+  <rect class="purple" x="965" y="112" width="28" height="24" rx="5"/>
+  <text class="small" x="1004" y="130">Cálculo / agrupación</text>
+  <path class="arrow" d="M1300 124 H1370"/>
+  <text class="small" x="1385" y="130">flujo principal</text>
+
+  <rect class="lane" x="48" y="155" width="2204" height="220" rx="18"/>
+  <text class="lane-title" x="78" y="193">1 · Cómo llega la aplicación al navegador</text>
+  <rect class="node" x="90" y="220" width="430" height="112" rx="12"/>
+  <text class="box-title" x="305" y="257" text-anchor="middle">Código fuente</text>
+  <text class="body" x="305" y="285" text-anchor="middle">HTML · JavaScript · CSS · recursos locales</text>
+  <text class="small" x="305" y="308" text-anchor="middle">La SPA no incluye un servidor propio</text>
+  <rect class="node" x="620" y="220" width="430" height="112" rx="12"/>
+  <text class="box-title" x="835" y="257" text-anchor="middle">GitHub Actions + Vite</text>
+  <text class="body" x="835" y="285" text-anchor="middle">Instala y compila el sitio estático en dist/</text>
+  <text class="small" x="835" y="308" text-anchor="middle">No ejecuta las funciones de la aplicación</text>
+  <rect class="node" x="1150" y="220" width="430" height="112" rx="12"/>
+  <text class="box-title" x="1365" y="257" text-anchor="middle">GitHub Pages</text>
+  <text class="body" x="1365" y="285" text-anchor="middle">Publica y sirve los archivos compilados</text>
+  <text class="small" x="1365" y="308" text-anchor="middle">Es hosting estático, no el backend de datos</text>
+  <rect class="node" x="1680" y="220" width="480" height="112" rx="12"/>
+  <text class="box-title" x="1920" y="257" text-anchor="middle">Navegador de la persona</text>
+  <text class="body" x="1920" y="285" text-anchor="middle">Carga index.html y ejecuta src/main.js</text>
+  <text class="small" x="1920" y="308" text-anchor="middle">La interfaz y la lógica viven aquí</text>
+  <path class="arrow" d="M520 276 H610"/>
+  <path class="arrow" d="M1050 276 H1140"/>
+  <path class="arrow" d="M1580 276 H1670"/>
+
+  <rect class="lane" x="48" y="400" width="2204" height="650" rx="18"/>
+  <text class="lane-title" x="78" y="440">2 · Arranque: autenticación, carga y primera pantalla</text>
+  <rect class="reference" x="1790" y="416" width="400" height="42" rx="12"/>
+  <text class="small" x="1990" y="443" text-anchor="middle">DIAGRAMA DETALLADO: flujo-arranque.svg</text>
+
+  <rect class="node" x="80" y="490" width="450" height="130" rx="12"/>
+  <text class="box-title" x="305" y="528" text-anchor="middle">La persona abre la aplicación</text>
+  <text class="body" x="305" y="558" text-anchor="middle">index.html presenta estructura y controles</text>
+  <text class="small" x="305" y="586" text-anchor="middle">Carga src/main.js</text>
+  <rect class="node" x="600" y="490" width="450" height="130" rx="12"/>
+  <text class="box-title" x="825" y="528" text-anchor="middle">src/main.js</text>
+  <text class="body" x="825" y="558" text-anchor="middle">Registra eventos y coordina estado</text>
+  <text class="small" x="825" y="586" text-anchor="middle">Ejecuta initializeAuth()</text>
+  <rect class="green" x="1120" y="490" width="450" height="130" rx="12"/>
+  <text class="box-title" x="1345" y="528" text-anchor="middle">Supabase Auth</text>
+  <text class="body" x="1345" y="558" text-anchor="middle">getSession() consulta la sesión guardada</text>
+  <text class="small" x="1345" y="586" text-anchor="middle">onAuthStateChange() escucha cambios de sesión</text>
+  <rect class="node" x="1640" y="490" width="500" height="130" rx="12"/>
+  <text class="box-title" x="1890" y="528" text-anchor="middle">renderAuthState()</text>
+  <text class="body" x="1890" y="558" text-anchor="middle">Decide si muestra acceso o contenido privado</text>
+  <text class="small" x="1890" y="586" text-anchor="middle">Sin sesión no se cargan viajes ni gastos privados</text>
+  <path class="arrow" d="M530 555 H590"/>
+  <path class="arrow" d="M1050 555 H1110"/>
+  <path class="arrow" d="M1570 555 H1630"/>
+
+  <rect class="note" x="90" y="655" width="750" height="95" rx="12"/>
+  <text class="box-title" x="115" y="690">Si no hay sesión</text>
+  <text class="body" x="115" y="720">La persona inicia sesión; Supabase Auth notifica el cambio y comienza la carga privada.</text>
+  <path class="dash" d="M1640 610 V635 H465 V645"/>
+  <rect class="note" x="900" y="655" width="1240" height="95" rx="12"/>
+  <text class="box-title" x="925" y="690">Si la sesión es válida</text>
+  <text class="body" x="925" y="720">loadTrips() obtiene viajes y días; después se preparan reservas e historia y se eligen viaje y fecha.</text>
+
+  <rect class="green" x="80" y="795" width="390" height="145" rx="12"/>
+  <text class="box-title" x="275" y="834" text-anchor="middle">loadTrips()</text>
+  <text class="body" x="275" y="864" text-anchor="middle">Lee trips + trip_days</text>
+  <text class="small" x="275" y="892" text-anchor="middle">No inventa datos si la consulta falla</text>
+  <rect class="green" x="500" y="795" width="390" height="145" rx="12"/>
+  <text class="box-title" x="695" y="834" text-anchor="middle">loadTripReservations()</text>
+  <text class="body" x="695" y="864" text-anchor="middle">Lee y agrupa reservas del viaje</text>
+  <text class="small" x="695" y="892" text-anchor="middle">La vista previa local es solo un respaldo</text>
+  <rect class="green" x="920" y="795" width="430" height="145" rx="12"/>
+  <text class="box-title" x="1135" y="834" text-anchor="middle">loadPersonalTravelHistory()</text>
+  <text class="body" x="1135" y="864" text-anchor="middle">Vuelos, estancias y análisis personal</text>
+  <text class="small" x="1135" y="892" text-anchor="middle">Incluye la carga de ubicaciones diarias</text>
+  <rect class="node" x="1380" y="795" width="390" height="145" rx="12"/>
+  <text class="box-title" x="1575" y="834" text-anchor="middle">Selecciona viaje y fecha</text>
+  <text class="body" x="1575" y="864" text-anchor="middle">Conserva la selección si todavía existe</text>
+  <text class="small" x="1575" y="892" text-anchor="middle">Después llama loadExpenses()</text>
+  <rect class="purple" x="1800" y="795" width="390" height="145" rx="12"/>
+  <text class="box-title" x="1995" y="834" text-anchor="middle">render()</text>
+  <text class="body" x="1995" y="864" text-anchor="middle">Dibuja usando el estado en memoria</text>
+  <text class="small" x="1995" y="892" text-anchor="middle">Las vistas no vuelven a pedir esos datos</text>
+  <path class="arrow" d="M470 867 H490"/>
+  <path class="arrow" d="M890 867 H910"/>
+  <path class="arrow" d="M1350 867 H1370"/>
+  <path class="arrow" d="M1770 867 H1790"/>
+  <text class="small" x="80" y="1005">Desde render() y los eventos de la interfaz, la persona abre las áreas detalladas abajo.</text>
+
+  <rect class="lane" x="48" y="1080" width="2204" height="355" rx="18"/>
+  <text class="lane-title" x="78" y="1120">3 · Viaje, resumen y días</text>
+  <rect class="reference" x="1800" y="1096" width="390" height="42" rx="12"/>
+  <text class="small" x="1995" y="1123" text-anchor="middle">DETALLE: flujo-arranque.svg</text>
+  <rect class="node" x="80" y="1170" width="320" height="170" rx="12"/>
+  <text class="box-title" x="240" y="1210" text-anchor="middle">Selección en la interfaz</text>
+  <text class="body" x="240" y="1242" text-anchor="middle">Viaje · día · navegación</text>
+  <text class="small" x="240" y="1272" text-anchor="middle">El estado marca el contexto activo</text>
+  <rect class="node" x="440" y="1170" width="380" height="170" rx="12"/>
+  <text class="box-title" x="630" y="1210" text-anchor="middle">selectDay() / moveDay()</text>
+  <text class="body" x="630" y="1242" text-anchor="middle">Cambia la fecha seleccionada</text>
+  <text class="small" x="630" y="1272" text-anchor="middle">openDayPage() abre el detalle diario</text>
+  <rect class="node" x="860" y="1170" width="320" height="170" rx="12"/>
+  <text class="box-title" x="1020" y="1210" text-anchor="middle">loadExpenses()</text>
+  <text class="body" x="1020" y="1242" text-anchor="middle">Lee gastos del viaje activo</text>
+  <text class="small" x="1020" y="1272" text-anchor="middle">Ignora respuestas de contexto antiguo</text>
+  <rect class="green" x="1220" y="1170" width="390" height="170" rx="12"/>
+  <text class="box-title" x="1415" y="1210" text-anchor="middle">Supabase: lecturas</text>
+  <text class="body" x="1415" y="1242" text-anchor="middle">trips · trip_days · expenses</text>
+  <text class="small" x="1415" y="1272" text-anchor="middle">La sesión y RLS limitan las filas</text>
+  <rect class="purple" x="1650" y="1170" width="540" height="170" rx="12"/>
+  <text class="box-title" x="1920" y="1210" text-anchor="middle">Vistas de viaje</text>
+  <text class="body" x="1920" y="1242" text-anchor="middle">renderSummary() · renderCharts()</text>
+  <text class="body" x="1920" y="1270" text-anchor="middle">renderDays() · renderExpenses() · renderDayPage()</text>
+  <path class="arrow" d="M400 1255 H430"/>
+  <path class="arrow" d="M820 1255 H850"/>
+  <path class="arrow" d="M1180 1255 H1210"/>
+  <path class="arrow" d="M1610 1255 H1640"/>
+  <text class="small" x="80" y="1392">El resumen y los gastos comparten viaje, fecha y estado; el mapa diario se explica en la sección 5.</text>
+
+  <rect class="lane" x="48" y="1460" width="2204" height="430" rx="18"/>
+  <text class="lane-title" x="78" y="1500">4 · Gastos: crear, convertir, guardar y administrar</text>
+  <rect class="reference" x="1800" y="1476" width="390" height="42" rx="12"/>
+  <text class="small" x="1995" y="1503" text-anchor="middle">DETALLE: flujo-gastos.svg</text>
+  <rect class="node" x="70" y="1545" width="320" height="150" rx="12"/>
+  <text class="box-title" x="230" y="1583" text-anchor="middle">Acción de la persona</text>
+  <text class="body" x="230" y="1614" text-anchor="middle">Añadir o editar</text>
+  <text class="small" x="230" y="1643" text-anchor="middle">O elegir exportar CSV</text>
+  <rect class="node" x="430" y="1545" width="320" height="150" rx="12"/>
+  <text class="box-title" x="590" y="1583" text-anchor="middle">Formularios</text>
+  <text class="body" x="590" y="1614" text-anchor="middle">openExpenseDialog()</text>
+  <text class="small" x="590" y="1643" text-anchor="middle">openEditExpenseDialog(id)</text>
+  <rect class="orange" x="790" y="1545" width="320" height="150" rx="12"/>
+  <text class="box-title" x="950" y="1583" text-anchor="middle">Moneda y tasa</text>
+  <text class="body" x="950" y="1614" text-anchor="middle">selectedCurrencyCode() → fetchRate()</text>
+  <text class="small" x="950" y="1643" text-anchor="middle">Frankfurter si no es PLN; la tasa se edita</text>
+  <rect class="node" x="1150" y="1545" width="320" height="150" rx="12"/>
+  <text class="box-title" x="1310" y="1583" text-anchor="middle">updatePreview()</text>
+  <text class="body" x="1310" y="1614" text-anchor="middle">Calcula el equivalente en PLN</text>
+  <text class="small" x="1310" y="1643" text-anchor="middle">Todavía no persiste el gasto</text>
+  <rect class="node" x="1510" y="1545" width="360" height="150" rx="12"/>
+  <text class="box-title" x="1690" y="1583" text-anchor="middle">Guardar formulario</text>
+  <text class="body" x="1690" y="1614" text-anchor="middle">saveExpense(): INSERT o UPDATE</text>
+  <text class="small" x="1690" y="1643" text-anchor="middle">Valida datos antes de guardar</text>
+  <rect class="green" x="1910" y="1545" width="300" height="150" rx="12"/>
+  <text class="box-title" x="2060" y="1583" text-anchor="middle">expenses</text>
+  <text class="body" x="2060" y="1614" text-anchor="middle">INSERT / UPDATE / DELETE</text>
+  <text class="small" x="2060" y="1643" text-anchor="middle">PostgreSQL aplica RLS</text>
+  <path class="arrow" d="M390 1620 H420"/>
+  <path class="arrow" d="M750 1620 H780"/>
+  <path class="arrow" d="M1110 1620 H1140"/>
+  <path class="arrow" d="M1470 1620 H1500"/>
+  <path class="arrow" d="M1870 1620 H1900"/>
+  <rect class="note" x="80" y="1730" width="680" height="105" rx="12"/>
+  <text class="box-title" x="105" y="1767">Acciones directas</text>
+  <text class="body" x="105" y="1798">markExpensePaid() → UPDATE; deleteExpense() → DELETE.</text>
+  <rect class="note" x="810" y="1730" width="680" height="105" rx="12"/>
+  <text class="box-title" x="835" y="1767">Exportación CSV</text>
+  <text class="body" x="835" y="1798">exportCSV() crea el archivo localmente; no se sube.</text>
+  <rect class="note" x="1540" y="1730" width="670" height="105" rx="12"/>
+  <text class="box-title" x="1565" y="1767">Importación Excel no conectada a la interfaz</text>
+  <text class="body" x="1565" y="1798">importWorkbook() existe, pero no tiene botón actual.</text>
+
+  <rect class="lane" x="48" y="1920" width="2204" height="490" rx="18"/>
+  <text class="lane-title" x="78" y="1960">5 · Reservas y detalle diario: cómo se dibujan los mapas</text>
+  <rect class="reference" x="1800" y="1936" width="390" height="42" rx="12"/>
+  <text class="small" x="1995" y="1963" text-anchor="middle">DETALLE: flujo-historial.svg</text>
+  <rect class="sub-lane" x="75" y="2000" width="1060" height="360" rx="16"/>
+  <text class="box-title" x="100" y="2038">A · Ruta de una reserva de vuelo</text>
+  <rect class="green" x="95" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="190" y="2107" text-anchor="middle">trip_reservations</text>
+  <text class="small" x="190" y="2138" text-anchor="middle">loadTripReservations()</text>
+  <text class="small" x="190" y="2163" text-anchor="middle">datos cargados al iniciar</text>
+  <rect class="node" x="305" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="400" y="2107" text-anchor="middle">showReservations()</text>
+  <text class="small" x="400" y="2138" text-anchor="middle">navega a la página</text>
+  <rect class="node" x="515" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="610" y="2107" text-anchor="middle">renderReservations()</text>
+  <text class="small" x="610" y="2138" text-anchor="middle">prepara lista y mapas</text>
+  <text class="small" x="610" y="2163" text-anchor="middle">renderFlightRouteMaps()</text>
+  <rect class="purple" x="725" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="820" y="2107" text-anchor="middle">flightRoutePoints()</text>
+  <text class="small" x="820" y="2138" text-anchor="middle">IATA + coordenadas</text>
+  <rect class="orange" x="935" y="2070" width="180" height="150" rx="12"/>
+  <text class="box-title" x="1025" y="2107" text-anchor="middle">Leaflet + Turf</text>
+  <text class="small" x="1025" y="2138" text-anchor="middle">gran círculo</text>
+  <text class="small" x="1025" y="2163" text-anchor="middle">mosaicos OSM</text>
+  <path class="arrow" d="M285 2145 H295"/>
+  <path class="arrow" d="M495 2145 H505"/>
+  <path class="arrow" d="M705 2145 H715"/>
+  <path class="arrow" d="M915 2145 H925"/>
+  <text class="small" x="100" y="2318">Las coordenadas de aeropuertos son datos locales; si faltan puntos, no se inventa una ruta.</text>
+
+  <rect class="sub-lane" x="1165" y="2000" width="1060" height="360" rx="16"/>
+  <text class="box-title" x="1190" y="2038">B · Mapa aproximado de un día del viaje</text>
+  <rect class="green" x="1185" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="1280" y="2107" text-anchor="middle">trip_days</text>
+  <text class="small" x="1280" y="2138" text-anchor="middle">fecha + destino</text>
+  <text class="small" x="1280" y="2163" text-anchor="middle">datos del viaje</text>
+  <rect class="node" x="1395" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="1490" y="2107" text-anchor="middle">openDayPage()</text>
+  <text class="small" x="1490" y="2138" text-anchor="middle">abre el día</text>
+  <rect class="node" x="1605" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="1700" y="2107" text-anchor="middle">renderDayPage()</text>
+  <text class="small" x="1700" y="2138" text-anchor="middle">dibuja el detalle</text>
+  <rect class="purple" x="1815" y="2070" width="190" height="150" rx="12"/>
+  <text class="box-title" x="1910" y="2107" text-anchor="middle">coordinatesForDate()</text>
+  <text class="small" x="1910" y="2138" text-anchor="middle">ciudad / coordenadas</text>
+  <rect class="orange" x="2025" y="2070" width="180" height="150" rx="12"/>
+  <text class="box-title" x="2115" y="2107" text-anchor="middle">Leaflet + OSM</text>
+  <text class="small" x="2115" y="2138" text-anchor="middle">marcador</text>
+  <text class="small" x="2115" y="2163" text-anchor="middle">no es GPS</text>
+  <path class="arrow" d="M1375 2145 H1385"/>
+  <path class="arrow" d="M1585 2145 H1595"/>
+  <path class="arrow" d="M1795 2145 H1805"/>
+  <path class="arrow" d="M2005 2145 H2015"/>
+  <text class="small" x="1190" y="2318">Si faltan coordenadas, la interfaz permite buscarlas; no presenta una ubicación como GPS.</text>
+
+  <rect class="lane" x="48" y="2440" width="2204" height="550" rx="18"/>
+  <text class="lane-title" x="78" y="2480">6 · Historia personal: vuelos, tiempo en Polonia, países y ubicaciones</text>
+  <rect class="reference" x="1800" y="2456" width="390" height="42" rx="12"/>
+  <text class="small" x="1995" y="2483" text-anchor="middle">DETALLE: flujo-historial.svg</text>
+  <rect class="node" x="80" y="2525" width="360" height="140" rx="12"/>
+  <text class="box-title" x="260" y="2564" text-anchor="middle">Pestaña de historia</text>
+  <text class="body" x="260" y="2594" text-anchor="middle">showPersonalHistoryPage()</text>
+  <text class="small" x="260" y="2622" text-anchor="middle">Historia · Polonia · países</text>
+  <rect class="node" x="480" y="2525" width="420" height="140" rx="12"/>
+  <text class="box-title" x="690" y="2564" text-anchor="middle">Carga de datos personales</text>
+  <text class="body" x="690" y="2594" text-anchor="middle">loadPersonalTravelHistory()</text>
+  <text class="small" x="690" y="2622" text-anchor="middle">loadPersonalDailyLocations()</text>
+  <rect class="green" x="940" y="2525" width="470" height="140" rx="12"/>
+  <text class="box-title" x="1175" y="2564" text-anchor="middle">Tablas Supabase + RLS</text>
+  <text class="body" x="1175" y="2594" text-anchor="middle">personal_travel_flights · personal_country_stays</text>
+  <text class="small" x="1175" y="2622" text-anchor="middle">personal_poland_analysis · personal_daily_locations</text>
+  <rect class="node" x="1450" y="2525" width="330" height="140" rx="12"/>
+  <text class="box-title" x="1615" y="2564" text-anchor="middle">renderPersonalHistory()</text>
+  <text class="body" x="1615" y="2594" text-anchor="middle">Distribuye los datos</text>
+  <text class="small" x="1615" y="2622" text-anchor="middle">por las páginas de historia</text>
+  <rect class="purple" x="1820" y="2525" width="370" height="140" rx="12"/>
+  <text class="box-title" x="2005" y="2564" text-anchor="middle">Tres vistas principales</text>
+  <text class="body" x="2005" y="2594" text-anchor="middle">renderPersonalFlights() · renderPolandTime()</text>
+  <text class="small" x="2005" y="2622" text-anchor="middle">Los datos personales son del propietario</text>
+  <path class="arrow" d="M440 2595 H470"/>
+  <path class="arrow" d="M900 2595 H930"/>
+  <path class="arrow" d="M1410 2595 H1440"/>
+  <path class="arrow" d="M1780 2595 H1810"/>
+
+  <rect class="purple" x="110" y="2720" width="650" height="145" rx="12"/>
+  <text class="box-title" x="435" y="2760" text-anchor="middle">Países y estancias</text>
+  <text class="body" x="435" y="2792" text-anchor="middle">renderDailyLocations() → buildDailyLocationRanges()</text>
+  <text class="small" x="435" y="2822" text-anchor="middle">Agrupa días por país y separa visitas intermedias</text>
+  <rect class="purple" x="825" y="2720" width="650" height="145" rx="12"/>
+  <text class="box-title" x="1150" y="2760" text-anchor="middle">Vuelos de historia personal</text>
+  <text class="body" x="1150" y="2792" text-anchor="middle">renderPersonalFlights() → renderPersonalFlightMaps()</text>
+  <text class="small" x="1150" y="2822" text-anchor="middle">mountPersonalFlightMap() + IntersectionObserver + Leaflet</text>
+  <rect class="orange" x="1540" y="2720" width="650" height="145" rx="12"/>
+  <text class="box-title" x="1865" y="2760" text-anchor="middle">Mapas de historia</text>
+  <text class="body" x="1865" y="2792" text-anchor="middle">Leaflet + Turf + OpenStreetMap</text>
+  <text class="small" x="1865" y="2822" text-anchor="middle">Se limpian al salir de la vista para liberar recursos</text>
+  <path class="arrow" d="M2005 2665 V2692 H435 V2710"/>
+  <path class="arrow" d="M2005 2665 V2692 H1150 V2710"/>
+  <path class="arrow" d="M2005 2665 V2692 H1865 V2710"/>
+  <text class="small" x="110" y="2925">Las ubicaciones se agrupan con datos diarios; no equivalen a seguimiento GPS en tiempo real.</text>
+
+  <rect class="lane" x="48" y="3020" width="2204" height="285" rx="18"/>
+  <text class="lane-title" x="78" y="3060">7 · Servicios y recursos compartidos por todos los procesos</text>
+  <rect class="green" x="80" y="3090" width="680" height="175" rx="14"/>
+  <text class="box-title" x="420" y="3130" text-anchor="middle">Un proyecto Supabase</text>
+  <text class="body" x="420" y="3162" text-anchor="middle">Auth + API REST automática (PostgREST)</text>
+  <text class="body" x="420" y="3192" text-anchor="middle">PostgreSQL almacena; RLS decide filas permitidas</text>
+  <text class="small" x="420" y="3222" text-anchor="middle">La aplicación no implementa API ni servidor propio</text>
+  <rect class="orange" x="810" y="3090" width="680" height="175" rx="14"/>
+  <text class="box-title" x="1150" y="3130" text-anchor="middle">Servicios externos cuando hacen falta</text>
+  <text class="body" x="1150" y="3162" text-anchor="middle">Frankfurter: tasas · OpenStreetMap: mosaicos</text>
+  <text class="body" x="1150" y="3192" text-anchor="middle">Turf: rutas aéreas · Leaflet: mapas en el navegador</text>
+  <text class="small" x="1150" y="3222" text-anchor="middle">No son una API propia ni una base adicional</text>
+  <rect class="node" x="1540" y="3090" width="680" height="175" rx="14"/>
+  <text class="box-title" x="1880" y="3130" text-anchor="middle">Recursos locales del navegador</text>
+  <text class="body" x="1880" y="3162" text-anchor="middle">JSON de aeropuertos · banderas · sessionStorage</text>
+  <text class="body" x="1880" y="3192" text-anchor="middle">CSV se descarga localmente; Excel se procesa en código</text>
+  <text class="small" x="1880" y="3222" text-anchor="middle">La importación Excel no tiene botón en la interfaz actual</text>
+</svg>

@@ -24,32 +24,53 @@ function dateToIso(value) {
   return match ? match[1] : '';
 }
 
+// PL: Zamień wartość komórki Excela na godzinę HH:MM lub zachowaj tekst. | ES-CO: Convierte una celda Excel a HH:MM o conserva su texto.
 function timeToText(value) {
+  // PL: Sformatuj poprawny obiekt daty jako godzinę UTC. | ES-CO: Formatea un objeto Date válido como hora UTC.
   if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString().slice(11, 16);
+  // PL: Oczyść tekstową wartość komórki. | ES-CO: Limpia el valor textual de la celda.
   const text = String(value ?? '').trim();
+  // PL: Wyodrębnij godzinę z pełnego znacznika daty ISO. | ES-CO: Extrae la hora de una marca de fecha ISO completa.
   const isoTime = text.match(/T(\d{2}:\d{2})/);
+  // PL: Zwróć znalezioną godzinę albo pierwotny tekst. | ES-CO: Devuelve la hora encontrada o el texto original.
   return isoTime ? isoTime[1] : text;
 }
 
+// PL: Podziel opis dostawcy i numer rezerwacji zapisane razem. | ES-CO: Separa el proveedor y la referencia de reserva guardados juntos.
 function splitProviderReference(value) {
+  // PL: Rozdziel tekst w miejscu środkowej kropki. | ES-CO: Divide el texto por el punto medio.
   const [provider, ...referenceParts] = String(value ?? '').split(' · ');
+  // PL: Zwróć oczyszczonego dostawcę i opcjonalny numer rezerwacji. | ES-CO: Devuelve el proveedor limpio y la referencia opcional.
   return { provider: provider.trim(), reference: referenceParts.join(' · ').trim() || null };
 }
 
+// PL: Odczytaj kwotę walutową, rozpoznając formaty cen obsługiwane w skoroszycie. | ES-CO: Lee importes monetarios en los formatos de precio admitidos por el libro.
 function numericPrice(value) {
+  // PL: Zaokrąglij od razu poprawną wartość liczbową. | ES-CO: Redondea de inmediato un valor numérico válido.
   if (typeof value === 'number' && Number.isFinite(value)) return roundAmount(value);
+  // PL: Przygotuj tekstową postać ceny do walidacji. | ES-CO: Prepara el precio como texto para validarlo.
   const text = String(value ?? '').trim();
+  // PL: Odrzuć puste, milowe i nierozpoznawalne zapisy cen. | ES-CO: Rechaza precios vacíos, expresados en millas o no reconocibles.
   if (!text || /mil|mile/i.test(text) || !(/[¥₩€$]|zł|\bPLN\b|\bJPY\b|\bKRW\b/i.test(text))) return null;
+  // PL: Wyodrębnij pierwszą liczbę z opcjonalną częścią dziesiętną. | ES-CO: Extrae el primer número con una posible parte decimal.
   const match = text.match(/[\d][\d\s\u00a0]*(?:[,.]\d{1,2})?/);
+  // PL: Usuń separatory tysięcy, zamień przecinek i zaokrąglij wynik. | ES-CO: Quita separadores de miles, cambia la coma y redondea el resultado.
   return match ? roundAmount(Number(match[0].replace(/[\s\u00a0]/g, '').replace(',', '.'))) : null;
 }
 
+// PL: Rozpoznaj kod waluty z symbolu podanego przy cenie. | ES-CO: Identifica la moneda a partir del símbolo del precio.
 function currencyForPrice(value) {
+  // PL: Ujednolić cenę do tekstu przed sprawdzaniem symboli. | ES-CO: Convierte el precio a texto antes de revisar sus símbolos.
   const text = String(value ?? '');
+  // PL: Rozpoznaj symbol jena. | ES-CO: Reconoce el símbolo del yen.
   if (text.includes('¥')) return 'JPY';
+  // PL: Rozpoznaj symbol wona. | ES-CO: Reconoce el símbolo del won.
   if (text.includes('₩')) return 'KRW';
+  // PL: Rozpoznaj symbol złotego. | ES-CO: Reconoce el símbolo del zloty.
   if (text.includes('zł')) return 'PLN';
+  // PL: Rozpoznaj symbol euro. | ES-CO: Reconoce el símbolo del euro.
   if (text.includes('€')) return 'EUR';
+  // PL: Zwróć brak rozpoznanej waluty zamiast zgadywać jej kod. | ES-CO: Devuelve que no se reconoció la moneda en vez de adivinarla.
   return null;
 }
 
@@ -89,17 +110,29 @@ export async function parseExpenseWorkbook(file) {
   const tripSourceRef = `excel:${normalizeText(tripName)}:${uniqueDays[0].date}`;
   // PL: Przechowuj konfigurację wyjazdu niezależnie od interfejsu aplikacji. | ES-CO: Devuelve la configuración del viaje separada de la interfaz.
   const trip = { name: tripName, startDate: uniqueDays[0].date, endDate: uniqueDays[uniqueDays.length - 1].date, dailyBudgetPln, availableBeforeTripPln, sourceRef: tripSourceRef };
+  // PL: Zbuduj rezerwacje hotelowe ze zweryfikowanych wierszy podsumowania. | ES-CO: Construye reservas de hotel a partir de filas validadas del resumen.
   const hotelReservations = hotelRows.flatMap((row, index) => {
+    // PL: Odczytaj miasto hotelu z wiersza arkusza. | ES-CO: Lee la ciudad del hotel desde la fila de la hoja.
     const city = String(row[1] ?? '').trim();
+    // PL: Odczytaj nazwę obiektu noclegowego. | ES-CO: Lee el nombre del alojamiento.
     const name = String(row[2] ?? '').trim();
+    // PL: Zamień datę zameldowania na ISO. | ES-CO: Convierte la fecha de entrada a ISO.
     const checkIn = dateToIso(row[3]);
+    // PL: Zamień datę wymeldowania na ISO. | ES-CO: Convierte la fecha de salida a ISO.
     const checkOut = dateToIso(row[4]);
+    // PL: Pomijaj niepełne rekordy hotelowe. | ES-CO: Omite registros de hotel incompletos.
     if (!name || !checkIn || !checkOut) return [];
+    // PL: Rozdziel nazwę dostawcy od numeru rezerwacji. | ES-CO: Separa el proveedor del código de reserva.
     const provider = splitProviderReference(row[7]);
+    // PL: Użyj wona dla Seulu, a jena dla pozostałych miast. | ES-CO: Usa won para Seúl y yen para las demás ciudades.
     const currencyCode = normalizeText(city) === 'seul' ? 'KRW' : 'JPY';
+    // PL: Odczytaj lokalną cenę pokoju, jeśli została rozpoznana. | ES-CO: Lee el precio local de la habitación si se reconoció.
     const amountLocal = numericPrice(row[8]);
+    // PL: Odczytaj liczbę nocy w rezerwacji. | ES-CO: Lee el número de noches de la reserva.
     const nights = Number(row[5]) || 0;
+    // PL: Odczytaj cenę PLN przypadającą na noc. | ES-CO: Lee el precio en PLN por noche.
     const plnPerNight = Number(row[9]) || 0;
+    // PL: Zwróć rezerwację hotelową ze stabilnym odwołaniem do źródła w skoroszycie. | ES-CO: Devuelve la reserva del hotel con una referencia estable a la hoja de origen.
     return [{
       type: 'hotel',
       sortOrder: index,
@@ -118,16 +151,27 @@ export async function parseExpenseWorkbook(file) {
       plnPerNight: plnPerNight || null,
     }];
   });
+  // PL: Zbuduj rezerwacje lotów ze zweryfikowanych wierszy podsumowania. | ES-CO: Construye reservas aéreas a partir de filas validadas del resumen.
   const flightReservations = flightRows.flatMap((row, index) => {
+    // PL: Odczytaj numer lotu ze skoroszytu. | ES-CO: Lee el número de vuelo del libro.
     const flightNumber = String(row[1] ?? '').trim();
+    // PL: Odczytaj opis trasy lotniczej. | ES-CO: Lee la descripción de la ruta aérea.
     const route = String(row[2] ?? '').trim();
+    // PL: Zamień datę wylotu na format ISO. | ES-CO: Convierte la fecha de salida al formato ISO.
     const flightDate = dateToIso(row[3]);
+    // PL: Pomijaj wiersz bez numeru, trasy lub poprawnej daty. | ES-CO: Omite la fila si falta número, ruta o fecha válida.
     if (!flightNumber || !route || !flightDate) return [];
+    // PL: Rozdziel nazwę dostawcy od referencji biletu. | ES-CO: Separa el proveedor de la referencia del boleto.
     const provider = splitProviderReference(row[7]);
+    // PL: Rozpoznaj wybrane logo linii po prefiksie numeru lotu. | ES-CO: Identifica el logotipo de algunas aerolíneas por el prefijo del vuelo.
     const airline = flightNumber.startsWith('LO') ? { name: 'LOT Polish Airlines', logo: 'lot' } : flightNumber.startsWith('NH') ? { name: 'ANA', logo: 'ana' } : flightNumber.startsWith('KE') ? { name: 'Korean Air', logo: 'korean-air' } : { name: provider.provider, logo: null };
+    // PL: Zachowaj źródłowy tekst ceny biletu. | ES-CO: Conserva el texto original del precio del boleto.
     const priceText = String(row[8] ?? '').trim();
+    // PL: Odczytaj tekst ceny całkowitej, jeśli komórka zawiera tekst. | ES-CO: Lee el precio total si la celda contiene texto.
     const totalPriceText = typeof row[9] === 'string' ? row[9].trim() : null;
+    // PL: Ustal kod waluty z symbolu ceny biletu. | ES-CO: Determina la moneda a partir del símbolo del precio.
     const currencyCode = currencyForPrice(row[8]);
+    // PL: Zwróć dane lotu z godzinami, przewoźnikiem i rozpoznanymi kwotami. | ES-CO: Devuelve vuelo, horarios, aerolínea e importes reconocidos.
     return [{
       type: 'flight',
       sortOrder: index,
@@ -148,6 +192,7 @@ export async function parseExpenseWorkbook(file) {
       amountPln: numericPrice(row[9]),
     }];
   });
+  // PL: Połącz listy rezerwacji hotelowych i lotniczych. | ES-CO: Combina las listas de reservas de hotel y de vuelos.
   const reservations = [...hotelReservations, ...flightReservations];
   // PL: Przejdź po wycenionych wierszach wydatków z prawidłowym numerem w Excelu. | ES-CO: Recorre los gastos con precio conservando su fila de Excel.
   const expenses = diaryRows.slice(9).flatMap((row, index) => {

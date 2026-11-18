@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1840" viewBox="0 0 1700 1840" role="img" aria-labelledby="title description">
+  <title id="title">Flujo de arranque y renderizado de la aplicación</title>
+  <desc id="description">La aplicación comprueba la sesión con Supabase Auth, carga viajes, reservas, historial y gastos, y después actualiza las distintas vistas desde el estado en memoria.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#46617f"/></marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #20344d; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #52677e; }
+      .head { font-size: 17px; font-weight: 700; }
+      .body { font-size: 14px; fill: #455d78; }
+      .small { font-size: 12px; fill: #52677e; }
+      .node { fill: #fff; stroke: #5a7fad; stroke-width: 2; rx: 14; }
+      .auth { fill: #edf8f1; stroke: #4a9366; stroke-width: 2; rx: 14; }
+      .note { fill: #fff7e8; stroke: #c17a31; stroke-width: 2; rx: 14; }
+      .render { fill: #f4effa; stroke: #8969ad; stroke-width: 2; rx: 12; }
+      .arrow { fill: none; stroke: #46617f; stroke-width: 2.5; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #8a9db3; stroke-width: 2; stroke-dasharray: 7 6; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1700" height="1840" fill="#fff"/>
+  <text class="title" x="48" y="52">Arranque: de la sesión a las pantallas</text>
+  <text class="subtitle" x="48" y="80">La ruta central muestra el caso normal con sesión válida. Los recuadros explican alternativas y datos que se cargan.</text>
+
+  <rect class="note" x="55" y="120" width="400" height="150"/>
+  <text class="head" x="80" y="155">Evento de autenticación</text>
+  <text class="body" x="80" y="184">onAuthStateChange()</text>
+  <text class="small" x="80" y="211">Si llega antes de getSession(), guarda la sesión pendiente.</text>
+  <text class="small" x="80" y="235">Después de iniciar, actualiza el usuario y carga o limpia datos.</text>
+  <rect class="auth" x="570" y="120" width="560" height="120"/>
+  <text class="head" x="850" y="158" text-anchor="middle">Módulo src/main.js inicia</text>
+  <text class="body" x="850" y="190" text-anchor="middle">Registra eventos y ejecuta initializeAuth()</text>
+  <path class="dash" d="M455 195 H560"/>
+
+  <rect class="auth" x="570" y="300" width="560" height="125"/>
+  <text class="head" x="850" y="340" text-anchor="middle">initializeAuth()</text>
+  <text class="body" x="850" y="369" text-anchor="middle">supabase.auth.getSession() lee la sesión guardada</text>
+  <text class="small" x="850" y="397" text-anchor="middle">Un evento Auth pendiente tiene prioridad si llegó durante la lectura</text>
+  <path class="arrow" d="M850 240 V290"/>
+
+  <rect class="node" x="570" y="485" width="560" height="120"/>
+  <text class="head" x="850" y="525" text-anchor="middle">Decide qué puede mostrarse</text>
+  <text class="body" x="850" y="555" text-anchor="middle">renderAuthState() muestra acceso o contenido privado</text>
+  <text class="small" x="850" y="579" text-anchor="middle">currentUser = sesión válida o null</text>
+  <path class="arrow" d="M850 425 V475"/>
+
+  <rect class="note" x="70" y="490" width="400" height="125"/>
+  <text class="head" x="95" y="525">Sin sesión</text>
+  <text class="body" x="95" y="554">Queda visible el formulario de acceso.</text>
+  <text class="small" x="95" y="581">No carga viajes ni gastos privados.</text>
+  <path class="dash" d="M570 545 H480"/>
+
+  <rect class="auth" x="570" y="660" width="560" height="140"/>
+  <text class="head" x="850" y="700" text-anchor="middle">loadTrips()</text>
+  <text class="body" x="850" y="730" text-anchor="middle">Consulta trips y sus trip_days con la sesión actual</text>
+  <text class="small" x="850" y="758" text-anchor="middle">Convierte nombres SQL a objetos del estado de la interfaz</text>
+  <text class="small" x="850" y="779" text-anchor="middle">Si falla, muestra un error; no simula que hay viajes</text>
+  <path class="arrow" d="M850 605 V650"/>
+
+  <rect class="auth" x="570" y="850" width="560" height="140"/>
+  <text class="head" x="850" y="890" text-anchor="middle">loadTripReservations(ownerId)</text>
+  <text class="body" x="850" y="920" text-anchor="middle">Lee trip_reservations y agrupa cada reserva por viaje</text>
+  <text class="small" x="850" y="948" text-anchor="middle">Si la consulta falla, puede mostrar una vista previa de sessionStorage</text>
+  <text class="small" x="850" y="969" text-anchor="middle">La caché es una vista previa; Supabase sigue siendo el origen guardado</text>
+  <path class="arrow" d="M850 800 V840"/>
+
+  <rect class="auth" x="570" y="1040" width="560" height="160"/>
+  <text class="head" x="850" y="1080" text-anchor="middle">loadPersonalTravelHistory(ownerId)</text>
+  <text class="body" x="850" y="1110" text-anchor="middle">Carga vuelos, estancias, análisis de Polonia y ubicaciones diarias</text>
+  <text class="small" x="850" y="1138" text-anchor="middle">En localhost puede usar una vista previa de desarrollo</text>
+  <text class="small" x="850" y="1161" text-anchor="middle">En Supabase: tablas personales; ubicaciones se leen por páginas de 1000</text>
+  <text class="small" x="850" y="1183" text-anchor="middle">RLS mantiene la historia personal limitada al propietario</text>
+  <path class="arrow" d="M850 990 V1030"/>
+
+  <rect class="node" x="570" y="1250" width="560" height="120"/>
+  <text class="head" x="850" y="1290" text-anchor="middle">Selecciona viaje y fecha inicial</text>
+  <text class="body" x="850" y="1320" text-anchor="middle">Conserva el viaje previo si sigue disponible; si no, elige el primero</text>
+  <text class="small" x="850" y="1346" text-anchor="middle">initialSelectedDate(): hoy dentro del viaje o su primer día</text>
+  <path class="arrow" d="M850 1200 V1240"/>
+
+  <rect class="auth" x="570" y="1420" width="560" height="130"/>
+  <text class="head" x="850" y="1460" text-anchor="middle">loadExpenses()</text>
+  <text class="body" x="850" y="1490" text-anchor="middle">Lee expenses del viaje activo y mapea sus columnas SQL</text>
+  <text class="small" x="850" y="1518" text-anchor="middle">Descarta respuestas tardías si cambia la cuenta o el viaje</text>
+  <path class="arrow" d="M850 1370 V1410"/>
+
+  <rect class="node" x="570" y="1600" width="560" height="110"/>
+  <text class="head" x="850" y="1640" text-anchor="middle">render() actualiza la interfaz</text>
+  <text class="body" x="850" y="1670" text-anchor="middle">Las funciones de render leen el estado; no vuelven a consultar datos</text>
+  <path class="arrow" d="M850 1550 V1590"/>
+
+  <path class="arrow" d="M850 1710 V1730"/>
+  <rect class="render" x="340" y="1740" width="1020" height="90"/>
+  <text class="small" x="850" y="1766" text-anchor="middle">renderTripContext · renderTripSelector · renderSummary · renderCharts</text>
+  <text class="small" x="850" y="1792" text-anchor="middle">renderDays · renderExpenses · renderReservations · renderDayPage (si está abierta)</text>
+  <text class="small" x="850" y="1818" text-anchor="middle">renderPersonalHistory (solo cuando su página está visible)</text>
+</svg>

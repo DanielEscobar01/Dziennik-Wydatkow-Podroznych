@@ -1,0 +1,105 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="travel-ledger-architecture" name="Arquitectura">
+    <mxGraphModel dx="1600" dy="1380" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1380" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="buildLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=17;fontStyle=1;fontColor=#20344D;" value="1 · COMPILACIÓN Y PUBLICACIÓN ESTÁTICA" vertex="1">
+          <mxGeometry height="225" width="1504" x="48" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="browserLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=17;fontStyle=1;fontColor=#20344D;" value="2 · EN EL NAVEGADOR — SPA" vertex="1">
+          <mxGeometry height="620" width="910" x="48" y="365" as="geometry" />
+        </mxCell>
+        <mxCell id="supabaseLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=17;fontStyle=1;fontColor=#20344D;" value="3 · SERVICIOS DE SUPABASE" vertex="1">
+          <mxGeometry height="620" width="554" x="998" y="365" as="geometry" />
+        </mxCell>
+        <mxCell id="externalLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=17;fontStyle=1;fontColor=#20344D;" value="4 · SERVICIOS EXTERNOS USADOS POR FUNCIONES DEL NAVEGADOR" vertex="1">
+          <mxGeometry height="145" width="1504" x="48" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="localFunctionLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=17;fontStyle=1;fontColor=#20344D;" value="5 · FUNCIÓN LOCAL DEL NAVEGADOR (NO ES UN SERVICIO EXTERNO)" vertex="1">
+          <mxGeometry height="145" width="1504" x="48" y="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="eSourceActions" edge="1" parent="1" source="source" target="actions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eActionsVite" edge="1" parent="1" source="actions" target="vite" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eVitePages" edge="1" parent="1" source="vite" target="pages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="publica dist">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ePagesMain" edge="1" parent="1" source="pages" target="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="El navegador descarga y ejecuta la aplicación">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="1365" y="343" /><mxPoint x="723" y="343" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eHtmlMain" edge="1" parent="1" source="html" target="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="HTML / DOM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eMainHelpers" edge="1" parent="1" source="main" target="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="usa módulos">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="438" y="555" /><mxPoint x="438" y="688" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="eMainLibs" edge="1" parent="1" source="main" target="libs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="usa bibliotecas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eMainAuth" edge="1" parent="1" source="main" target="auth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="sesión">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eMainApi" edge="1" parent="1" source="main" target="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="leer / guardar">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="970" y="535" /><mxPoint x="970" y="667" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="eApiDb" edge="1" parent="1" source="api" target="db" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="consultas / cambios; RLS">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="source" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=15;fontColor=#20344D;" value="&lt;b&gt;Código fuente&lt;/b&gt;&lt;br&gt;HTML · JavaScript · CSS · recursos" vertex="1">
+          <mxGeometry height="105" width="290" x="80" y="178" as="geometry" />
+        </mxCell>
+        <mxCell id="actions" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=15;fontColor=#20344D;" value="&lt;b&gt;GitHub Actions&lt;/b&gt;&lt;br&gt;npm ci · npm run build" vertex="1">
+          <mxGeometry height="105" width="290" x="460" y="178" as="geometry" />
+        </mxCell>
+        <mxCell id="vite" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=15;fontColor=#20344D;" value="&lt;b&gt;Vite&lt;/b&gt;&lt;br&gt;Empaqueta archivos estáticos en dist/" vertex="1">
+          <mxGeometry height="105" width="290" x="840" y="178" as="geometry" />
+        </mxCell>
+        <mxCell id="pages" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=15;fontColor=#20344D;" value="&lt;b&gt;GitHub Pages&lt;/b&gt;&lt;br&gt;Entrega archivos; no ejecuta backend" vertex="1">
+          <mxGeometry height="105" width="290" x="1220" y="178" as="geometry" />
+        </mxCell>
+        <mxCell id="html" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="&lt;b&gt;index.html&lt;/b&gt;&lt;br&gt;Pantallas, formularios y estilos&lt;br&gt;Proporciona elementos que actualiza JavaScript" vertex="1">
+          <mxGeometry height="125" width="330" x="88" y="447" as="geometry" />
+        </mxCell>
+        <mxCell id="main" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEAFF;strokeColor=#3A6BB5;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="&lt;b&gt;src/main.js&lt;/b&gt;&lt;br&gt;Estado · eventos · consultas · renderizado&lt;br&gt;Coordina las funciones de la aplicación" vertex="1">
+          <mxGeometry height="125" width="350" x="548" y="447" as="geometry" />
+        </mxCell>
+        <mxCell id="helpers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Módulos de dominio&lt;/b&gt;&lt;br&gt;stay-expenses.js · daily-location-ranges.js&lt;br&gt;Promedios, días caros y rangos de ubicación" vertex="1">
+          <mxGeometry height="125" width="330" x="88" y="626" as="geometry" />
+        </mxCell>
+        <mxCell id="libs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Bibliotecas&lt;/b&gt;&lt;br&gt;Chart.js · Leaflet · Turf&lt;br&gt;Gráficos, mapas y rutas aéreas" vertex="1">
+          <mxGeometry height="125" width="350" x="548" y="626" as="geometry" />
+        </mxCell>
+        <mxCell id="localResources" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Recursos locales&lt;/b&gt;&lt;br&gt;Banderas · logos · JSON de aeropuertos&lt;br&gt;Empaquetados con el sitio estático" vertex="1">
+          <mxGeometry height="125" width="330" x="88" y="806" as="geometry" />
+        </mxCell>
+        <mxCell id="localActions" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Almacenamiento / exportación local&lt;/b&gt;&lt;br&gt;sessionStorage: vistas previas limitadas&lt;br&gt;CSV creado y descargado en el dispositivo" vertex="1">
+          <mxGeometry height="125" width="350" x="548" y="806" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Supabase Auth&lt;/b&gt;&lt;br&gt;Inicio de sesión · sesión persistente · cierre de sesión" vertex="1">
+          <mxGeometry height="105" width="430" x="1060" y="447" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;API REST de datos de Supabase&lt;/b&gt;&lt;br&gt;PostgREST automática; no es API propia&lt;br&gt;La usa @supabase/supabase-js en supabase.from(...)" vertex="1">
+          <mxGeometry height="115" width="430" x="1060" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Base de datos Supabase: PostgreSQL&lt;/b&gt;&lt;br&gt;trips · trip_days · expenses · trip_reservations&lt;br&gt;Historial personal y ubicaciones diarias&lt;br&gt;RLS limita filas según sesión y reglas SQL" vertex="1">
+          <mxGeometry height="145" width="430" x="1060" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="fx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=6;" value="&lt;b&gt;Frankfurter API&lt;/b&gt;&lt;br&gt;src/main.js → fetchRate(): tasas de conversión a PLN" vertex="1">
+          <mxGeometry height="68" width="520" x="180" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="osm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=6;" value="&lt;b&gt;OpenStreetMap&lt;/b&gt;&lt;br&gt;Leaflet en src/main.js descarga mosaicos para mapas" vertex="1">
+          <mxGeometry height="68" width="520" x="900" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="excel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=6;" value="&lt;b&gt;Importación Excel · código local&lt;/b&gt;&lt;br&gt;Parser implementado; actualmente sin botón en la interfaz" vertex="1">
+          <mxGeometry height="68" width="420" x="590" y="1235" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

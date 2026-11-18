@@ -43,35 +43,56 @@ create table if not exists public.trip_days (
   constraint trip_days_unique_date unique (trip_id, trip_date)
 );
 
+-- PL: Przechowuj rezerwacje przypisane do prywatnych podróży. | ES-CO: Guarda reservas asociadas a viajes privados.
 create table if not exists public.trip_reservations (
+  -- PL: Nadaj rezerwacji unikalny identyfikator UUID. | ES-CO: Asigna un identificador UUID único a la reserva.
   id uuid primary key default gen_random_uuid(),
+  -- PL: Powiąż rezerwację z właścicielem zalogowanego konta. | ES-CO: Vincula la reserva con la cuenta autenticada propietaria.
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  -- PL: Powiąż rezerwację z podróżą. | ES-CO: Vincula la reserva con el viaje.
   trip_id uuid not null references public.trips(id) on delete cascade,
+  -- PL: Ogranicz typ rezerwacji do noclegu albo lotu. | ES-CO: Limita el tipo de reserva a hotel o vuelo.
   reservation_type text not null check (reservation_type in ('hotel', 'flight')),
+  -- PL: Przechowuj nieujemną kolejność wyświetlania. | ES-CO: Guarda el orden de visualización no negativo.
   sort_order integer not null default 0 check (sort_order >= 0),
+  -- PL: Zapisz identyfikator wiersza źródłowego do deduplikacji. | ES-CO: Guarda la referencia de origen para evitar duplicados.
   source_ref text not null,
+  -- PL: Zachowaj tytuł rezerwacji. | ES-CO: Conserva el título de la reserva.
   title text not null,
+  -- PL: Zapisz miasto noclegu, jeśli dotyczy. | ES-CO: Guarda la ciudad del alojamiento, si aplica.
   city text,
+  -- PL: Daty zameldowania i wymeldowania rezerwacji hotelowej. | ES-CO: Fechas de entrada y salida de la reserva hotelera.
   check_in date,
   check_out date,
+  -- PL: Liczba nocy może pozostać pusta, ale nie może być ujemna. | ES-CO: Las noches pueden ser nulas, pero no negativas.
   nights integer check (nights is null or nights >= 0),
+  -- PL: Dane identyfikujące trasę i datę lotu. | ES-CO: Datos que identifican la ruta y fecha del vuelo.
   flight_number text,
   route text,
   flight_date date,
+  -- PL: Opcjonalne godziny odlotu i przylotu. | ES-CO: Horas opcionales de salida y llegada.
   departure_time text,
   arrival_time text,
+  -- PL: Dane identyfikujące przewoźnika. | ES-CO: Datos que identifican a la aerolínea.
   airline_name text,
   airline_logo text,
+  -- PL: Dane dostawcy i numeru rezerwacji. | ES-CO: Datos del proveedor y del código de reserva.
   provider text,
   booking_reference text,
+  -- PL: Zachowaj źródłowe zapisy cen z arkusza. | ES-CO: Conserva las representaciones originales de los precios de la hoja.
   price_text text,
   total_price_text text,
+  -- PL: Kwoty lokalne i PLN nie mogą być ujemne. | ES-CO: Los importes locales y en PLN no pueden ser negativos.
   amount_local numeric(14, 2) check (amount_local is null or amount_local >= 0),
   currency_code char(3),
   amount_pln numeric(14, 2) check (amount_pln is null or amount_pln >= 0),
+  -- PL: Zapisz przelicznik ceny za noc, jeśli został wyliczony. | ES-CO: Guarda el precio por noche si se pudo calcular.
   pln_per_night numeric(18, 8) check (pln_per_night is null or pln_per_night >= 0),
+  -- PL: Automatycznie zapisuj czas utworzenia rezerwacji. | ES-CO: Registra automáticamente la fecha de creación de la reserva.
   created_at timestamptz not null default now(),
+  -- PL: Nie pozwól na ponowny import tego samego źródła w podróży. | ES-CO: Evita importar otra vez la misma referencia en un viaje.
   constraint trip_reservations_unique_source unique (trip_id, source_ref),
+  -- PL: Zapewnij poprawną kolejność dat hotelowych. | ES-CO: Exige el orden correcto de las fechas del hotel.
   constraint trip_reservations_valid_dates check (check_in is null or check_out is null or check_out >= check_in)
 );
 
@@ -113,6 +134,7 @@ create table if not exists public.expenses (
 alter table public.trips enable row level security;
 -- PL: Włącz RLS dla planu dni. | ES-CO: Activa RLS para los días del viaje.
 alter table public.trip_days enable row level security;
+-- PL: Włącz RLS także dla rezerwacji podróży. | ES-CO: Activa RLS también para las reservas del viaje.
 alter table public.trip_reservations enable row level security;
 -- PL: Wymuś kontrolę dostępu na poziomie każdego wiersza wydatków. | ES-CO: Activa el control de acceso a nivel de fila en gastos.
 alter table public.expenses enable row level security;
@@ -170,12 +192,16 @@ drop policy if exists trip_days_delete_own on public.trip_days;
 create policy trip_days_delete_own on public.trip_days for delete to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_days.trip_id and trips.user_id = (select auth.uid())));
 
 drop policy if exists trip_reservations_select_own on public.trip_reservations;
+-- PL: Zezwól na odczyt wyłącznie własnej rezerwacji należącej do własnej podróży. | ES-CO: Permite leer solo reservas propias de viajes propios.
 create policy trip_reservations_select_own on public.trip_reservations for select to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
 drop policy if exists trip_reservations_insert_own on public.trip_reservations;
+-- PL: Wymagaj własności konta i podróży przy dodawaniu rezerwacji. | ES-CO: Exige ser dueño de la cuenta y del viaje al insertar una reserva.
 create policy trip_reservations_insert_own on public.trip_reservations for insert to authenticated with check ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
 drop policy if exists trip_reservations_update_own on public.trip_reservations;
+-- PL: Ogranicz aktualizację rezerwacji do właściciela konta oraz podróży. | ES-CO: Limita la actualización al dueño de la cuenta y del viaje.
 create policy trip_reservations_update_own on public.trip_reservations for update to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid()))) with check ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
 drop policy if exists trip_reservations_delete_own on public.trip_reservations;
+-- PL: Pozwól usuwać rezerwacje tylko ich właścicielowi i właścicielowi podróży. | ES-CO: Permite borrar reservas solo al propietario de la reserva y del viaje.
 create policy trip_reservations_delete_own on public.trip_reservations for delete to authenticated using ((select auth.uid()) = user_id and exists (select 1 from public.trips where trips.id = trip_reservations.trip_id and trips.user_id = (select auth.uid())));
 
 -- PL: Usuń poprzednią politykę odczytu, aby skrypt można było uruchomić ponownie. | ES-CO: Borra la política de lectura previa para permitir repetir el script.

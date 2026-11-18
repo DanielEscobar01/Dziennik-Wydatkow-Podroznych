@@ -1,0 +1,408 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="app-startup" name="1 · Arranque y renderizado">
+    <mxGraphModel dx="1700" dy="1840" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1840" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sEdge0" edge="1" parent="1" source="sStart" target="sInit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge1" edge="1" parent="1" source="sInit" target="sSession" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge2" edge="1" parent="1" source="sSession" target="sTrips" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="sí, hay sesión">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge3" edge="1" parent="1" source="sTrips" target="sReservations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge4" edge="1" parent="1" source="sReservations" target="sHistory" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge5" edge="1" parent="1" source="sHistory" target="sSelect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge6" edge="1" parent="1" source="sSelect" target="sExpenses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="si hay viaje">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge7" edge="1" parent="1" source="sExpenses" target="sRender" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sEdge8" edge="1" parent="1" source="sRender" target="sOutputs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sTitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#20344D;" value="ARRANQUE — de la sesión a las pantallas" vertex="1">
+          <mxGeometry height="40" width="1000" x="48" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sStart" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=15;fontColor=#20344D;spacing=10;" value="&lt;b&gt;Se carga src/main.js&lt;/b&gt;&lt;br&gt;Registra eventos y ejecuta initializeAuth()" vertex="1">
+          <mxGeometry height="120" width="560" x="570" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="sInit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=10;" value="&lt;b&gt;initializeAuth()&lt;/b&gt;&lt;br&gt;supabase.auth.getSession() lee la sesión guardada&lt;br&gt;Si llegó un evento Auth mientras esperaba, usa la sesión más reciente" vertex="1">
+          <mxGeometry height="125" width="560" x="570" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="sSession" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=10;" value="&lt;b&gt;renderAuthState()&lt;/b&gt;&lt;br&gt;Con sesión: muestra la aplicación privada&lt;br&gt;Sin sesión: muestra el formulario de acceso" vertex="1">
+          <mxGeometry height="120" width="560" x="570" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="sNoSession" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;Sin sesión&lt;/b&gt;&lt;br&gt;No consulta viajes ni gastos privados.&lt;br&gt;render() deja visible el acceso." vertex="1">
+          <mxGeometry height="125" width="400" x="70" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="sListener" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=10;" value="&lt;b&gt;onAuthStateChange()&lt;/b&gt;&lt;br&gt;Antes de initializeAuth: guarda el evento pendiente.&lt;br&gt;Después: actualiza currentUser; al salir limpia datos; al entrar llama loadTrips()." vertex="1">
+          <mxGeometry height="150" width="420" x="70" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="sTrips" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;loadTrips()&lt;/b&gt;&lt;br&gt;Consulta trips + trip_days; convierte columnas a objetos del viaje.&lt;br&gt;Si falla, informa el error; no inventa viajes." vertex="1">
+          <mxGeometry height="140" width="560" x="570" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="sReservations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;loadTripReservations(ownerId)&lt;/b&gt;&lt;br&gt;Lee trip_reservations y agrupa por viaje.&lt;br&gt;Si no está disponible, puede usar la vista previa de sessionStorage." vertex="1">
+          <mxGeometry height="140" width="560" x="570" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="sHistory" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;loadPersonalTravelHistory(ownerId)&lt;/b&gt;&lt;br&gt;Vuelos · estancias · análisis de Polonia · ubicaciones diarias.&lt;br&gt;Usa vista previa en localhost o tablas personales; ubicaciones se leen por lotes de 1000.&lt;br&gt;RLS restringe la historia al propietario." vertex="1">
+          <mxGeometry height="160" width="560" x="570" y="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="sSelect" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;Elige currentTrip y selectedDate&lt;/b&gt;&lt;br&gt;Conserva el viaje anterior si existe; si no, toma el primero.&lt;br&gt;initialSelectedDate(): hoy dentro del viaje o el primer día." vertex="1">
+          <mxGeometry height="120" width="560" x="570" y="1250" as="geometry" />
+        </mxCell>
+        <mxCell id="sExpenses" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=10;" value="&lt;b&gt;loadExpenses()&lt;/b&gt;&lt;br&gt;Lee expenses del viaje activo y mapea las columnas SQL.&lt;br&gt;Descarta resultados tardíos si cambió cuenta o viaje." vertex="1">
+          <mxGeometry height="130" width="560" x="570" y="1420" as="geometry" />
+        </mxCell>
+        <mxCell id="sRender" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=10;" value="&lt;b&gt;render()&lt;/b&gt;&lt;br&gt;Actualiza la interfaz a partir del estado en memoria; no vuelve a pedir los datos." vertex="1">
+          <mxGeometry height="110" width="560" x="570" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="sOutputs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="renderTripContext · renderTripSelector · renderSummary · renderCharts&lt;br&gt;renderDays · renderExpenses · renderReservations · renderDayPage (si está abierta)&lt;br&gt;renderPersonalHistory (solo cuando su página está visible)" vertex="1">
+          <mxGeometry height="90" width="1020" x="340" y="1740" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="expense-flows" name="2 · Gastos y archivos">
+    <mxGraphModel dx="1900" dy="1740" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1740" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ePanelManual" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#20344D;" value="A · CREAR O EDITAR UN GASTO" vertex="1">
+          <mxGeometry height="1560" width="870" x="48" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="ePanelImport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#20344D;" value="B · IMPORTACIÓN EXCEL (CÓDIGO EXISTENTE)" vertex="1">
+          <mxGeometry height="750" width="604" x="948" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="ePanelCsv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#20344D;" value="C · EXPORTACIÓN CSV" vertex="1">
+          <mxGeometry height="772" width="604" x="948" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="eCreateForm" edge="1" parent="1" source="eCreate" target="eForm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="262" y="330" /><mxPoint x="350" y="330" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="eEditForm" edge="1" parent="1" source="eEdit" target="eForm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="704" y="330" /><mxPoint x="610" y="330" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="eFormRate" edge="1" parent="1" source="eForm" target="eRate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="fecha / moneda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eRatePreview" edge="1" parent="1" source="eRate" target="ePreview" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ePreviewSave" edge="1" parent="1" source="ePreview" target="eSave" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="submit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eSaveDb" edge="1" parent="1" source="eSave" target="eDb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="INSERT / UPDATE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eDbState" edge="1" parent="1" source="eDb" target="eState" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="respuesta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eImportParse" edge="1" parent="1" source="eImport" target="eParse" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eParseConfirm" edge="1" parent="1" source="eParse" target="eConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eConfirmUpsert" edge="1" parent="1" source="eConfirm" target="eUpsert" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="confirma">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eUpsertReload" edge="1" parent="1" source="eUpsert" target="eReload" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eCsvBuild" edge="1" parent="1" source="eCsv" target="eCsvBlob" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eCsvDownload" edge="1" parent="1" source="eCsvBlob" target="eCsvFile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eTitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#20344D;" value="GASTOS — formulario, escritura y archivos" vertex="1">
+          <mxGeometry height="40" width="1100" x="48" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eCreate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;openExpenseDialog()&lt;/b&gt;&lt;br&gt;Formulario nuevo; fecha del día elegido" vertex="1">
+          <mxGeometry height="105" width="340" x="92" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="eEdit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;openEditExpenseDialog(id)&lt;/b&gt;&lt;br&gt;Rellena el formulario desde expenses" vertex="1">
+          <mxGeometry height="105" width="340" x="534" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="eForm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Formulario&lt;/b&gt;&lt;br&gt;Fecha · categoría · descripción · importe · moneda · tasa · estado · pago" vertex="1">
+          <mxGeometry height="105" width="620" x="172" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="eRate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;selectedCurrencyCode() → fetchRate()&lt;/b&gt;&lt;br&gt;PLN: tasa 1. Otra moneda: Frankfurter; pasado = histórica, futuro = latest.&lt;br&gt;Si falla, permite tasa manual." vertex="1">
+          <mxGeometry height="140" width="620" x="172" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="ePreview" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;updatePreview()&lt;/b&gt;&lt;br&gt;Importe local × tasa = vista previa PLN; todavía no guarda" vertex="1">
+          <mxGeometry height="100" width="620" x="172" y="685" as="geometry" />
+        </mxCell>
+        <mxCell id="eSave" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;saveExpense(event)&lt;/b&gt;&lt;br&gt;Valida sesión, viaje, descripción, moneda e importes positivos.&lt;br&gt;Redondea importe (2), tasa (8), PLN (2); evita doble envío.&lt;br&gt;Elige INSERT o UPDATE." vertex="1">
+          <mxGeometry height="140" width="620" x="172" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="eDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Supabase Data API → PostgreSQL + RLS&lt;/b&gt;&lt;br&gt;Guarda expenses con user_id, trip_id, tasa e información de pago.&lt;br&gt;La base verifica si la sesión puede escribir." vertex="1">
+          <mxGeometry height="120" width="620" x="172" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="eState" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Actualiza estado y confirma&lt;/b&gt;&lt;br&gt;Mapea fila → expenses → selectedDate → render().&lt;br&gt;Cierra el diálogo y muestra showToast()." vertex="1">
+          <mxGeometry height="135" width="620" x="172" y="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="eActions" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Acciones desde renderExpenses()&lt;/b&gt;&lt;br&gt;data-paid → markExpensePaid(): UPDATE de estado.&lt;br&gt;data-delete → deleteExpense(): DELETE; solo quita del estado tras confirmación.&lt;br&gt;data-edit → openEditExpenseDialog().&lt;br&gt;Errores se muestran; no se simula éxito." vertex="1">
+          <mxGeometry height="245" width="782" x="92" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="eImport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;importWorkbook(file)&lt;/b&gt;&lt;br&gt;Función escrita, pero no hay botón en la interfaz actual" vertex="1">
+          <mxGeometry height="90" width="500" x="1000" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="eParse" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;parseExpenseWorkbook(file)&lt;/b&gt;&lt;br&gt;read-excel-file lee localmente Dziennik y Podsumowanie.&lt;br&gt;Prepara viaje, días, hoteles, vuelos y gastos." vertex="1">
+          <mxGeometry height="105" width="500" x="1000" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="eConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Previsualiza y pide confirmación&lt;/b&gt;&lt;br&gt;Cancelar no guarda cambios." vertex="1">
+          <mxGeometry height="85" width="500" x="1000" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="eUpsert" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Upsert con source_ref para evitar duplicados&lt;/b&gt;&lt;br&gt;trips → trip_days → trip_reservations → expenses" vertex="1">
+          <mxGeometry height="135" width="500" x="1000" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="eReload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;loadTrips()&lt;/b&gt;&lt;br&gt;Recarga estado y vistas" vertex="1">
+          <mxGeometry height="65" width="500" x="1000" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="eCsv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Botón Exportar → exportCSV()&lt;/b&gt;&lt;br&gt;Usa expenses en memoria; no consulta Supabase otra vez" vertex="1">
+          <mxGeometry height="105" width="500" x="1000" y="985" as="geometry" />
+        </mxCell>
+        <mxCell id="eCsvBlob" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Construye CSV en navegador&lt;/b&gt;&lt;br&gt;Separador ; · comillas escapadas · BOM UTF-8" vertex="1">
+          <mxGeometry height="115" width="500" x="1000" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="eCsvFile" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;Descarga wydatki-podrozne.csv&lt;/b&gt;&lt;br&gt;El archivo no se sube a ningún servicio" vertex="1">
+          <mxGeometry height="100" width="500" x="1000" y="1290" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="history-flows" name="3 · Historia y mapas">
+    <mxGraphModel dx="1800" dy="1660" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1660" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="hPanelData" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#20344D;" value="A · CARGA DE HISTORIA Y VISTAS" vertex="1">
+          <mxGeometry height="1495" width="790" x="48" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="hPanelMaps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#20344D;" value="B · MAPAS SEGÚN EL CONTEXTO VISIBLE" vertex="1">
+          <mxGeometry height="1495" width="874" x="878" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="hLoadNav" edge="1" parent="1" source="hNav" target="hLoad" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hLoadLocations" edge="1" parent="1" source="hLoad" target="hLocations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hLocationsRender" edge="1" parent="1" source="hLocations" target="hRender" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hRenderBus" edge="1" parent="1" source="hRender" target="hBus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="440" y="850" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="hBusFlight" edge="1" parent="1" source="hBus" target="hFlights" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hBusPoland" edge="1" parent="1" source="hBus" target="hPoland" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hBusPlaces" edge="1" parent="1" source="hBus" target="hPlaces" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlightMaps" edge="1" parent="1" source="hFlightView" target="hFlightLazy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlightMapTiles" edge="1" parent="1" source="hFlightLazy" target="hFlightTiles" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hReservationMaps" edge="1" parent="1" source="hReservation" target="hReservationRoute" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hDayMap" edge="1" parent="1" source="hDay" target="hDayCoords" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hDayTiles" edge="1" parent="1" source="hDayCoords" target="hDayLeaflet" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hTitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#20344D;" value="HISTORIA Y MAPAS — carga, transformación y visualización" vertex="1">
+          <mxGeometry height="40" width="1300" x="48" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hNav" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Pestañas de historia&lt;br&gt;showPersonalHistoryPage(view) + wrappers" vertex="1">
+          <mxGeometry height="100" width="670" x="105" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="hLoad" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;loadPersonalTravelHistory(ownerId)&lt;/b&gt;&lt;br&gt;Vista previa en localhost o tablas personales de Supabase.&lt;br&gt;Descarta respuestas de otra sesión." vertex="1">
+          <mxGeometry height="145" width="670" x="105" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="hLocations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="&lt;b&gt;loadPersonalDailyLocations(ownerId)&lt;/b&gt;&lt;br&gt;personal_daily_locations en lotes de hasta 1000.&lt;br&gt;RLS mantiene esta historia limitada al propietario." vertex="1">
+          <mxGeometry height="130" width="670" x="105" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="hRender" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="&lt;b&gt;renderPersonalHistory()&lt;/b&gt;&lt;br&gt;Reparte el estado entre vuelos, tiempo en Polonia y países / ubicaciones." vertex="1">
+          <mxGeometry height="110" width="670" x="105" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="hBus" parent="1" style="ellipse;html=1;fillColor=none;strokeColor=none;opacity=0;" value="" vertex="1">
+          <mxGeometry height="1" width="1" x="440" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlights" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=11;fontColor=#20344D;" value="Vuelos&lt;br&gt;renderPersonalFlights(): filtro por año y búsqueda" vertex="1">
+          <mxGeometry height="155" width="225" x="80" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="hPoland" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=11;fontColor=#20344D;" value="Tiempo en Polonia&lt;br&gt;renderPolandTime(): métricas actuales y pronóstico" vertex="1">
+          <mxGeometry height="155" width="225" x="330" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="hPlaces" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=11;fontColor=#20344D;" value="Países y días&lt;br&gt;renderDailyLocations(): año, límite y rangos" vertex="1">
+          <mxGeometry height="155" width="225" x="580" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="hRanges" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="buildDailyLocationRanges(rows)&lt;br&gt;Combina contextos país/fecha, une días consecutivos y corta estancias ante visitas de un día a otro país." vertex="1">
+          <mxGeometry height="185" width="670" x="105" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="hPrivacy" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Tablas personales: personal_travel_flights · personal_country_stays · personal_poland_analysis · personal_daily_locations.&lt;br&gt;Las reservas del viaje actual usan trips, trip_days, trip_reservations y expenses." vertex="1">
+          <mxGeometry height="200" width="670" x="105" y="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlightView" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Vuelos de historia personal&lt;br&gt;renderPersonalFlights() → renderPersonalFlightMaps()" vertex="1">
+          <mxGeometry height="105" width="770" x="930" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlightLazy" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="IntersectionObserver carga mapas cercanos a pantalla.&lt;br&gt;closePersonalFlightMaps() limpia; mountPersonalFlightMap() importa Leaflet bajo demanda." vertex="1">
+          <mxGeometry height="145" width="770" x="930" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="hFlightTiles" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="history-airports.json da coordenadas; Turf greatCircle dibuja la ruta; OpenStreetMap aporta mosaicos.&lt;br&gt;Si faltan coordenadas, muestra un aviso y no inventa ruta." vertex="1">
+          <mxGeometry height="160" width="770" x="930" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="hReservation" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Reservas: showReservations() → renderReservations() → renderFlightRouteMaps()" vertex="1">
+          <mxGeometry height="105" width="770" x="930" y="735" as="geometry" />
+        </mxCell>
+        <mxCell id="hReservationRoute" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="flightRoutePoints() busca códigos IATA y coordenadas locales.&lt;br&gt;Leaflet dibuja gran círculo y mosaicos OSM; si faltan puntos, informa que no hay coordenadas." vertex="1">
+          <mxGeometry height="140" width="770" x="930" y="885" as="geometry" />
+        </mxCell>
+        <mxCell id="hDay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Detalle de día: openDayPage(date) → renderDayPage()" vertex="1">
+          <mxGeometry height="105" width="770" x="930" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="hDayCoords" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="coordinatesForDate() busca una ciudad conocida o coordenadas aproximadas de algunos países.&lt;br&gt;Si no hay, ofrece abrir OpenStreetMap para buscar manualmente." vertex="1">
+          <mxGeometry height="150" width="770" x="930" y="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="hDayLeaflet" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Leaflet dibuja el marcador con mosaicos de OpenStreetMap.&lt;br&gt;El lugar es aproximado; no es una ubicación GPS." vertex="1">
+          <mxGeometry height="120" width="770" x="930" y="1415" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="full-application-map" name="4 · Mapa maestro">
+    <mxGraphModel dx="2300" dy="3340" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="3340" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mDeploy" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="1 · CÓMO LLEGA LA APLICACIÓN AL NAVEGADOR" vertex="1">
+          <mxGeometry height="220" width="2204" x="48" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="mStartup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="2 · ARRANQUE: AUTENTICACIÓN, CARGA Y PRIMERA PANTALLA" vertex="1">
+          <mxGeometry height="650" width="2204" x="48" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="mOverview" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="3 · VIAJE, RESUMEN Y DÍAS — detalle: flujo-arranque.svg" vertex="1">
+          <mxGeometry height="355" width="2204" x="48" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="mExpenses" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="4 · GASTOS: CREAR, CONVERTIR, GUARDAR Y ADMINISTRAR — detalle: flujo-gastos.svg" vertex="1">
+          <mxGeometry height="430" width="2204" x="48" y="1460" as="geometry" />
+        </mxCell>
+        <mxCell id="mMaps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="5 · RESERVAS Y DETALLE DIARIO: CÓMO SE DIBUJAN LOS MAPAS — detalle: flujo-historial.svg" vertex="1">
+          <mxGeometry height="490" width="2204" x="48" y="1920" as="geometry" />
+        </mxCell>
+        <mxCell id="mHistory" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="6 · HISTORIA PERSONAL: VUELOS, POLONIA, PAÍSES Y UBICACIONES — detalle: flujo-historial.svg" vertex="1">
+          <mxGeometry height="550" width="2204" x="48" y="2440" as="geometry" />
+        </mxCell>
+        <mxCell id="mShared" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FAFF;strokeColor=#8DA7C3;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=20;spacingTop=12;fontSize=18;fontStyle=1;fontColor=#20344D;" value="7 · SERVICIOS Y RECURSOS COMPARTIDOS" vertex="1">
+          <mxGeometry height="285" width="2204" x="48" y="3020" as="geometry" />
+        </mxCell>
+        <mxCell id="mDeploy1" edge="1" parent="1" source="mSource" target="mBuild" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDeploy2" edge="1" parent="1" source="mBuild" target="mPages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDeploy3" edge="1" parent="1" source="mPages" target="mBrowser" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart1" edge="1" parent="1" source="mOpen" target="mMain" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart2" edge="1" parent="1" source="mMain" target="mAuth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart3" edge="1" parent="1" source="mAuth" target="mGate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart4" edge="1" parent="1" source="mTrips" target="mReservations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart5" edge="1" parent="1" source="mReservations" target="mHistoryLoad" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart6" edge="1" parent="1" source="mHistoryLoad" target="mSelect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mStart7" edge="1" parent="1" source="mSelect" target="mRender" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mOverview1" edge="1" parent="1" source="mTripControls" target="mSelectDay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mOverview2" edge="1" parent="1" source="mSelectDay" target="mLoadExpenses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mOverview3" edge="1" parent="1" source="mLoadExpenses" target="mTripDb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mOverview4" edge="1" parent="1" source="mTripDb" target="mTripViews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mExpense1" edge="1" parent="1" source="mAction" target="mForms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mExpense2" edge="1" parent="1" source="mForms" target="mRate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mExpense3" edge="1" parent="1" source="mRate" target="mPreview" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mExpense4" edge="1" parent="1" source="mPreview" target="mWrite" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mExpense5" edge="1" parent="1" source="mWrite" target="mExpenseDb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mReservation1" edge="1" parent="1" source="mReservationDb" target="mShowReservations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mReservation2" edge="1" parent="1" source="mShowReservations" target="mRenderReservations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mReservation3" edge="1" parent="1" source="mRenderReservations" target="mRoutePoints" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mReservation4" edge="1" parent="1" source="mRoutePoints" target="mReservationMap" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDay1" edge="1" parent="1" source="mDayDb" target="mOpenDay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDay2" edge="1" parent="1" source="mOpenDay" target="mRenderDay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDay3" edge="1" parent="1" source="mRenderDay" target="mCoordinates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mDay4" edge="1" parent="1" source="mCoordinates" target="mDayMap" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistory1" edge="1" parent="1" source="mHistoryTab" target="mHistoryLoad2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistory2" edge="1" parent="1" source="mHistoryLoad2" target="mHistoryDb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistory3" edge="1" parent="1" source="mHistoryDb" target="mHistoryRender" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4A9366;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistory4" edge="1" parent="1" source="mHistoryRender" target="mHistoryViews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistoryBranch1" edge="1" parent="1" source="mHistoryViews" target="mCountries" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistoryBranch2" edge="1" parent="1" source="mHistoryViews" target="mFlights" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mHistoryBranch3" edge="1" parent="1" source="mHistoryViews" target="mHistoryMaps" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#46617F;strokeWidth=2;" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="mTitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=28;fontStyle=1;fontColor=#20344D;" value="MAPA MAESTRO — cómo funciona toda la aplicación" vertex="1"><mxGeometry height="45" width="1400" x="55" y="35" as="geometry" /></mxCell>
+        <mxCell id="mSubtitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontColor=#52677E;" value="Sigue el recorrido de arriba hacia abajo. Cada proceso indica el diagrama pequeño que lo explica en detalle." vertex="1"><mxGeometry height="35" width="1600" x="55" y="80" as="geometry" /></mxCell>
+        <mxCell id="mSource" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="Código fuente&lt;br&gt;HTML · JavaScript · CSS · recursos locales" vertex="1"><mxGeometry height="112" width="430" x="90" y="220" as="geometry" /></mxCell>
+        <mxCell id="mBuild" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="GitHub Actions + Vite&lt;br&gt;Instala y compila dist/&lt;br&gt;No ejecuta la aplicación" vertex="1"><mxGeometry height="112" width="430" x="620" y="220" as="geometry" /></mxCell>
+        <mxCell id="mPages" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="GitHub Pages&lt;br&gt;Sirve archivos estáticos&lt;br&gt;No es el backend de datos" vertex="1"><mxGeometry height="112" width="430" x="1150" y="220" as="geometry" /></mxCell>
+        <mxCell id="mBrowser" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="Navegador&lt;br&gt;Carga index.html y ejecuta src/main.js" vertex="1"><mxGeometry height="112" width="480" x="1680" y="220" as="geometry" /></mxCell>
+        <mxCell id="mOpen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="Persona abre la app&lt;br&gt;index.html presenta la interfaz" vertex="1"><mxGeometry height="130" width="450" x="80" y="490" as="geometry" /></mxCell>
+        <mxCell id="mMain" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="src/main.js&lt;br&gt;Registra eventos y ejecuta initializeAuth()" vertex="1"><mxGeometry height="130" width="450" x="600" y="490" as="geometry" /></mxCell>
+        <mxCell id="mAuth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="Supabase Auth&lt;br&gt;getSession() + onAuthStateChange()" vertex="1"><mxGeometry height="130" width="450" x="1120" y="490" as="geometry" /></mxCell>
+        <mxCell id="mGate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=14;fontColor=#20344D;spacing=8;" value="renderAuthState()&lt;br&gt;Decide si muestra acceso o contenido privado" vertex="1"><mxGeometry height="130" width="500" x="1640" y="490" as="geometry" /></mxCell>
+        <mxCell id="mLogin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Sin sesión: muestra acceso.&lt;br&gt;signInWithPassword() → evento Auth → carga privada." vertex="1"><mxGeometry height="95" width="750" x="90" y="655" as="geometry" /></mxCell>
+        <mxCell id="mSessionValid" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Sesión válida: continúa con loadTrips(); consulta sus filas autorizadas, reservas e historia." vertex="1"><mxGeometry height="95" width="1240" x="900" y="655" as="geometry" /></mxCell>
+        <mxCell id="mTrips" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="loadTrips()&lt;br&gt;trips + trip_days" vertex="1"><mxGeometry height="145" width="390" x="80" y="795" as="geometry" /></mxCell>
+        <mxCell id="mReservations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="loadTripReservations()&lt;br&gt;Agrupa reservas del viaje" vertex="1"><mxGeometry height="145" width="390" x="500" y="795" as="geometry" /></mxCell>
+        <mxCell id="mHistoryLoad" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="loadPersonalTravelHistory()&lt;br&gt;Vuelos, estancias, análisis y ubicaciones diarias" vertex="1"><mxGeometry height="145" width="430" x="920" y="795" as="geometry" /></mxCell>
+        <mxCell id="mSelect" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Selecciona viaje / fecha&lt;br&gt;Luego loadExpenses()" vertex="1"><mxGeometry height="145" width="390" x="1380" y="795" as="geometry" /></mxCell>
+        <mxCell id="mRender" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="render()&lt;br&gt;Actualiza vistas desde el estado en memoria" vertex="1"><mxGeometry height="145" width="390" x="1800" y="795" as="geometry" /></mxCell>
+        <mxCell id="mTripControls" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Persona elige viaje / día&lt;br&gt;Estado de la interfaz" vertex="1"><mxGeometry height="170" width="320" x="80" y="1170" as="geometry" /></mxCell>
+        <mxCell id="mSelectDay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="selectDay() / moveDay()&lt;br&gt;openDayPage() abre detalle diario" vertex="1"><mxGeometry height="170" width="380" x="440" y="1170" as="geometry" /></mxCell>
+        <mxCell id="mLoadExpenses" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="loadExpenses()&lt;br&gt;Lee gastos del viaje activo" vertex="1"><mxGeometry height="170" width="320" x="860" y="1170" as="geometry" /></mxCell>
+        <mxCell id="mTripDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="Supabase / RLS&lt;br&gt;trips · trip_days · expenses" vertex="1"><mxGeometry height="170" width="390" x="1220" y="1170" as="geometry" /></mxCell>
+        <mxCell id="mTripViews" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=13;fontColor=#20344D;spacing=8;" value="renderSummary() · renderCharts()&lt;br&gt;renderDays() · renderExpenses() · renderDayPage()" vertex="1"><mxGeometry height="170" width="540" x="1650" y="1170" as="geometry" /></mxCell>
+        <mxCell id="mAction" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Añadir o editar gasto" vertex="1"><mxGeometry height="150" width="320" x="70" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mForms" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="openExpenseDialog()&lt;br&gt;openEditExpenseDialog(id)" vertex="1"><mxGeometry height="150" width="320" x="430" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mRate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="selectedCurrencyCode() → fetchRate()&lt;br&gt;Frankfurter si no es PLN" vertex="1"><mxGeometry height="150" width="320" x="790" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mPreview" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="updatePreview()&lt;br&gt;Importe × tasa = vista previa PLN" vertex="1"><mxGeometry height="150" width="320" x="1150" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mWrite" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="saveExpense()&lt;br&gt;INSERT o UPDATE" vertex="1"><mxGeometry height="150" width="360" x="1510" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mExpenseDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="expenses&lt;br&gt;INSERT / UPDATE / DELETE + RLS" vertex="1"><mxGeometry height="150" width="300" x="1910" y="1545" as="geometry" /></mxCell>
+        <mxCell id="mAdminActions" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Acciones directas: markExpensePaid() hace UPDATE; deleteExpense() hace DELETE; no pasan por el formulario." vertex="1"><mxGeometry height="105" width="680" x="80" y="1730" as="geometry" /></mxCell>
+        <mxCell id="mExport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="exportCSV(): crea y descarga local; no sube el archivo." vertex="1"><mxGeometry height="105" width="680" x="810" y="1730" as="geometry" /></mxCell>
+        <mxCell id="mImport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="importWorkbook() existe, pero actualmente no tiene botón en la interfaz." vertex="1"><mxGeometry height="105" width="670" x="1540" y="1730" as="geometry" /></mxCell>
+        <mxCell id="mReservationDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="trip_reservations&lt;br&gt;cargadas" vertex="1"><mxGeometry height="150" width="190" x="95" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mShowReservations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="showReservations()" vertex="1"><mxGeometry height="150" width="190" x="305" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mRenderReservations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="renderReservations() → renderFlightRouteMaps()" vertex="1"><mxGeometry height="150" width="190" x="515" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mRoutePoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="flightRoutePoints()&lt;br&gt;IATA + coords locales" vertex="1"><mxGeometry height="150" width="190" x="725" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mReservationMap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="Leaflet + Turf&lt;br&gt;OpenStreetMap" vertex="1"><mxGeometry height="150" width="180" x="935" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mDayDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="trip_days&lt;br&gt;fecha + destino" vertex="1"><mxGeometry height="150" width="190" x="1185" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mOpenDay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="openDayPage()" vertex="1"><mxGeometry height="150" width="190" x="1395" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mRenderDay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="renderDayPage()" vertex="1"><mxGeometry height="150" width="190" x="1605" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mCoordinates" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="coordinatesForDate()&lt;br&gt;aproximadas" vertex="1"><mxGeometry height="150" width="190" x="1815" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mDayMap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="Leaflet + OSM&lt;br&gt;No es GPS" vertex="1"><mxGeometry height="150" width="180" x="2025" y="2070" as="geometry" /></mxCell>
+        <mxCell id="mHistoryTab" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="showPersonalHistoryPage()" vertex="1"><mxGeometry height="140" width="360" x="80" y="2525" as="geometry" /></mxCell>
+        <mxCell id="mHistoryLoad2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="loadPersonalTravelHistory()&lt;br&gt;loadPersonalDailyLocations()" vertex="1"><mxGeometry height="140" width="420" x="480" y="2525" as="geometry" /></mxCell>
+        <mxCell id="mHistoryDb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=11;fontColor=#20344D;spacing=6;" value="personal_travel_flights&lt;br&gt;personal_country_stays&lt;br&gt;personal_poland_analysis&lt;br&gt;personal_daily_locations + RLS" vertex="1"><mxGeometry height="140" width="470" x="940" y="2525" as="geometry" /></mxCell>
+        <mxCell id="mHistoryRender" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="renderPersonalHistory()" vertex="1"><mxGeometry height="140" width="330" x="1450" y="2525" as="geometry" /></mxCell>
+        <mxCell id="mHistoryViews" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="renderPersonalFlights() · renderPolandTime() · renderDailyLocations()" vertex="1"><mxGeometry height="140" width="370" x="1820" y="2525" as="geometry" /></mxCell>
+        <mxCell id="mCountries" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="renderDailyLocations() → buildDailyLocationRanges()" vertex="1"><mxGeometry height="145" width="650" x="110" y="2720" as="geometry" /></mxCell>
+        <mxCell id="mFlights" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EFFA;strokeColor=#8969AD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="renderPersonalFlights() → renderPersonalFlightMaps()&lt;br&gt;mountPersonalFlightMap() + IntersectionObserver + Leaflet" vertex="1"><mxGeometry height="145" width="650" x="825" y="2720" as="geometry" /></mxCell>
+        <mxCell id="mHistoryMaps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Mapas: aeropuertos locales + Turf + OpenStreetMap&lt;br&gt;Se limpian al salir de la vista" vertex="1"><mxGeometry height="145" width="650" x="1540" y="2720" as="geometry" /></mxCell>
+        <mxCell id="mSharedSupabase" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF8F1;strokeColor=#4A9366;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Un proyecto Supabase&lt;br&gt;Auth + API REST automática (PostgREST)&lt;br&gt;PostgreSQL almacena; RLS limita filas&lt;br&gt;No hay API ni servidor propio" vertex="1"><mxGeometry height="175" width="680" x="80" y="3090" as="geometry" /></mxCell>
+        <mxCell id="mSharedExternal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E8;strokeColor=#C17A31;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Servicios externos cuando hacen falta&lt;br&gt;Frankfurter: tasas · OpenStreetMap: mosaicos&lt;br&gt;Turf: rutas · Leaflet: mapas en navegador" vertex="1"><mxGeometry height="175" width="680" x="810" y="3090" as="geometry" /></mxCell>
+        <mxCell id="mSharedLocal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5A7FAD;strokeWidth=2;fontSize=12;fontColor=#20344D;spacing=8;" value="Recursos locales&lt;br&gt;JSON de aeropuertos · banderas · sessionStorage&lt;br&gt;CSV se descarga localmente&lt;br&gt;Excel: código existente sin botón de interfaz" vertex="1"><mxGeometry height="175" width="680" x="1540" y="3090" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

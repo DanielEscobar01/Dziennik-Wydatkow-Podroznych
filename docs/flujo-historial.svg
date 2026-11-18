@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1660" viewBox="0 0 1800 1660" role="img" aria-labelledby="title description">
+  <title id="title">Flujo de historia personal, ubicaciones y mapas</title>
+  <desc id="description">La navegación de historia carga las tablas personales, transforma y filtra datos para tres vistas, agrupa ubicaciones diarias y carga mapas de forma diferida con Leaflet, OpenStreetMap y Turf.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#46617f"/></marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #20344d; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #52677e; }
+      .head { font-size: 16px; font-weight: 700; }
+      .body { font-size: 13px; fill: #455d78; }
+      .small { font-size: 12px; fill: #52677e; }
+      .panel { fill: #f7faff; stroke: #8da7c3; stroke-width: 2; }
+      .node { fill: #fff; stroke: #5a7fad; stroke-width: 2; rx: 12; }
+      .green { fill: #edf8f1; stroke: #4a9366; stroke-width: 2; rx: 12; }
+      .orange { fill: #fff5e8; stroke: #c17a31; stroke-width: 2; rx: 12; }
+      .purple { fill: #f4effa; stroke: #8969ad; stroke-width: 2; rx: 12; }
+      .note { fill: #fff7e8; stroke: #c17a31; stroke-width: 2; rx: 12; }
+      .arrow { fill: none; stroke: #46617f; stroke-width: 2.5; marker-end: url(#arrow); }
+      .green-arrow { fill: none; stroke: #4a9366; stroke-width: 2.5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1800" height="1660" fill="#fff"/>
+  <text class="title" x="48" y="52">Historia, países y mapas: quién carga y transforma los datos</text>
+  <text class="subtitle" x="48" y="80">La historia personal es distinta de las reservas de un viaje; RLS la limita a su propietario.</text>
+
+  <rect class="panel" x="48" y="112" width="790" height="1495" rx="18"/>
+  <text class="head" x="78" y="152">A · Carga de historia y vistas</text>
+  <rect class="node" x="105" y="190" width="670" height="100" rx="12"/>
+  <text class="head" x="440" y="227" text-anchor="middle">Pestaña → showPersonalHistoryPage(view)</text>
+  <text class="body" x="440" y="256" text-anchor="middle">showPersonalHistory · showPolandHistory · showCountriesHistory</text>
+  <path class="arrow" d="M440 290 V325"/>
+  <rect class="green" x="105" y="335" width="670" height="145" rx="12"/>
+  <text class="head" x="440" y="372" text-anchor="middle">loadPersonalTravelHistory(ownerId)</text>
+  <text class="body" x="440" y="401" text-anchor="middle">En localhost puede leer la vista previa de desarrollo</text>
+  <text class="small" x="440" y="430" text-anchor="middle">En Supabase consulta vuelos, estancias, análisis de Polonia</text>
+  <text class="small" x="440" y="454" text-anchor="middle">y ubicaciones diarias; descarta resultados de otra sesión</text>
+  <path class="arrow" d="M440 480 V515"/>
+  <rect class="green" x="105" y="525" width="670" height="130" rx="12"/>
+  <text class="head" x="440" y="562" text-anchor="middle">loadPersonalDailyLocations(ownerId)</text>
+  <text class="body" x="440" y="591" text-anchor="middle">personal_daily_locations, en lotes de hasta 1000 filas</text>
+  <text class="small" x="440" y="620" text-anchor="middle">Errores de migración se distinguen de otros fallos de lectura</text>
+  <path class="arrow" d="M440 655 V690"/>
+  <rect class="node" x="105" y="700" width="670" height="110" rx="12"/>
+  <text class="head" x="440" y="739" text-anchor="middle">renderPersonalHistory()</text>
+  <text class="body" x="440" y="768" text-anchor="middle">Distribuye el estado hacia listas, estadísticas y ubicaciones</text>
+  <path class="arrow" d="M440 810 V850"/>
+  <path d="M175 850 H705" fill="none" stroke="#46617f" stroke-width="2.5"/>
+  <rect class="purple" x="80" y="880" width="225" height="155" rx="12"/>
+  <text class="head" x="192" y="916" text-anchor="middle">Vuelos</text>
+  <text class="body" x="192" y="945" text-anchor="middle">renderPersonalFlights()</text>
+  <text class="small" x="192" y="974" text-anchor="middle">Filtra por año y búsqueda</text>
+  <text class="small" x="192" y="998" text-anchor="middle">Formato de aerolínea, fecha y ruta</text>
+  <rect class="purple" x="330" y="880" width="225" height="155" rx="12"/>
+  <text class="head" x="442" y="916" text-anchor="middle">Tiempo en Polonia</text>
+  <text class="body" x="442" y="945" text-anchor="middle">renderPolandTime()</text>
+  <text class="small" x="442" y="974" text-anchor="middle">Métricas actuales y pronóstico</text>
+  <text class="small" x="442" y="998" text-anchor="middle">Muestra datos agregados de la tabla</text>
+  <rect class="purple" x="580" y="880" width="225" height="155" rx="12"/>
+  <text class="head" x="692" y="916" text-anchor="middle">Países / días</text>
+  <text class="body" x="692" y="945" text-anchor="middle">renderDailyLocations()</text>
+  <text class="small" x="692" y="974" text-anchor="middle">Año, cantidad y lista de estancias</text>
+  <text class="small" x="692" y="998" text-anchor="middle">Renderiza rangos ya agrupados</text>
+  <path class="arrow" d="M192 850 V870"/>
+  <path class="arrow" d="M442 850 V870"/>
+  <path class="arrow" d="M692 850 V870"/>
+
+  <rect class="note" x="80" y="1070" width="725" height="210" rx="12"/>
+  <text class="head" x="108" y="1110">Cálculos de países y estancias</text>
+  <text class="body" x="108" y="1147">renderPersonalHistory() suma días y visitas por país y calcula</text>
+  <text class="body" x="108" y="1173">días fuera de Polonia por año, país y país extranjero principal.</text>
+  <text class="body" x="108" y="1210">renderDailyLocations() llama buildDailyLocationRanges(rows):</text>
+  <text class="small" x="108" y="1238">combina contexto por país/fecha, une días consecutivos y separa una estancia</text>
+  <text class="small" x="108" y="1261">cuando hay una visita de un día a otro país; después aplica año y límite visible.</text>
+
+  <rect class="note" x="80" y="1310" width="725" height="240" rx="12"/>
+  <text class="head" x="108" y="1350">Datos y privacidad</text>
+  <text class="body" x="108" y="1387">personal_travel_flights · personal_country_stays</text>
+  <text class="body" x="108" y="1416">personal_poland_analysis · personal_daily_locations</text>
+  <text class="small" x="108" y="1450">La sesión determina ownerId; las políticas RLS de PostgreSQL son</text>
+  <text class="small" x="108" y="1474">la barrera final. Los viajes y reservas del panel principal usan tablas</text>
+  <text class="small" x="108" y="1498">distintas: trips, trip_days, trip_reservations y expenses.</text>
+
+  <rect class="panel" x="878" y="112" width="874" height="1495" rx="18"/>
+  <text class="head" x="908" y="152">B · Mapas según el contexto visible</text>
+
+  <rect class="node" x="930" y="190" width="770" height="105" rx="12"/>
+  <text class="head" x="1315" y="228" text-anchor="middle">Vuelos de la historia personal</text>
+  <text class="body" x="1315" y="258" text-anchor="middle">renderPersonalFlights() → renderPersonalFlightMaps()</text>
+  <path class="arrow" d="M1315 295 V330"/>
+  <rect class="orange" x="930" y="340" width="770" height="145" rx="12"/>
+  <text class="head" x="1315" y="378" text-anchor="middle">Carga diferida y con limpieza</text>
+  <text class="body" x="1315" y="407" text-anchor="middle">IntersectionObserver espera a que el mapa esté cerca de pantalla</text>
+  <text class="small" x="1315" y="436" text-anchor="middle">closePersonalFlightMaps() destruye instancias al cambiar de vista</text>
+  <text class="small" x="1315" y="460" text-anchor="middle">mountPersonalFlightMap() importa Leaflet solo cuando se necesita</text>
+  <path class="arrow" d="M1315 485 V520"/>
+  <rect class="green" x="930" y="530" width="770" height="160" rx="12"/>
+  <text class="head" x="1315" y="568" text-anchor="middle">Leaflet + datos locales + servicios de mapa</text>
+  <text class="body" x="1315" y="597" text-anchor="middle">history-airports.json da coordenadas por código de aeropuerto</text>
+  <text class="body" x="1315" y="626" text-anchor="middle">Turf greatCircle calcula la ruta; OpenStreetMap aporta mosaicos</text>
+  <text class="small" x="1315" y="655" text-anchor="middle">Si faltan coordenadas, muestra el aviso y no inventa la ruta</text>
+
+  <rect class="node" x="930" y="735" width="770" height="105" rx="12"/>
+  <text class="head" x="1315" y="773" text-anchor="middle">Mapa de reserva de vuelo</text>
+  <text class="body" x="1315" y="803" text-anchor="middle">showReservations() → renderReservations() → renderFlightRouteMaps()</text>
+  <path class="arrow" d="M1315 840 V875"/>
+  <rect class="green" x="930" y="885" width="770" height="140" rx="12"/>
+  <text class="head" x="1315" y="923" text-anchor="middle">flightRoutePoints(flight) → Leaflet</text>
+  <text class="body" x="1315" y="952" text-anchor="middle">Busca códigos IATA reconocidos en la ruta y sus coordenadas</text>
+  <text class="small" x="1315" y="980" text-anchor="middle">Dibuja línea de gran círculo y mosaicos OSM; si no hay puntos, avisa</text>
+
+  <rect class="node" x="930" y="1070" width="770" height="105" rx="12"/>
+  <text class="head" x="1315" y="1108" text-anchor="middle">Detalle de un día de viaje</text>
+  <text class="body" x="1315" y="1138" text-anchor="middle">openDayPage(date) → renderDayPage()</text>
+  <path class="arrow" d="M1315 1175 V1210"/>
+  <rect class="orange" x="930" y="1220" width="770" height="165" rx="12"/>
+  <text class="head" x="1315" y="1258" text-anchor="middle">coordinatesForDate() elige coordenadas aproximadas</text>
+  <text class="body" x="1315" y="1287" text-anchor="middle">Busca ciudad conocida; si no, usa coordenadas de algunos países</text>
+  <text class="body" x="1315" y="1316" text-anchor="middle">Leaflet dibuja marcador y permite abrir OpenStreetMap</text>
+  <text class="small" x="1315" y="1346" text-anchor="middle">La interfaz aclara que no es una ubicación GPS</text>
+  <rect class="note" x="930" y="1430" width="770" height="120" rx="12"/>
+  <text class="head" x="960" y="1470">Consecuencia práctica</text>
+  <text class="body" x="960" y="1500">Los mapas se crean solo cuando corresponde y se eliminan al cambiar</text>
+  <text class="body" x="960" y="1528">de vista para liberar recursos del navegador.</text>
+</svg>

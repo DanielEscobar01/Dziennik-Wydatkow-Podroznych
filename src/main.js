@@ -2,8 +2,11 @@
 import { createClient } from '@supabase/supabase-js';
 // PL: Importuj Chart.js z kontrolerami potrzebnymi do wykresów dziennych i kołowych. | ES-CO: Importa Chart.js con controladores para gráficos diarios y circulares.
 import Chart from 'chart.js/auto';
+// PL: Grupuj wpisy dziennych lokalizacji w przedziały podróży. | ES-CO: Agrupa los registros diarios de ubicación en periodos de viaje.
 import { buildDailyLocationRanges } from './daily-location-ranges.js';
+// PL: Wyliczaj wydatki pobytu z pominięciem transportu. | ES-CO: Calcula los gastos de estancia excluyendo el transporte.
 import { isTransportExpense, summarizeStayExpenses } from './stay-expenses.js';
+// PL: Załaduj podstawowy krój Quicksand dla polskich znaków i różnych grubości. | ES-CO: Carga las variantes de Quicksand para los caracteres polacos y sus distintos pesos.
 import '@fontsource/quicksand/latin-400.css';
 import '@fontsource/quicksand/latin-500.css';
 import '@fontsource/quicksand/latin-600.css';
@@ -12,8 +15,11 @@ import '@fontsource/quicksand/latin-ext-400.css';
 import '@fontsource/quicksand/latin-ext-500.css';
 import '@fontsource/quicksand/latin-ext-600.css';
 import '@fontsource/quicksand/latin-ext-700.css';
+// PL: Obliczaj geometrię tras lotniczych na mapie. | ES-CO: Calcula la geometría de las rutas aéreas en el mapa.
 import { greatCircle } from '@turf/great-circle';
+// PL: Załaduj arkusz stylów biblioteki Leaflet. | ES-CO: Carga la hoja de estilos de Leaflet.
 import 'leaflet/dist/leaflet.css';
+// PL: Pobierz ikony przewoźników renderowane jako znaki SVG. | ES-CO: Importa iconos de aerolíneas que se representan como SVG.
 import {
   siAeromexico,
   siAirfrance,
@@ -25,6 +31,7 @@ import {
   siUnitedairlines,
   siWizzair,
 } from 'simple-icons';
+// PL: Załaduj lokalne logotypy linii lotniczych do widoku historii. | ES-CO: Carga logotipos locales de aerolíneas para el historial.
 import airlineAmericanColorLogo from './assets/airlines/aa.png';
 import airlineAviancaColorLogo from './assets/airlines/av.png';
 import airlineCopaColorLogo from './assets/airlines/cm.webp';
@@ -40,21 +47,35 @@ import airlineTurkishColorLogo from './assets/airlines/tk-trim.png';
 import airlineAnaLogo from './assets/airlines/nh.png';
 import airlineKoreanLogo from './assets/korean-air.svg';
 import airlineVivaLogo from './assets/airline-viva.svg';
+// PL: Pobierz lokalne mapy adresów flag krajów. | ES-CO: Importa los mapas locales de URL de banderas de países.
 import countryFlagAssets from './country-flag-assets.js';
+// PL: Wczytaj dane źródłowe lotnisk z plików JSON. | ES-CO: Carga los datos de aeropuertos desde archivos JSON.
 import historyAirportCoordinates from './history-airports.json';
 import historyAirportCountries from './history-airport-countries.json';
 
+// PL: Odczytaj adres backendu Supabase z publicznej konfiguracji Vite. | ES-CO: Lee la URL del backend de Supabase desde la configuración pública de Vite.
 const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+// PL: Odczytaj klucz publiczny używany przez klienta Supabase. | ES-CO: Lee la clave pública que utiliza el cliente de Supabase.
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// PL: Wskaż tabelę przechowującą wydatki aplikacji. | ES-CO: Indica la tabla que almacena los gastos de la aplicación.
 const TABLE_NAME = 'expenses';
+// PL: Nadaj kluczom podglądu rezerwacji wspólny prefiks pamięci podręcznej. | ES-CO: Define un prefijo común para la caché de reservas.
 const RESERVATION_CACHE_PREFIX = 'trip-reservations-preview';
+// PL: Mapuj popularne kody walut na polskie nazwy używane w interfejsie. | ES-CO: Asocia códigos de moneda comunes con sus nombres en polaco para la interfaz.
 const currencyNames = { JPY: 'Japoński jen', KRW: 'Won południowokoreański', PLN: 'Polski złoty', EUR: 'Euro', USD: 'Dolar amerykański', GBP: 'Funt szterling', CHF: 'Frank szwajcarski', CZK: 'Korona czeska', HUF: 'Forint węgierski', SEK: 'Korona szwedzka', NOK: 'Korona norweska', DKK: 'Korona duńska', CAD: 'Dolar kanadyjski', AUD: 'Dolar australijski', SGD: 'Dolar singapurski', HKD: 'Dolar hongkoński', CNY: 'Juan chiński', INR: 'Rupia indyjska', THB: 'Bat tajski', TRY: 'Lira turecka', BRL: 'Real brazylijski', MXN: 'Peso meksykańskie', ZAR: 'Rand południowoafrykański', NZD: 'Dolar nowozelandzki', RON: 'Lej rumuński', BGN: 'Lew bułgarski', ISK: 'Korona islandzka', IDR: 'Rupia indonezyjska', ILS: 'Nowy szekel izraelski', MYR: 'Ringgit malezyjski', PHP: 'Peso filipińskie' };
+// PL: Zdefiniuj kategorie dostępne przy rejestrowaniu wydatków. | ES-CO: Define las categorías disponibles al registrar gastos.
 const expenseCategories = ['Hotel', 'Loty', 'Transport', 'Jedzenie', 'Atrakcje', 'Zakupy', 'Inne'];
+// PL: Ustal kolory używane do rozróżniania kategorii na wykresie. | ES-CO: Define los colores que distinguen categorías en los gráficos.
 const chartColors = ['#4f91ff', '#50c8ef', '#f4c86b', '#f17ca5', '#55d4b0', '#ff936f', '#9bb0c9'];
+// PL: Ustaw domyślny kolor tekstu wykresów. | ES-CO: Define el color predeterminado del texto de los gráficos.
 Chart.defaults.color = '#a4b4ca';
+// PL: Dopasuj domyślne obramowania siatek wykresów do motywu aplikacji. | ES-CO: Adapta los bordes predeterminados de las cuadrículas al tema de la aplicación.
 Chart.defaults.borderColor = 'rgba(142, 178, 225, .16)';
+// PL: Odczytaj ustawienie systemowe ograniczające animacje. | ES-CO: Consulta la preferencia del sistema para reducir animaciones.
 const chartMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+// PL: Przechowuj obserwatory ujawniania wykresów bez utrzymywania ich instancji przy życiu. | ES-CO: Guarda observadores de aparición sin mantener vivas sus instancias.
 const chartRevealObservers = new WeakMap();
+// PL: Animuj wykres dopiero po pojawieniu się panelu na ekranie. | ES-CO: Anima el gráfico solo cuando su panel aparece en pantalla.
 const chartReveal = {
   id: 'chartReveal',
   afterInit(chart) {
@@ -77,6 +98,7 @@ const chartReveal = {
     chartRevealObservers.delete(chart);
   },
 };
+// PL: Rysuj wartości procentowe na odpowiednio dużych wycinkach wykresu kołowego. | ES-CO: Dibuja porcentajes sobre segmentos suficientemente grandes del gráfico circular.
 const categoryArcLabels = {
   id: 'categoryArcLabels',
   afterDatasetsDraw(chart) {
@@ -105,6 +127,7 @@ const categoryArcLabels = {
     ctx.restore();
   },
 };
+// PL: Zmień środkową etykietę wykresu zależnie od wskazanej kategorii. | ES-CO: Cambia la etiqueta central del gráfico según la categoría seleccionada.
 function setCategoryChartCenter(index) {
   const dataset = categoryChart?.data.datasets[0];
   if (!dataset) return;
@@ -113,17 +136,22 @@ function setCategoryChartCenter(index) {
     ? dataset.data.reduce((sum, value) => sum + value, 0)
     : dataset.data[index]);
 }
+// PL: Wykorzystaj ten sam zestaw flag w widoku bieżącej podróży i historii. | ES-CO: Usa el mismo conjunto de banderas en la vista del viaje actual y del historial.
 const flagAssets = countryFlagAssets;
 const historyFlagAssets = countryFlagAssets;
+// PL: Zbuduj mapę logotypów lokalnych linii według kodu przewoźnika. | ES-CO: Crea un mapa de logotipos locales por código de aerolínea.
 const downloadedHistoryAirlineLogos = Object.fromEntries(
   Object.entries(import.meta.glob('./assets/airlines/*.{svg,png,jpg,jpeg,webp}', { eager: true, import: 'default', query: '?url' }))
     .map(([path, url]) => [path.split('/').pop().replace(/\.[^.]+$/, '').toUpperCase(), url]),
 );
+// PL: Zamień ikonę Simple Icons na zakodowany obraz SVG z jej firmowym kolorem. | ES-CO: Convierte un icono de Simple Icons en una imagen SVG codificada con su color de marca.
 function colorizedAirlineIcon(icon) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#${icon.hex}" d="${icon.path}"/></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
+// PL: Powiąż używane w aplikacji identyfikatory linii z ich lokalnymi logotypami. | ES-CO: Asocia los identificadores de aerolíneas usados por la aplicación con sus logotipos locales.
 const airlineLogoAssets = { ana: airlineAnaLogo, lot: airlineLotColorLogo, 'korean-air': airlineKoreanLogo };
+// PL: Scal lokalne grafiki z ikonami generowanymi dla historii lotów. | ES-CO: Combina imágenes locales e iconos generados para el historial de vuelos.
 const historyAirlineLogos = {
   ...downloadedHistoryAirlineLogos,
   AA: airlineAmericanColorLogo, AF: colorizedAirlineIcon(siAirfrance), AM: colorizedAirlineIcon(siAeromexico),
@@ -135,6 +163,7 @@ const historyAirlineLogos = {
   UA: colorizedAirlineIcon(siUnitedairlines), W6: colorizedAirlineIcon(siWizzair),
   WN: colorizedAirlineIcon(siSouthwestairlines), VH: airlineVivaLogo, VV: airlineVivaLogo,
 };
+// PL: Przetłumacz kody przewoźników na pełne nazwy pokazywane w historii. | ES-CO: Traduce códigos de aerolíneas a los nombres completos del historial.
 const historyAirlineNames = {
   '4C': 'LATAM Colombia', '4Y': 'Discover Airlines', '7C': 'Jeju Air', '9R': 'SATENA', A3: 'Aegean Airlines',
   AA: 'American Airlines', AD: 'Azul Brazilian Airlines', AF: 'Air France', AM: 'Aeroméxico',
@@ -249,6 +278,7 @@ function initialSelectedDate() {
 
 // PL: Znajdź nazwę miejsca zapisaną dla konkretnej daty. | ES-CO: Encuentra el destino guardado para una fecha.
 function destinationForDate(date) { return currentTrip?.days.find((day) => day.date === date)?.destination || currentTrip?.name || 'Podróż'; }
+// PL: Zwróć kraj dnia albo jego miejsce docelowe jako wartość zastępczą. | ES-CO: Devuelve el país del día o, como alternativa, su destino.
 function countryForDate(date) { return currentTrip?.days.find((day) => day.date === date)?.country || destinationForDate(date); }
 // PL: Zwróć budżet konkretnego dnia lub budżet domyślny wyjazdu. | ES-CO: Devuelve el presupuesto del día o el general del viaje.
 function dailyBudgetForDate(date) { return Number(currentTrip?.days.find((day) => day.date === date)?.dailyBudget ?? currentTrip?.dailyBudget ?? 0); }
@@ -286,21 +316,25 @@ const airportCoordinates = {
   ICN: [126.4407, 37.4602],
 };
 
+// PL: Wyszukaj rozpoznane kraje w nazwie miejsca, korzystając z aliasów. | ES-CO: Busca países reconocidos en el nombre del lugar mediante alias.
 function countriesFor(value) {
   const normalized = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   return countryAliases.filter((country) => country.aliases.some((alias) => normalized.includes(alias)));
 }
 
+// PL: Zrenderuj flagi pasujące do krajów wykrytych w przekazanym tekście. | ES-CO: Renderiza las banderas de los países detectados en el texto.
 function countryFlagMarkup(value) {
   const countries = countriesFor(value);
   if (!countries.length) return '';
   return `<span class="country-flags">${countries.map((country) => `<img class="country-flag" src="${flagAssets[country.code]}" alt="${escapeHTML(country.name)}" title="${escapeHTML(country.name)}">`).join('')}</span>`;
 }
 
+// PL: Zbierz niepowtarzające się kraje planu i przygotuj ich flagi. | ES-CO: Reúne países únicos del itinerario y genera sus banderas.
 function tripFlagsMarkup() {
   const countries = [...new Map((currentTrip?.days || []).flatMap((day) => countriesFor(day.country || day.destination)).map((country) => [country.code, country])).values()];
   return countryFlagMarkup(countries.map((country) => country.name).join(' '));
 }
+// PL: Znajdź współrzędne miasta lub kraju dla znacznika mapy dnia. | ES-CO: Busca coordenadas de ciudad o país para el mapa del día.
 function coordinatesForDate(date) {
   const destination = String(destinationForDate(date)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const cities = [
@@ -317,6 +351,7 @@ function coordinatesForDate(date) {
   return countryCoordinates[countries.at(-1)?.code] || countryCoordinates[countries[0]?.code] || null;
 }
 
+// PL: Rozpoznaj lotniska IATA i przygotuj współrzędne końców trasy. | ES-CO: Identifica aeropuertos IATA y prepara coordenadas para la ruta.
 function flightRoutePoints(flight) {
   const airportCodes = [...String(flight.route || '').matchAll(/\(([A-Z]{3})\)/g)].map((match) => match[1]);
   if (airportCodes.length < 2) return null;
@@ -325,6 +360,7 @@ function flightRoutePoints(flight) {
   return origin && destination ? { airportCodes: [airportCodes[0], airportCodes[airportCodes.length - 1]], origin, destination } : null;
 }
 
+// PL: Ujednolić nazwę celu podróży na potrzeby widoku mapy. | ES-CO: Normaliza el nombre del destino para mostrarlo en el mapa.
 function mapDestinationForDate(date) {
   const destination = String(destinationForDate(date)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   return destination.includes('fuji') ? 'Fujiyoshida' : destinationForDate(date);
@@ -382,13 +418,16 @@ function renderTripSelector() {
   if (currentTrip) tripSelector.value = currentTrip.id;
 }
 
+// PL: Utwórz klucz pamięci podręcznej rezerwacji z identyfikatorów konta i podróży. | ES-CO: Crea una clave de caché de reservas con los identificadores de cuenta y viaje.
 function reservationCacheKey(userId, tripId) { return `${RESERVATION_CACHE_PREFIX}:${userId}:${tripId}`; }
 
+// PL: Zapisz kopię podglądu rezerwacji w pamięci sesji i aplikacji. | ES-CO: Guarda una copia de la vista previa de reservas en la sesión y la aplicación.
 function cacheReservationPreview(userId, tripId, reservations) {
   try { sessionStorage.setItem(reservationCacheKey(userId, tripId), JSON.stringify(reservations)); } catch {}
   reservationPreviewByTrip.set(tripId, reservations);
 }
 
+// PL: Odczytaj zapisaną kopię rezerwacji, jeśli jest dostępna. | ES-CO: Lee la copia guardada de las reservas si está disponible.
 function readReservationPreview(userId, tripId) {
   if (reservationPreviewByTrip.has(tripId)) return reservationPreviewByTrip.get(tripId);
   try {
@@ -398,6 +437,7 @@ function readReservationPreview(userId, tripId) {
   } catch { return []; }
 }
 
+// PL: Wyczyść wszystkie lokalnie przechowywane kopie rezerwacji. | ES-CO: Limpia todas las copias locales de reservas.
 function clearReservationPreview() {
   reservationPreviewByTrip.clear();
   try {
@@ -405,6 +445,7 @@ function clearReservationPreview() {
   } catch {}
 }
 
+// PL: Pobierz rezerwacje wyjazdów użytkownika i przekształć rekordy bazy do widoku. | ES-CO: Carga reservas de viajes del usuario y adapta las filas de la base a la interfaz.
 async function loadTripReservations(ownerId) {
   if (!trips.length) return;
   const { data, error } = await supabase.from('trip_reservations').select('*').in('trip_id', trips.map((trip) => trip.id)).order('sort_order', { ascending: true });
@@ -423,6 +464,7 @@ async function loadTripReservations(ownerId) {
   trips = trips.map((trip) => ({ ...trip, reservations: reservationsByTrip.get(trip.id) || [] }));
 }
 
+// PL: Stronicuj prywatne lokalizacje dzienne, aby pobrać również długą historię. | ES-CO: Pagina las ubicaciones diarias privadas para cargar historiales extensos.
 async function loadPersonalDailyLocations(ownerId) {
   const rows = [];
   let offset = 0;
@@ -442,6 +484,7 @@ async function loadPersonalDailyLocations(ownerId) {
   return { data: rows, error: null };
 }
 
+// PL: Wczytaj historię podróży z podglądu lokalnego lub tabel Supabase. | ES-CO: Carga el historial desde la vista previa local o las tablas de Supabase.
 async function loadPersonalTravelHistory(ownerId, force = false) {
   try {
     const previewKey = `personal-travel-history-preview:${ownerId}`;
@@ -599,6 +642,7 @@ function renderTripContext() {
   dateInput.max = currentTrip?.endDate || '';
 }
 
+// PL: Wyświetl listy noclegów i lotów z rezerwacji aktywnej podróży. | ES-CO: Muestra las listas de hoteles y vuelos reservados para el viaje activo.
 function renderReservations() {
   clearFlightRouteMaps();
   const reservations = currentTrip?.reservations || [];
@@ -627,6 +671,7 @@ function renderReservations() {
   if (activeMainView === 'reservations' && !reservationsPage.hidden) renderFlightRouteMaps(flights);
 }
 
+// PL: Ujednolić tekst rezerwacji do bezpiecznego wyszukiwania i porównań. | ES-CO: Normaliza el texto de una reserva para buscar y comparar de forma segura.
 function normalizeReservationText(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
@@ -641,17 +686,20 @@ const historyCountryCodes = {
 };
 const historyCountryNames = new Intl.DisplayNames(['pl-PL'], { type: 'region' });
 
+// PL: Wyszukaj flagę odpowiadającą nazwie kraju w historii. | ES-CO: Busca la bandera correspondiente al país del historial.
 function historyCountryFlag(country) {
   const code = historyCountryCodes[country];
   const flag = code && historyFlagAssets[code];
   return flag ? `<img class="history-country-flag" src="${flag}" alt="${escapeHTML(country)}">` : '';
 }
 
+// PL: Sformatuj czas historycznego lotu do widoku listy. | ES-CO: Da formato a la hora del vuelo para la lista del historial.
 function historyFlightTime(value) {
   const text = String(value || '');
   return text.includes('T') ? text.slice(11, 16) : text.slice(0, 5) || '—';
 }
 
+// PL: Sformatuj datę historycznego lotu do polskiej postaci. | ES-CO: Da formato a la fecha del vuelo con el formato regional polaco.
 function historyFlightDate(value) {
   const date = String(value || '').slice(0, 10);
   if (!date) return '—';
@@ -663,6 +711,7 @@ function historyFlightDate(value) {
   return `${day} ${month.charAt(0).toLocaleUpperCase('pl-PL')}${month.slice(1)} ${year}`;
 }
 
+// PL: Określ nazwę przewoźnika dla wpisu historycznego lotu. | ES-CO: Determina la aerolínea de un vuelo del historial.
 function historyFlightAirline(flight) {
   const airlineCode = String(flight.airline || '').match(/^([A-Z0-9]{2,3})\s*-/)?.[1];
   const flightNumber = String(flight.flight_number || '').trim().toUpperCase();
@@ -675,6 +724,7 @@ function historyFlightAirline(flight) {
   };
 }
 
+// PL: Zwróć czytelną nazwę lotniska z kodem i rolą w podróży. | ES-CO: Devuelve el nombre legible del aeropuerto con su código y función.
 function historyAirportName(value, code, side) {
   const cleaned = String(value || '').replace(/\s*\([A-Z]{3}\/[A-Z0-9]{3,4}\)\s*$/, '').trim();
   const city = cleaned.split('/')[0].trim() || cleaned;
@@ -684,6 +734,7 @@ function historyAirportName(value, code, side) {
   return `<span class="history-airport${side === 'origin' ? ' history-airport--origin' : ''}"><span class="history-airport-code">${escapeHTML(code || '---')}</span><span class="history-airport-details"><span class="history-airport-city">${escapeHTML(city)}</span><span class="history-airport-country">${flag}<span>${escapeHTML(countryName || countryCode || '')}</span></span></span></span>`;
 }
 
+// PL: Narysuj osobistą historię lotów, pobytów i lokalizacji dziennych. | ES-CO: Renderiza el historial personal de vuelos, estancias y ubicaciones diarias.
 function renderPersonalHistory() {
   if (!currentUser) return;
   try {
@@ -753,6 +804,7 @@ function renderPersonalHistory() {
   renderDailyLocations();
 }
 
+// PL: Wyświetl dni spędzone w poszczególnych krajach zgrupowane w pobyty. | ES-CO: Muestra los días por país agrupados en estancias.
 function renderDailyLocations() {
   if (!dailyLocationsList) return;
   const rows = personalTravelHistory.dailyLocations || [];
@@ -805,6 +857,7 @@ function renderDailyLocations() {
   showMoreDailyLocations.textContent = `Pokaż wcześniejsze pobyty (${historyCountFormatter.format(filtered.length - visible.length)})`;
 }
 
+// PL: Oblicz i przedstaw statystyki czasu spędzonego w Polsce. | ES-CO: Calcula y presenta estadísticas del tiempo en Polonia.
 function renderPolandTime() {
   const analysis = personalTravelHistory.poland;
   const current = analysis?.current_metrics;
@@ -838,6 +891,7 @@ function renderPolandTime() {
   }).join('') : '<p class="reservation-empty">Brak rocznych danych o pobycie.</p>';
 }
 
+// PL: Wyświetl osobistą listę odbytych lotów wraz z ich szczegółami. | ES-CO: Muestra la lista personal de vuelos realizados y sus detalles.
 function renderPersonalFlights() {
   if (!personalFlightList) return;
   const today = new Date().toISOString().slice(0, 10);
@@ -870,6 +924,7 @@ function renderPersonalFlights() {
   renderPersonalFlightMaps();
 }
 
+// PL: Zatrzymaj i usuń mapy szczegółów lotu z pamięci. | ES-CO: Destruye y elimina de memoria los mapas de detalle de vuelos.
 function closePersonalFlightMaps() {
   if (personalFlightMapObserver) personalFlightMapObserver.disconnect();
   personalFlightMapObserver = null;
@@ -878,6 +933,7 @@ function closePersonalFlightMaps() {
   personalFlightMapPending.clear();
 }
 
+// PL: Utwórz mapę trasy lotu w przekazanym elemencie interfejsu. | ES-CO: Crea el mapa de ruta del vuelo dentro del elemento indicado.
 async function mountPersonalFlightMap(container) {
   const sourceRow = container.dataset.historyMap;
   if (personalFlightMaps.has(sourceRow) || personalFlightMapPending.has(sourceRow)) return;
@@ -907,6 +963,7 @@ async function mountPersonalFlightMap(container) {
   map.fitBounds(routeLayer.getBounds().pad(.15), { padding: [20, 20], maxZoom: 7 });
 }
 
+// PL: Załaduj mapy tras tylko dla lotów, które są aktualnie widoczne. | ES-CO: Carga mapas de rutas solo para vuelos visibles actualmente.
 function renderPersonalFlightMaps() {
   closePersonalFlightMaps();
   const containers = [...personalFlightList.querySelectorAll('[data-history-map]')];
@@ -930,11 +987,13 @@ function renderPersonalFlightMaps() {
   containers.forEach((container) => personalFlightMapObserver.observe(container));
 }
 
+// PL: Usuń instancje map tras i zwolnij przypisane zasoby. | ES-CO: Elimina las instancias de mapas de ruta y libera sus recursos.
 function clearFlightRouteMaps() {
   flightRouteMapInstances.forEach((map) => map.remove());
   flightRouteMapInstances.clear();
 }
 
+// PL: Asynchronicznie przygotuj mapy tras dla wskazanych lotów. | ES-CO: Prepara de forma asíncrona mapas de ruta para los vuelos indicados.
 async function renderFlightRouteMaps(flights) {
   if (reservationsPage.hidden || !flights.length || !currentTrip || !currentUser) return;
   const ownerId = currentUser.id;
@@ -962,6 +1021,7 @@ async function renderFlightRouteMaps(flights) {
   }
 }
 
+// PL: Pokaż główny widok podsumowania podróży. | ES-CO: Muestra la vista principal del resumen del viaje.
 function showOverview() {
   clearFlightRouteMaps();
   closePersonalFlightMaps();
@@ -981,6 +1041,7 @@ function showOverview() {
   document.querySelector('#backToOverview').hidden = true;
 }
 
+// PL: Przełącz stronę na widok rezerwacji. | ES-CO: Cambia la página a la vista de reservas.
 function showReservations() {
   if (!currentTrip?.reservations?.length) return;
   clearFlightRouteMaps();
@@ -1003,6 +1064,7 @@ function showReservations() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// PL: Otwórz wybraną stronę osobistej historii i odśwież jej dane. | ES-CO: Abre la página del historial personal indicada y actualiza sus datos.
 async function showPersonalHistoryPage(view) {
   if (!currentUser) return;
   clearFlightRouteMaps();
@@ -1028,10 +1090,14 @@ async function showPersonalHistoryPage(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// PL: Otwórz listę lotów i pobytów z osobistej historii. | ES-CO: Abre la lista de vuelos y estancias del historial personal.
 function showPersonalHistory() { return showPersonalHistoryPage('history'); }
+// PL: Pokaż analizę czasu spędzonego w Polsce. | ES-CO: Muestra el análisis del tiempo pasado en Polonia.
 function showPolandHistory() { return showPersonalHistoryPage('poland-history'); }
+// PL: Pokaż historię lokalizacji według odwiedzonych krajów. | ES-CO: Muestra el historial de ubicaciones por países visitados.
 function showCountriesHistory() { return showPersonalHistoryPage('countries-history'); }
 
+// PL: Otwórz stronę szczegółów dla wybranego dnia podróży. | ES-CO: Abre la página de detalles del día seleccionado del viaje.
 function openDayPage(date) {
   if (!datesInTrip().includes(date)) return;
   clearFlightRouteMaps();
@@ -1050,6 +1116,7 @@ function openDayPage(date) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// PL: Ustaw aktywny dzień i odśwież powiązane dane widoku. | ES-CO: Selecciona el día activo y actualiza los datos relacionados.
 function selectDay(date) {
   if (!datesInTrip().includes(date)) return;
   selectedDate = date;
@@ -1057,12 +1124,14 @@ function selectDay(date) {
   renderExpenses();
 }
 
+// PL: Przejdź do innego dnia według podanego przesunięcia. | ES-CO: Navega a otro día según el desplazamiento indicado.
 function moveDay(offset) {
   const dates = datesInTrip();
   const nextDate = dates[dates.indexOf(selectedDate) + offset];
   if (nextDate) openDayPage(nextDate);
 }
 
+// PL: Wyświetl szczegóły lokalizacji, budżetu i wydatków bieżącego dnia. | ES-CO: Muestra ubicación, presupuesto y gastos del día actual.
 async function renderDayPage() {
   if (dayPage.hidden || !currentTrip || !selectedDate) return;
   const destination = mapDestinationForDate(selectedDate);
@@ -1116,6 +1185,7 @@ async function renderDayPage() {
 }
 
 // PL: Aktualizuj sumę wydatków, saldo i licznik dni do podróży. | ES-CO: Actualiza gastos totales, saldo y cuenta regresiva.
+// PL: Oblicz i wyświetl zagregowane wskaźniki wybranej podróży. | ES-CO: Calcula y muestra indicadores agregados del viaje seleccionado.
 function renderSummary() {
   const setMetric = (selector, value) => {
     const element = document.querySelector(selector);
@@ -1161,6 +1231,7 @@ function renderSummary() {
 }
 
 // PL: Aktualizuj wykresy dzienne i kategorii wyłącznie danymi bieżącego użytkownika. | ES-CO: Actualiza gráficas solo con datos del usuario activo.
+// PL: Buduj lub odśwież wykresy dzienne oraz podział wydatków na kategorie. | ES-CO: Crea o actualiza gráficos diarios y de gastos por categoría.
 function renderCharts() {
   const setMetric = (selector, value) => {
     const element = document.querySelector(selector);
@@ -1329,6 +1400,7 @@ function renderCharts() {
 }
 
 // PL: Zbuduj listę dni z sumą PLN i wykorzystaniem budżetu dziennego. | ES-CO: Construye la lista de días con totales y uso del presupuesto.
+// PL: Zrenderuj listę dni i przypisanych do nich kwot. | ES-CO: Renderiza la lista de días y sus importes asociados.
 function renderDays() {
   // PL: Pokaż pierwszy import, gdy konto nie ma jeszcze wyjazdu. | ES-CO: Invita a importar el primer viaje cuando aún no existe.
   if (!currentTrip) {
@@ -1365,6 +1437,7 @@ function renderDays() {
 }
 
 // PL: Przypisz klasę koloru do rodzaju wydatku. | ES-CO: Asigna un color visual según la categoría del gasto.
+// PL: Przypisz klasę wizualną do kategorii wydatku. | ES-CO: Asigna una clase visual a la categoría del gasto.
 function markClass(category) {
   // PL: Wyróżnij atrakcje i zakupy ciepłym kolorem. | ES-CO: Resalta atracciones y compras con un color cálido.
   if (category === 'Atrakcje' || category === 'Zakupy') return 'orange';
@@ -1375,6 +1448,7 @@ function markClass(category) {
 }
 
 // PL: Pokaż wydatki i budżet wybranego dnia. | ES-CO: Muestra gastos y presupuesto del día.
+// PL: Wyświetl wydatki bieżącej podróży lub wybranego dnia. | ES-CO: Muestra los gastos del viaje actual o del día seleccionado.
 function renderExpenses() {
   const current = dayExpenses(selectedDate).sort((a, b) => b.createdAt - a.createdAt);
   if (expensesLoading) {
@@ -1420,6 +1494,7 @@ function renderExpenses() {
   });
 }
 
+// PL: Zmień status wybranego wydatku na opłacony w bazie i widoku. | ES-CO: Marca el gasto seleccionado como pagado en la base y la interfaz.
 async function markExpensePaid(id, button) {
   const item = expenses.find((expense) => expense.id === id);
   if (!currentUser || !currentTrip || !item || savingExpenseIds.has(id) || !['Płatne w Hotelu', 'Nieopłacone'].includes(item.status)) return;
@@ -1445,6 +1520,7 @@ async function markExpensePaid(id, button) {
 }
 
 // PL: Pokaż formularz i pobierz kurs dla wybranej waluty oraz daty. | ES-CO: Abre el formulario y consulta la tasa para la moneda y fecha elegidas.
+// PL: Otwórz pusty formularz dodawania nowego wydatku. | ES-CO: Abre el formulario vacío para añadir un gasto.
 function openExpenseDialog() {
   // PL: Wyczyść pola, pozostawiając domyślne wartości formularza. | ES-CO: Limpia los campos y restablece los valores predeterminados.
   expenseForm.reset();
@@ -1467,6 +1543,7 @@ function openExpenseDialog() {
   setTimeout(() => document.querySelector('#expenseDescription').focus(), 0);
 }
 
+// PL: Wypełnij formularz danymi wydatku przeznaczonego do edycji. | ES-CO: Rellena el formulario con los datos del gasto que se editará.
 function openEditExpenseDialog(id) {
   const item = expenses.find((expense) => expense.id === id);
   if (!item || !currentUser || !currentTrip || item.tripId !== currentTrip.id) return;
@@ -1493,6 +1570,7 @@ function openEditExpenseDialog(id) {
 }
 
 // PL: Ustal trzyznakowy kod waluty z listy albo pola niestandardowego. | ES-CO: Obtiene el código de tres letras de la lista o campo personalizado.
+// PL: Odczytaj i ujednolić kod waluty wybrany w formularzu. | ES-CO: Lee y normaliza el código de moneda elegido en el formulario.
 function selectedCurrencyCode() {
   // PL: Odczytaj wybraną opcję formularza. | ES-CO: Lee la opción elegida en el formulario.
   const selected = currencyInput.value;
@@ -1503,6 +1581,7 @@ function selectedCurrencyCode() {
 }
 
 // PL: Pobierz kurs referencyjny lub pozostaw możliwość wpisania go ręcznie. | ES-CO: Consulta una tasa de referencia o permite ingresarla manualmente.
+// PL: Pobierz kurs walutowy dla daty i kodu wybranych w formularzu. | ES-CO: Consulta el tipo de cambio para la fecha y moneda del formulario.
 async function fetchRate() {
   // PL: Odróżnij odpowiedź bieżącego żądania od odpowiedzi starszej. | ES-CO: Identifica la solicitud actual para descartar respuestas viejas.
   const request = ++rateRequest;
@@ -1569,6 +1648,7 @@ async function fetchRate() {
 }
 
 // PL: Oblicz bieżący odpowiednik PLN, nie zapisując jeszcze wydatku. | ES-CO: Calcula el equivalente PLN sin guardar todavía el gasto.
+// PL: Przelicz podgląd kwoty w PLN przy zmianie danych wydatku. | ES-CO: Recalcula la vista previa en PLN cuando cambian los datos del gasto.
 function updatePreview() {
   // PL: Odczytaj liczbę jednostek waluty źródłowej. | ES-CO: Lee el importe en la moneda original.
   const amount = Number(amountInput.value) || 0;
@@ -1579,6 +1659,7 @@ function updatePreview() {
 }
 
 // PL: Zapisz wydatek do Supabase i odśwież widok po potwierdzeniu bazy. | ES-CO: Guarda el gasto en Supabase y actualiza la vista al confirmarlo.
+// PL: Zweryfikuj formularz i zapisz nowy lub edytowany wydatek. | ES-CO: Valida el formulario y guarda el gasto nuevo o editado.
 async function saveExpense(event) {
   // PL: Zablokuj domyślne wysłanie formularza i przeładowanie strony. | ES-CO: Evita el envío normal del formulario y la recarga.
   event.preventDefault();
@@ -1658,6 +1739,7 @@ async function saveExpense(event) {
 }
 
 // PL: Importuj wycenione pozycje z wybranego skoroszytu do konta użytkownika. | ES-CO: Importa gastos con precio del Excel a la cuenta activa.
+// PL: Wczytaj dane podróży z lokalnego skoroszytu i zapisz je w Supabase. | ES-CO: Lee el viaje del libro local y guarda sus datos en Supabase.
 async function importWorkbook(file) {
   // PL: Wymagaj zalogowania, ponieważ baza przypisuje każdy import do konta. | ES-CO: Exige sesión porque la base asigna cada fila a una cuenta.
   if (!currentUser) { showToast('Zaloguj się, aby zaimportować wydatki.'); return; }
@@ -1771,6 +1853,7 @@ async function importWorkbook(file) {
 }
 
 // PL: Usuń wskazany rekord w bazie dopiero po potwierdzeniu żądania. | ES-CO: Elimina el registro de la base al confirmar la solicitud.
+// PL: Usuń wydatek po potwierdzeniu operacji przez użytkownika. | ES-CO: Elimina el gasto después de que el usuario confirme la acción.
 async function deleteExpense(id) {
   // PL: Wymagaj aktywnej sesji przed próbą usunięcia. | ES-CO: Exige sesión activa antes de eliminar.
   if (!currentUser) return;
@@ -1793,6 +1876,7 @@ async function deleteExpense(id) {
 }
 
 // PL: Eksportuj widoczne dane właściciela do pliku CSV z separatorem zgodnym z arkuszem. | ES-CO: Exporta los gastos del usuario a CSV compatible con hojas de cálculo.
+// PL: Eksportuj wydatki aktywnej podróży do pliku CSV. | ES-CO: Exporta los gastos del viaje activo a un archivo CSV.
 function exportCSV() {
   // PL: Zdefiniuj polskie nagłówki zachowujące obie waluty i kurs. | ES-CO: Define encabezados polacos que conservan valor local y tasa.
   const headers = ['data', 'kategoria', 'opis', 'kwota_lokalna', 'waluta', 'kurs_pln', 'kwota_pln', 'status', 'platnosc', 'data_kursu'];
@@ -1817,6 +1901,7 @@ function exportCSV() {
 }
 
 // PL: Pokaż krótkie powiadomienie i automatycznie je schowaj. | ES-CO: Muestra un aviso breve y lo oculta automáticamente.
+// PL: Wyświetl krótką informację zwrotną w komunikacie aplikacji. | ES-CO: Muestra un mensaje breve de confirmación en la aplicación.
 function showToast(message) {
   // PL: Pobierz wspólny element statusu aplikacji. | ES-CO: Obtén el elemento de estado compartido.
   const toast = document.querySelector('#toast');
@@ -1961,6 +2046,7 @@ supabase.auth.onAuthStateChange((_event, session) => {
 });
 
 // PL: Odczytaj zapisaną sesję asynchronicznie po załadowaniu modułu. | ES-CO: Lee la sesión guardada de forma asíncrona al cargar el módulo.
+// PL: Uruchom klienta Supabase i obsłuż początkowy stan logowania. | ES-CO: Inicializa el cliente de Supabase y gestiona el estado de autenticación inicial.
 async function initializeAuth() {
   // PL: Pobierz bieżącą sesję z bezpiecznego magazynu Supabase Auth. | ES-CO: Recupera la sesión actual del almacenamiento seguro de Supabase Auth.
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();

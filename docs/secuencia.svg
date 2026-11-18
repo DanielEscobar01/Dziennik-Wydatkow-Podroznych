@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1050" viewBox="0 0 1500 1050" role="img" aria-labelledby="title description">
+  <title id="title">Secuencia simplificada de uso de la aplicación</title>
+  <desc id="description">La persona usa la aplicación en el navegador; el navegador consulta Supabase Auth y su API de datos automática, que lee y escribe en PostgreSQL protegido por RLS. Frankfurter se consulta solo para tasas de cambio.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#465e7d"/>
+    </marker>
+    <marker id="arrowOpen" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M1,1 L9,4 L1,7" fill="none" stroke="#465e7d" stroke-width="1.5"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #172b4d; }
+      .title { font-size: 28px; font-weight: 700; }
+      .label { font-size: 14px; font-weight: 700; }
+      .msg { font-size: 13px; fill: #243b5a; }
+      .note { font-size: 13px; fill: #536780; }
+      .actor { fill: #eaf3ff; stroke: #4a78b8; stroke-width: 2; rx: 10; }
+      .actorGreen { fill: #e8f7f1; stroke: #39856b; stroke-width: 2; rx: 10; }
+      .actorOrange { fill: #fff3e5; stroke: #bf7b35; stroke-width: 2; rx: 10; }
+      .life { stroke: #a8b6c8; stroke-width: 1.5; stroke-dasharray: 5 6; }
+      .call { stroke: #465e7d; stroke-width: 2; marker-end: url(#arrow); }
+      .return { stroke: #465e7d; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#arrowOpen); }
+    </style>
+  </defs>
+  <rect width="1500" height="1050" fill="#fbfcfe"/>
+  <text class="title" x="40" y="42">Flujo simple: iniciar sesión, cargar y guardar un gasto</text>
+  <text class="note" x="40" y="68">La aplicación corre en el navegador; no hay un servidor propio de la aplicación.</text>
+
+  <rect class="actor" x="10" y="90" width="180" height="58"/>
+  <text class="label" x="100" y="125" text-anchor="middle">Persona</text>
+  <rect class="actor" x="250" y="90" width="180" height="58"/>
+  <text class="label" x="340" y="125" text-anchor="middle">Navegador</text>
+  <rect class="actorGreen" x="490" y="90" width="180" height="58"/>
+  <text class="label" x="580" y="125" text-anchor="middle">Supabase Auth</text>
+  <rect class="actorGreen" x="730" y="90" width="180" height="58"/>
+  <text class="label" x="820" y="116" text-anchor="middle">API de datos de Supabase</text>
+  <text class="note" x="820" y="137" text-anchor="middle">automática (PostgREST)</text>
+  <rect class="actorGreen" x="970" y="90" width="180" height="58"/>
+  <text class="label" x="1060" y="116" text-anchor="middle">Base de datos Supabase</text>
+  <text class="note" x="1060" y="137" text-anchor="middle">PostgreSQL + RLS</text>
+  <rect class="actorOrange" x="1230" y="90" width="180" height="58"/>
+  <text class="label" x="1320" y="116" text-anchor="middle">Frankfurter</text>
+  <text class="note" x="1320" y="137" text-anchor="middle">API externa de tasas</text>
+
+  <path class="life" d="M100 148 V1010"/>
+  <path class="life" d="M340 148 V1010"/>
+  <path class="life" d="M580 148 V1010"/>
+  <path class="life" d="M820 148 V1010"/>
+  <path class="life" d="M1060 148 V1010"/>
+  <path class="life" d="M1320 148 V1010"/>
+
+  <text class="msg" x="110" y="180">1. Abre el sitio</text>
+  <path class="call" d="M100 190 H340"/>
+  <text class="msg" x="350" y="220">2. Comprueba la sesión guardada</text>
+  <path class="call" d="M340 230 H580"/>
+  <text class="msg" x="350" y="260">3. Devuelve sesión o indica que no hay</text>
+  <path class="return" d="M580 270 H340"/>
+  <rect x="250" y="292" width="660" height="62" rx="10" fill="#fff9e9" stroke="#d7ad4d" stroke-width="1.5"/>
+  <text class="label" x="270" y="317">Solo si no hay sesión:</text>
+  <text class="msg" x="270" y="339">la persona ingresa email y contraseña; Supabase Auth los verifica.</text>
+  <text class="msg" x="110" y="385">4. Envía sus credenciales</text>
+  <path class="call" d="M100 395 H340"/>
+  <text class="msg" x="350" y="425">5. Solicita inicio de sesión</text>
+  <path class="call" d="M340 435 H580"/>
+  <text class="msg" x="350" y="465">6. Devuelve la sesión autenticada</text>
+  <path class="return" d="M580 475 H340"/>
+
+  <text class="msg" x="450" y="520">7. Pide viajes y gastos</text>
+  <path class="call" d="M340 530 H820"/>
+  <text class="msg" x="830" y="560">8. Consulta la base de datos</text>
+  <path class="call" d="M820 570 H1060"/>
+  <text class="msg" x="820" y="600">9. PostgreSQL aplica RLS y devuelve solo filas permitidas</text>
+  <path class="return" d="M1060 610 H820"/>
+  <text class="msg" x="450" y="640">10. Devuelve los datos al navegador</text>
+  <path class="return" d="M820 650 H340"/>
+  <text class="note" x="350" y="680">11. El navegador muestra el resumen, los días y los gastos.</text>
+
+  <rect x="250" y="700" width="1160" height="56" rx="10" fill="#fff3e5" stroke="#bf7b35" stroke-width="1.5"/>
+  <text class="label" x="270" y="724">Conversión de moneda (opcional)</text>
+  <text class="msg" x="270" y="746">Si la moneda no es PLN, el navegador consulta Frankfurter por una tasa de referencia. La tasa se puede corregir manualmente.</text>
+  <text class="msg" x="350" y="785">12. Consulta tasa hacia PLN</text>
+  <path class="call" d="M340 795 H1320"/>
+  <text class="msg" x="830" y="825">13. Devuelve tasa y fecha</text>
+  <path class="return" d="M1320 835 H340"/>
+
+  <text class="msg" x="110" y="865">14. Envía el gasto</text>
+  <path class="call" d="M100 875 H340"/>
+  <text class="msg" x="450" y="895">15. Envía el cambio con la sesión</text>
+  <path class="call" d="M340 905 H820"/>
+  <text class="msg" x="830" y="925">16. Inserta o actualiza el gasto</text>
+  <path class="call" d="M820 935 H1060"/>
+  <text class="msg" x="830" y="955">17. Devuelve resultado autorizado</text>
+  <path class="return" d="M1060 965 H820"/>
+  <text class="msg" x="450" y="985">18. Devuelve resultado al navegador</text>
+  <path class="return" d="M820 995 H340"/>
+  <text class="note" x="350" y="1030">El navegador actualiza la pantalla con el gasto guardado.</text>
+</svg>
